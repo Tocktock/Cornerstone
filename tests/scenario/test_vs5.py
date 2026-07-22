@@ -51,9 +51,11 @@ from cornerstone_cli.runtime import (
     _explicit_document_change_projection_anchor,
     _explicit_document_change_rows,
     _explicit_tension_rows,
+    _grounded_conflict_rows,
     _grounded_decision_risk_rows,
     _grounded_key_fact_fallback,
     _input_specific_uncertainty,
+    _incident_relevance_bonus,
     _evidence_query_is_comparison,
     _korean_transcript_statement_is_attributed,
     _korean_transcript_procedural_record,
@@ -68,6 +70,7 @@ from cornerstone_cli.runtime import (
     _paired_version_clause_rows,
     _question_requests_decision_direction,
     _question_specific_review_uncertainty,
+    _question_specific_next_step,
     _repair_korean_transcript_attribution,
     _key_fact_row_is_redundant,
     _normalize_brief_title,
@@ -2689,6 +2692,75 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             [row["statement"] for row in fallback],
         )
 
+    def test_term_replacement_and_temporary_default_waiver_are_projected(self) -> None:
+        lonza_question = (
+            "Should the owner continue or extend Lonza manufacturing services under "
+            "the amended agreement?"
+        )
+        lonza_chunks = [
+            {
+                "artifact_id": "lonza-amendment",
+                "evidence_chunk_id": "lonza-identity",
+                "span": {"char_start": 0},
+                "text": (
+                    "AMENDMENT NO. 1 to the Master Services Agreement between "
+                    "LONZA LTD and ITI LIMITED."
+                ),
+            },
+            {
+                "artifact_id": "lonza-amendment",
+                "evidence_chunk_id": "lonza-term",
+                "span": {"char_start": 900},
+                "text": (
+                    "Clause 14.1 of the Agreement will be deleted and shall hereby "
+                    "be replaced with the following new clause 14.1. 14.1 Term. "
+                    "This Agreement shall commence on the Effective Date and will "
+                    "end on 31 December 2028, unless terminated earlier."
+                ),
+            },
+        ]
+        lonza_rows = _explicit_document_change_rows(
+            lonza_chunks,
+            decision_question=lonza_question,
+            limit=10,
+        )
+        self.assertIn(
+            "Lonza: Amendment No. 1 sets the agreement end date at December 31, 2028.",
+            [row["statement"] for row in lonza_rows],
+        )
+
+        airspan_question = (
+            "Should the owner continue the Airspan dependency after the Chapter 11 "
+            "event and amendment?"
+        )
+        airspan_chunks = [
+            {
+                "artifact_id": "airspan-amendment",
+                "evidence_chunk_id": "airspan-identity",
+                "span": {"char_start": 0},
+                "text": "AMENDMENT TO AIRSPAN/GOGO AGREEMENTS between Airspan and Gogo.",
+            },
+            {
+                "artifact_id": "airspan-amendment",
+                "evidence_chunk_id": "airspan-waiver",
+                "span": {"char_start": 900},
+                "text": (
+                    "Limited Waiver. With effect from the date hereof until the "
+                    "Waiver Termination Date, Gogo agrees to waive each default or "
+                    "event of default under the Airspan/Gogo Agreements."
+                ),
+            },
+        ]
+        airspan_rows = _explicit_document_change_rows(
+            airspan_chunks,
+            decision_question=airspan_question,
+            limit=10,
+        )
+        self.assertIn(
+            "Airspan: the amendment waives defaults until the Waiver Termination Date.",
+            [row["statement"] for row in airspan_rows],
+        )
+
     def test_empty_brief_repairs_project_only_explicit_document_changes(self) -> None:
         cases = [
             (
@@ -3457,12 +3529,11 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 )["brief"]
 
         self.assertEqual(brief["status"], "evidence_backed", brief)
-        self.assertEqual(
-            brief["conflicts_risks"],
-            [
-                "Bristol-Myers: Amendment No. 1 deletes ITI's Qualified Study "
-                "prerequisite before third-party licensing."
-            ],
+        self.assertEqual(brief["conflicts_risks"], [])
+        self.assertIn(
+            "Bristol-Myers: Amendment No. 1 deletes ITI's Qualified Study "
+            "prerequisite before third-party licensing.",
+            brief["key_facts"],
         )
         self.assertEqual(
             brief["bottom_line"],
@@ -3472,21 +3543,21 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertEqual(
             brief["recommended_next_steps"],
             [
-                "Review the amended term before deciding: Bristol-Myers: Amendment "
-                "No. 1 deletes ITI's Qualified Study prerequisite before third-party "
-                "licensing."
+                "Review the amended term and confirm its current operational effect "
+                "before deciding."
             ],
         )
-        conflict_row = next(
+        change_row = next(
             row
             for row in brief["load_bearing_statements"]
-            if row["section"] == "conflicts_risks"
+            if row["section"] == "key_facts"
+            and row["statement"].startswith("Bristol-Myers:")
         )
         self.assertEqual(
-            conflict_row["validation_mode"],
+            change_row["validation_mode"],
             "explicit_document_change_projection",
         )
-        self.assertTrue(conflict_row["citation_refs"])
+        self.assertTrue(change_row["citation_refs"])
         self.assertTrue(
             all(
                 check["status"] == "passed"
@@ -3801,6 +3872,12 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             "Section 2 above, the Agreement shall remain unchanged",
             "The Master Agreement between Health Net",
             "AstraZeneca's remedies under Clause 1.10, this Clause 6",
+            "Exchange Commission (other than as provided in Item 201)",
+            "1 (Exhibit 10.14) was executed by both parties",
+            "Pass Through Costs Line Total Area [**] Manufacturing Summary [**] [**] [**]",
+            "Will be measured using an Incident RCA based measurement approach",
+            "The Parties agree that manufacturing deviations",
+            "Under the Lonza Agreement, Lonza has agreed to manufacture",
         ):
             self.assertTrue(_low_information_key_fact(statement), statement)
         self.assertFalse(
@@ -3808,6 +3885,67 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 "제2조는 민생회복지원금을 한시적 일회성 지원으로 정의한다."
             )
         )
+
+    def test_incident_relevance_bonus_reserves_the_named_failure_window(self) -> None:
+        question = (
+            "Should the owner continue IBM outsourcing after the missing-drive "
+            "incident?"
+        )
+        incident = (
+            "IBM, which handles Health Net's data center operations, notified us "
+            "that it could not locate several hard disk drives used in the data center."
+        )
+
+        self.assertGreater(_incident_relevance_bonus(question, incident), 0)
+        self.assertEqual(
+            _incident_relevance_bonus(
+                question,
+                "The annual report contains an Item 201 performance graph.",
+            ),
+            0,
+        )
+
+    def test_question_specific_review_need_and_next_step_name_the_decision_surface(self) -> None:
+        question = (
+            "Should the contract owner continue AstraZeneca manufacturing while "
+            "readiness and remediation evidence remains incomplete?"
+        )
+
+        uncertainty = _question_specific_review_uncertainty(question)
+        next_step = _question_specific_next_step(question)
+
+        self.assertIn("manufacturing readiness", uncertainty.lower())
+        self.assertIn("remediation", uncertainty.lower())
+        self.assertNotIn("evidence for this decision", uncertainty.lower())
+        self.assertIn("manufacturing readiness", next_step.lower())
+        self.assertIn("remediation", next_step.lower())
+
+        contract_next_step = _question_specific_next_step(
+            "Should the owner extend the agreement given its minimum-purchase "
+            "and exclusivity provisions?"
+        )
+        self.assertEqual(
+            contract_next_step,
+            "Confirm the minimum-purchase terms and annual sales threshold before deciding.",
+        )
+
+    def test_grounded_conflicts_reject_lowercase_clause_tail(self) -> None:
+        chunk = {
+            "evidence_chunk_id": "purchase",
+            "text": "Renewal is conditioned on continued minimum-purchase compliance.",
+            "safety": {},
+        }
+        rows = _grounded_conflict_rows(
+            [
+                {
+                    "statement": "is conditioned on continued minimum-purchase compliance",
+                    "citation_refs": ["evidence_chunk:purchase"],
+                }
+            ],
+            {"evidence_chunk:purchase": chunk},
+        )
+
+        self.assertEqual(rows, [])
 
     def test_korean_grounding_handles_particles_and_rejects_negation_inversion(self) -> None:
         source = "조례안 내용은 변경되지 않았습니다."
@@ -6574,6 +6712,38 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertTrue(repaired)
         self.assertTrue(selected["statement"].startswith("Evidence does not yet establish a decision:"))
 
+    def test_bottom_line_compaction_rejects_exhibit_number_fragments(self) -> None:
+        ref = "evidence_chunk:gsk-amendment"
+        source = (
+            "Amendment No. 1 (Exhibit 10.14) was executed by both parties; "
+            "the Agreement remains in full force."
+        )
+        row = {
+            "statement": source,
+            "citation_refs": [ref],
+            "allowed_citation_refs": [ref],
+        }
+
+        selected, repaired = _select_grounded_bottom_line(
+            None,
+            [],
+            [row],
+            {ref: {"text": source}},
+            decision_question=(
+                "Should iTeos continue its share of the GSK global development plan "
+                "under the amended collaboration?"
+            ),
+        )
+
+        self.assertTrue(repaired)
+        self.assertIsNotNone(selected)
+        assert selected is not None
+        self.assertNotRegex(
+            selected["statement"],
+            r"decision:\s*1\s*\(Exhibit\s+10\.14\)",
+        )
+        self.assertIn("Amendment No. 1", selected["statement"])
+
     def test_conservative_decision_synthesis_keeps_only_its_grounded_basis(self) -> None:
         ref = "evidence_chunk:chunk_" + "b" * 64
         source = "Legal says the data-processing addendum is still unsigned."
@@ -6771,6 +6941,57 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             repaired[0]["statement"],
             "Use this cited fact as the decision baseline: The target launch date is September 30.",
         )
+
+    def test_recommendation_fallback_does_not_repeat_the_entire_cited_fact(self) -> None:
+        ref = "evidence_chunk:manufacturing"
+        basis = {
+            "statement": "Production shall occur using a cGMP validated manufacturing process.",
+            "citation_refs": [ref],
+            "allowed_citation_refs": [ref],
+        }
+        repaired, changed = _repair_grounded_recommendations(
+            [],
+            [],
+            [basis],
+            {ref: {"text": basis["statement"]}},
+            decision_question=(
+                "Should the owner continue AstraZeneca manufacturing while readiness "
+                "and remediation evidence remains incomplete?"
+            ),
+        )
+
+        self.assertTrue(changed)
+        self.assertEqual(
+            repaired[0]["statement"],
+            "Verify manufacturing readiness and remediation evidence before deciding.",
+        )
+        self.assertNotIn(basis["statement"], repaired[0]["statement"])
+        self.assertEqual(repaired[0]["proposal_basis_statement"], basis["statement"])
+
+        amendment_basis = {
+            "statement": (
+                "The license amendment deletes ITI's Qualified Study requirement "
+                "and BMS's Article 3 negotiation right."
+            ),
+            "citation_refs": [ref],
+            "allowed_citation_refs": [ref],
+        }
+        repaired, changed = _repair_grounded_recommendations(
+            [],
+            [],
+            [amendment_basis],
+            {ref: {"text": amendment_basis["statement"]}},
+            decision_question=(
+                "Should the owner continue the BMS license under the amended scope "
+                "and termination terms?"
+            ),
+        )
+        self.assertTrue(changed)
+        self.assertEqual(
+            repaired[0]["statement"],
+            "Review the amended term and confirm its current operational effect before deciding.",
+        )
+        self.assertNotIn(amendment_basis["statement"], repaired[0]["statement"])
 
     def test_decision_repairs_skip_legal_headings_and_drafting_furniture(self) -> None:
         heading_ref = "evidence_chunk:heading"
@@ -8421,6 +8642,163 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 }
             ],
         )
+
+    def test_grounded_key_fact_fallback_prefers_question_relevance_and_projects_allocations(self) -> None:
+        incident_chunks = [
+            {
+                "artifact_id": "filing",
+                "evidence_chunk_id": "sec-furniture",
+                "text": (
+                    "The graph shall not be filed with the Securities and Exchange "
+                    "Commission other than as provided in Item 201."
+                ),
+                "safety": {},
+            },
+            {
+                "artifact_id": "filing",
+                "evidence_chunk_id": "drive-incident",
+                "text": (
+                    "IBM, which handles Health Net's data center operations, notified "
+                    "Health Net that it could not locate several hard disk drives "
+                    "used in the data center."
+                ),
+                "safety": {},
+            },
+        ]
+        incident_rows = _grounded_key_fact_fallback(
+            incident_chunks,
+            limit=3,
+            decision_question=(
+                "Should the owner continue IBM outsourcing after the missing-drive "
+                "incident?"
+            ),
+        )
+        self.assertEqual(
+            [row["statement"] for row in incident_rows],
+            [
+                "IBM could not locate several hard disk drives used in the data center"
+            ],
+        )
+
+        allocation_rows = _grounded_key_fact_fallback(
+            [
+                {
+                    "artifact_id": "collaboration",
+                    "evidence_chunk_id": "development-costs",
+                    "text": (
+                        "The Parties share Development Costs, with GSK bearing sixty "
+                        "percent (60%) of such Development Costs and ITEOS bearing "
+                        "forty percent (40%) of such Development Costs."
+                    ),
+                    "safety": {},
+                }
+            ],
+            decision_question=(
+                "Should iTeos continue its share of the GSK global development plan?"
+            ),
+        )
+        self.assertEqual(
+            [row["statement"] for row in allocation_rows],
+            ["GSK bears 60% and ITEOS bears 40% of shared Development Costs"],
+        )
+
+        purchase_rows = _grounded_key_fact_fallback(
+            [
+                {
+                    "artifact_id": "amex",
+                    "evidence_chunk_id": "generic-services",
+                    "text": (
+                        "Service Provider shall provide the services mutually "
+                        "agreed under this Agreement."
+                    ),
+                    "safety": {},
+                },
+                {
+                    "artifact_id": "amex",
+                    "evidence_chunk_id": "minimum-purchase",
+                    "text": (
+                        "AXP agrees to comply with any such required minimum "
+                        "purchase obligations."
+                    ),
+                    "safety": {},
+                },
+            ],
+            decision_question=(
+                "Should the owner extend the American Express agreement given its "
+                "minimum-purchase and exclusivity provisions?"
+            ),
+        )
+        self.assertEqual(
+            [row["statement"] for row in purchase_rows],
+            ["AXP agrees to comply with required minimum-purchase obligations"],
+        )
+
+    def test_key_fact_fallback_projects_decision_bearing_amendment_terms(self) -> None:
+        cases = [
+            (
+                {
+                    "artifact_id": "cigna-amendment",
+                    "evidence_chunk_id": "program-replacement",
+                    "text": (
+                        "All references in the Admin Agreement to \u201cType 2 Program\u201d "
+                        "shall be deleted and replaced by references to \u201cDiabetes "
+                        "Program\u201d."
+                    ),
+                    "safety": {},
+                },
+                "Should the owner renew the administrative-services arrangement "
+                "under the latest amendment?",
+                'The Admin Agreement amendment replaces "Type 2 Program" references '
+                'with "Diabetes Program"',
+            ),
+            (
+                {
+                    "artifact_id": "bms-amendment",
+                    "evidence_chunk_id": "scope-release",
+                    "text": (
+                        "The Parties hereby amend the Agreement (i) to delete the "
+                        "requirement that ITI complete a Qualified Study before pursuing "
+                        "any License with a Third Party and (ii) to delete Article 3 of "
+                        "the Agreement (BMS\u2019s right of negotiation)."
+                    ),
+                    "safety": {},
+                },
+                "Should the owner continue the BMS license under the amended scope?",
+                "The license amendment deletes ITI's Qualified Study requirement and "
+                "BMS's Article 3 negotiation right",
+            ),
+            (
+                {
+                    "artifact_id": "tulex-filing",
+                    "evidence_chunk_id": "clinical-supply-dependency",
+                    "text": (
+                        "We depend on Tulex to develop, test and manufacture clinical "
+                        "supplies of SP-104."
+                    ),
+                    "safety": {},
+                },
+                "Should the owner continue the Tulex manufacturing relationship?",
+                "Tulex is responsible for developing, testing, and manufacturing "
+                "SP-104 clinical supplies",
+            ),
+        ]
+
+        for chunk, question, expected in cases:
+            with self.subTest(expected=expected):
+                rows = _grounded_key_fact_fallback(
+                    [chunk],
+                    limit=3,
+                    decision_question=question,
+                )
+                self.assertTrue(rows)
+                self.assertEqual(rows[0]["statement"], expected)
+                self.assertEqual(
+                    _brief_output_echo_violations(
+                        {"title": "", "bottom_line": None, "key_facts": [rows[0]]},
+                        [chunk["text"]],
+                    ),
+                    [],
+                )
 
     def test_decision_risks_prefer_distinct_evidence_windows(self) -> None:
         chunks = [

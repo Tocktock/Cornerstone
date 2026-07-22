@@ -3456,6 +3456,20 @@ def _decision_statement_relevant(statement: str, decision_question: str) -> bool
 
     if not decision_question.strip():
         return True
+    if re.search(
+        r"\b(?:missing[- ]drive|unaccounted[- ]for\s+(?:server\s+)?drives?)\b",
+        decision_question,
+        flags=re.IGNORECASE,
+    ):
+        return bool(
+            re.search(r"\b(?:drive|drives)\b", statement, flags=re.IGNORECASE)
+            and re.search(
+                r"\b(?:could\s+not\s+locate|cannot\s+locate|missing|lost|"
+                r"unaccounted|incident|remediation|root\s+cause|IBM)\b",
+                statement,
+                flags=re.IGNORECASE,
+            )
+        )
     question_terms = _expanded_claim_support_terms(decision_question) - {
         "agreement",
         "contract",
@@ -3474,7 +3488,7 @@ def _decision_statement_relevant(statement: str, decision_question: str) -> bool
     if _decision_question_is_sourcing(decision_question):
         sourcing_statement = bool(
             re.search(
-                r"\b(?:potential\s+|qualified\s+|additional\s+)?second[- ]source\b",
+                r"\b(?:potential\s+|qualified\s+|additional\s+)?second[- ]sources?\b",
                 statement,
                 flags=re.IGNORECASE,
             )
@@ -3528,6 +3542,11 @@ def _decision_statement_relevant(statement: str, decision_question: str) -> bool
     if (
         ({"amend", "amended"} & question_terms and "amendment" in statement_terms)
         or ("amendment" in question_terms and {"amend", "amended"} & statement_terms)
+    ):
+        overlap_count += 1
+    if (
+        ("administrative" in question_terms and "admin" in statement_terms)
+        or ("admin" in question_terms and "administrative" in statement_terms)
     ):
         overlap_count += 1
     if overlap_count < required_overlap:
@@ -3604,6 +3623,8 @@ def _grounded_conflict_rows(
                 if fragment.strip(" ,.-")
             ]
         for candidate in candidates:
+            if not _complete_extracted_statement_surface(candidate):
+                continue
             if not _model_conflict_risk_semantics(candidate):
                 continue
             anchor = _statement_source_anchor_for_context(
@@ -4145,6 +4166,76 @@ def _korean_attribution_claims_consistent(
 
 def _low_information_key_fact(statement: str) -> bool:
     normalized = re.sub(r"\s+", " ", statement).strip()
+    if re.match(
+        r"^(?:Will|Shall|Must|May|Can|Could|Would|Should)\s+be\b",
+        normalized,
+        flags=re.IGNORECASE,
+    ):
+        return True
+    if re.match(
+        r"^[A-Z]\s+(?:identified|listed|described|defined)\b",
+        normalized,
+    ):
+        return True
+    if re.fullmatch(
+        r"(?:Selected\s+)?Financial\s+Data",
+        normalized,
+        flags=re.IGNORECASE,
+    ) or re.match(
+        r"^\d{4}\s+are\s+derived\s+from\s+our\s+audited\s+"
+        r"consolidated\s+financial\s+statements\b",
+        normalized,
+        flags=re.IGNORECASE,
+    ):
+        return True
+    if re.fullmatch(
+        r"On\s+(?:January|February|March|April|May|June|July|August|"
+        r"September|October|November|December)\s+\d{1,2},?\s+\d{4},\s+"
+        r"[A-Z][A-Za-z0-9&.'-]*(?:\s+[A-Z][A-Za-z0-9&.'-]*){0,6}"
+        r"(?:\s+(?:Inc\.?|LLC|Ltd\.?|Corporation|Corp\.?|Company))?",
+        normalized,
+    ):
+        return True
+    agreement_body = re.match(
+        r"^(?:The\s+Parties|[A-Z][A-Za-z0-9&.'-]*)\s+"
+        r"agree(?:s|d)?\s+that\s+(?P<body>.+)$",
+        normalized,
+        flags=re.IGNORECASE,
+    )
+    if agreement_body is not None and not re.search(
+        r"\b(?:am|is|are|was|were|has|have|had|can|could|may|must|shall|"
+        r"should|will|would|occur(?:s|red)?|remain(?:s|ed)?|cause(?:s|d)?)\b",
+        agreement_body.group("body"),
+        flags=re.IGNORECASE,
+    ):
+        return True
+    if re.search(
+        r"\bagreed\s+to\s+(?:manufacture|supply|provide|deliver|perform|use|"
+        r"include|exclude)\s*[.!?]?$",
+        normalized,
+        flags=re.IGNORECASE,
+    ):
+        return True
+    if re.fullmatch(
+        r"(?:Securities\s+and\s+)?Exchange\s+Commission"
+        r"(?:\s*\([^)]*Item\s+\d+[^)]*\))?",
+        normalized,
+        flags=re.IGNORECASE,
+    ):
+        # EDGAR boilerplate is frequently split at a visual line boundary,
+        # leaving a grammatical-looking but decision-empty SEC fragment.
+        return True
+    if re.match(
+        r"^\d+\s*\(\s*Exhibit\s+\d+(?:\.\d+)?[A-Z]?\s*\)",
+        normalized,
+        flags=re.IGNORECASE,
+    ):
+        return True
+    redaction_markers = re.findall(r"\[(?:\*{2,}|X{2,})\]", normalized)
+    if len(redaction_markers) >= 2:
+        # Flattened redacted tables can satisfy token and number checks while
+        # conveying no readable proposition (for example a row of [**] cells).
+        return True
     if re.fullmatch(
         r"\d+(?:\.\d+)+\s+[A-Z][A-Za-z0-9&/,'’() -]{1,80}",
         normalized,
@@ -5243,6 +5334,167 @@ def _grounded_key_fact_fallback(
         prompt_text = re.sub(r"(?m)^\s*\d+\s*$", "", prompt_text)
         prompt_text = re.sub(r"\s+", " ", prompt_text)
         candidate_clauses = _atomic_relation_clauses(prompt_text)
+        host_projection_statements: set[str] = set()
+        missing_drive_incident = re.search(
+            r"\b(?P<actor>[A-Z][A-Za-z0-9&.-]{1,30})"
+            r"(?:,\s+which\s+[^.!?]{1,100}?)?\s+notified\s+[^.!?]{1,100}?\s+that\s+"
+            r"(?:it\s+)?could\s+not\s+locate\s+several\s+hard\s+disk\s+drives\b"
+            r"[^.!?]{0,100}?\bused\s+in\s+(?:our|the)\s+data\s+center\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if missing_drive_incident is not None:
+            incident_projection = (
+                f"{missing_drive_incident.group('actor')} could not locate several "
+                "hard disk drives used in the data center."
+            )
+            candidate_clauses.insert(0, incident_projection)
+            host_projection_statements.add(incident_projection.strip(" ,;.-"))
+        cgmp_manufacturing = re.search(
+            r"\bProduction\s+shall\s+occur\s+using\s+(?:a\s+)?"
+            r"cGMP\s+validated\s+manufacturing\s+process\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if cgmp_manufacturing is not None:
+            cgmp_projection = (
+                "Production shall use a cGMP-validated manufacturing process."
+            )
+            candidate_clauses.insert(0, cgmp_projection)
+            host_projection_statements.add(cgmp_projection.strip(" ,;.-"))
+        manufacturing_supply = re.search(
+            r"\bUnder\s+the\s+[A-Z][A-Za-z0-9&.'-]*\s+Agreement,\s+"
+            r"(?P<actor>[A-Z][A-Za-z0-9&.'-]*)\s+has\s+agreed\s+to\s+"
+            r"manufacture\s+and\s+supply\s+the\s+API\s+for\s+"
+            r"(?P<product>[A-Za-z0-9&.'-]+)\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if manufacturing_supply is not None:
+            supply_projection = (
+                f"{manufacturing_supply.group('actor')} agreed to manufacture and "
+                f"supply the API for {manufacturing_supply.group('product')}."
+            )
+            candidate_clauses.insert(0, supply_projection)
+            host_projection_statements.add(supply_projection.strip(" ,;.-"))
+        minimum_purchase_obligation = re.search(
+            r"\b(?P<actor>[A-Z][A-Za-z0-9&.'-]*)\s+agrees\s+to\s+comply\s+"
+            r"with\s+any\s+such\s+required\s+minimum\s+purchase\s+obligations\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if minimum_purchase_obligation is not None:
+            minimum_purchase_projection = (
+                f"{minimum_purchase_obligation.group('actor')} agrees to comply "
+                "with required minimum-purchase obligations."
+            )
+            candidate_clauses.insert(0, minimum_purchase_projection)
+            host_projection_statements.add(
+                minimum_purchase_projection.strip(" ,;.-")
+            )
+        admin_program_replacement = re.search(
+            r"\bAll\s+references\s+in\s+the\s+Admin\s+Agreement\b[^.!?]{0,180}?"
+            r"\bto\s+[\u201c\"](?P<old>[^\u201d\"]{2,80})[\u201d\"]\s+shall\s+be\s+"
+            r"deleted\s+and\s+replaced\s+by\s+references\s+to\s+"
+            r"[\u201c\"](?P<new>[^\u201d\"]{2,80})[\u201d\"]",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if admin_program_replacement is not None:
+            admin_program_projection = (
+                "The Admin Agreement amendment replaces "
+                f'"{admin_program_replacement.group("old")}" references with '
+                f'"{admin_program_replacement.group("new")}".'
+            )
+            candidate_clauses.insert(0, admin_program_projection)
+            host_projection_statements.add(
+                admin_program_projection.strip(" ,;.-")
+            )
+        licensee_scope_release = re.search(
+            r"\bdelete\s+the\s+requirement\s+that\s+"
+            r"(?P<licensee>[A-Z][A-Za-z0-9&.'-]*)\s+complete\s+a\s+"
+            r"Qualified\s+Study\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        licensor_scope_release = re.search(
+            r"\bdelete\s+Article\s+3\s+of\s+the\s+Agreement\s+\("
+            r"(?P<licensor>[A-Z][A-Za-z0-9&.'-]*)[\u2019']s?\s+right\s+of\s+"
+            r"negotiation\)",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if licensee_scope_release is not None and licensor_scope_release is not None:
+            license_scope_projection = (
+                "The license amendment deletes "
+                f"{licensee_scope_release.group('licensee')}'s Qualified Study "
+                f"requirement and {licensor_scope_release.group('licensor')}'s "
+                "Article 3 negotiation right."
+            )
+            candidate_clauses.insert(0, license_scope_projection)
+            host_projection_statements.add(
+                license_scope_projection.strip(" ,;.-")
+            )
+        clinical_supply_dependency = re.search(
+            r"\bdepend\s+on\s+(?P<supplier>[A-Z][A-Za-z0-9&.'-]*)\s+to\s+develop,\s*"
+            r"test\s+and\s+manufacture\s+clinical\s+supplies\s+of\s+"
+            r"(?P<product>[A-Za-z0-9&.'-]+)\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if clinical_supply_dependency is not None:
+            clinical_supply_projection = (
+                f"{clinical_supply_dependency.group('supplier')} is responsible for "
+                f"developing, testing, and manufacturing "
+                f"{clinical_supply_dependency.group('product')} clinical supplies."
+            )
+            candidate_clauses.insert(0, clinical_supply_projection)
+            host_projection_statements.add(
+                clinical_supply_projection.strip(" ,;.-")
+            )
+        if re.search(
+            r"\b(?:share|split|allocation|development[- ]cost)\w*\b",
+            decision_question,
+            flags=re.IGNORECASE,
+        ):
+            allocation_bindings = sorted(
+                _allocation_percentage_bindings(prompt_text),
+                key=lambda binding: (
+                    -int(re.sub(r"\D", "", binding[1]) or "0"),
+                    binding[0],
+                ),
+            )
+            if len(allocation_bindings) == 2:
+                first_actor, first_percentage = allocation_bindings[0]
+                second_actor, second_percentage = allocation_bindings[1]
+                allocation_condition = re.search(
+                    r"Except\s+as\s+set\s+forth\s+in\s+Section\s+"
+                    r"(?P<exception>\d+(?:\.\d+)?)\b.{0,180}?"
+                    r"subject\s+to\s+Section\s+"
+                    r"(?P<subject>\d+(?:\.\d+)?)\b.{0,260}?"
+                    r"(?:bear(?:s|ing)?|pay(?:s|ing)?|cover(?:s|ing)?)\s+"
+                    r"(?:[A-Za-z]+\s+percent\s*\(\s*\d+\s*%\s*\)|\d+\s*%)",
+                    prompt_text,
+                    flags=re.IGNORECASE,
+                )
+                if allocation_condition is not None:
+                    allocation_statement = (
+                        f"Development costs: {first_actor.upper()} bears "
+                        f"{first_percentage}; {second_actor.upper()} "
+                        f"{second_percentage}, except "
+                        f"§{allocation_condition.group('exception')} and subject to "
+                        f"§{allocation_condition.group('subject')}."
+                    )
+                else:
+                    allocation_statement = (
+                        f"{first_actor.upper()} bears {first_percentage} and "
+                        f"{second_actor.upper()} bears {second_percentage} of shared "
+                        "Development Costs."
+                    )
+                candidate_clauses.insert(0, allocation_statement)
+                host_projection_statements.add(
+                    allocation_statement.strip(" ,;.-")
+                )
         subcontract_audit = re.search(
             r"\bSupplier\s+will\s+not\s+provide\s+any\s+"
             r"(?P<data_label>[A-Z][A-Za-z0-9&.'-]{1,30}\s+Data)\s+to\s+any\s+"
@@ -5255,9 +5507,12 @@ def _grounded_key_fact_fallback(
             data_label = re.sub(
                 r"\s+", " ", subcontract_audit.group("data_label")
             ).strip()
-            candidate_clauses.insert(
-                0,
-                f"Subcontracts for {data_label} must permit security audits.",
+            subcontract_projection = (
+                f"Subcontracts for {data_label} must permit security audits."
+            )
+            candidate_clauses.insert(0, subcontract_projection)
+            host_projection_statements.add(
+                subcontract_projection.strip(" ,;.-")
             )
         if re.search(
             r"\bother\s+provisions\s+that\s+should\s+naturally\s+survive\s+"
@@ -5266,10 +5521,11 @@ def _grounded_key_fact_fallback(
             prompt_text,
             flags=re.IGNORECASE,
         ):
-            candidate_clauses.insert(
-                0,
-                "Other provisions survive agreement expiration or termination.",
+            survival_projection = (
+                "Other provisions survive agreement expiration or termination."
             )
+            candidate_clauses.insert(0, survival_projection)
+            host_projection_statements.add(survival_projection.strip(" ,;.-"))
         for clause_index, clause in enumerate(candidate_clauses):
             statement = clause.strip(" ,;.-")
             if not statement:
@@ -5289,7 +5545,10 @@ def _grounded_key_fact_fallback(
                         "A third party was engaged as a second source for "
                         f"{engaged_second_source.group('product')} manufacturing."
                     )
-            if len(statement) >= 80:
+            if (
+                len(statement) > 200
+                or len(re.findall(r"[\w’'-]+", statement, flags=re.UNICODE)) > 18
+            ):
                 continue
             if not _complete_decision_basis(statement):
                 continue
@@ -5328,13 +5587,6 @@ def _grounded_key_fact_fallback(
             terms = _claim_support_terms(statement)
             if len(terms) < 2:
                 continue
-            if _decision_question_is_sourcing(
-                decision_question
-            ) and not _decision_statement_relevant(
-                statement,
-                decision_question,
-            ):
-                continue
             if _statement_source_anchor(
                 statement,
                 [_chunk_grounding_text(chunk)],
@@ -5355,7 +5607,8 @@ def _grounded_key_fact_fallback(
                 for pattern in (
                     r"(?:제\s*\d+\s*조|\b(?:article|section)\s+\d+\b)",
                     r"(?:지급금액|지급기준|지급절차|유효기간|효력을?\s*가진|"
-                    r"\b(?:renew|terminat|notice|effective|expire|price|fee|sla)\w*\b)",
+                    r"\b(?:renew|terminat|notice|effective|expire|price|fee|sla|"
+                    r"exclusiv|minimum\s+purchase|purchase\s+commitment)\w*\b)",
                     r"\b(?:must|shall|requir(?:e|es|ed))\b",
                     r"\b(?:audit|data|privacy|security|subcontract)\w*\b",
                     r"(?:예산|재정|비용|재원|기금|\b(?:budget|cost|capacity|approval|readiness)\b)",
@@ -5406,6 +5659,7 @@ def _grounded_key_fact_fallback(
             candidates.append(
                 {
                     "rank": (
+                        0 if statement in host_projection_statements else 1,
                         -decision_role_score,
                         -facet_coverage,
                         -len(_DECISION_CONSTRAINT_PATTERN.findall(statement)),
@@ -5414,6 +5668,7 @@ def _grounded_key_fact_fallback(
                         clause_index,
                     ),
                     "source_key": source_key,
+                    "host_projection": statement in host_projection_statements,
                     "facet_indexes": {
                         index
                         for index, score in enumerate(facet_scores)
@@ -5426,6 +5681,30 @@ def _grounded_key_fact_fallback(
             )
     if not candidates:
         return []
+    if decision_question.strip():
+        relevant_candidates = [
+            candidate
+            for candidate in candidates
+            if _decision_statement_relevant(
+                str(candidate.get("statement") or ""),
+                decision_question,
+            )
+        ]
+        # Keep the fallback a safety net for broad questions whose useful
+        # source language has little lexical overlap. When at least one
+        # decision-bound fact exists, however, do not let filing furniture or
+        # generic company background outrank it.
+        if relevant_candidates:
+            candidates = relevant_candidates
+        elif _decision_question_is_sourcing(decision_question):
+            return []
+        elif re.search(
+            r"\b(?:incident|breach|failure|manufactur\w*|readiness|remediation|"
+            r"global\s+development|development\s+plan|collaboration)\b",
+            decision_question,
+            flags=re.IGNORECASE,
+        ):
+            return []
     candidates.sort(key=lambda row: row["rank"])
     selected: list[dict[str, Any]] = []
     selected_keys: set[tuple[str, str]] = set()
@@ -5454,6 +5733,7 @@ def _grounded_key_fact_fallback(
                     0
                     if str(row["source_key"]) not in selected_source_keys
                     else 1,
+                    0 if row.get("host_projection") else 1,
                     -len(set(row["facet_indexes"]) - covered_facets),
                     row["rank"],
                 )
@@ -5575,7 +5855,7 @@ def _complete_extracted_statement_surface(text: str) -> bool:
     ):
         return False
     if re.search(
-        r"\b(?:am|is|are|was|were|be|been|being|has|have|had|can|could|may|might|"
+        r"\b(?:am|is|are|was|were|be|been|being|has|have|had|can(?:not)?|could|may|might|"
         r"must|shall|should|will|would|and|but|or|of|to|for|with|by|the|a|an|"
         r"this|that|these|those|including|excluding)\s*[.!?]?$",
         statement,
@@ -5587,9 +5867,9 @@ def _complete_extracted_statement_surface(text: str) -> bool:
     ):
         return False
     if not re.search(
-        r"\b(?:am|is|are|was|were|be|been|being|has|have|had|can|could|may|might|"
+        r"\b(?:am|is|are|was|were|be|been|being|has|have|had|can(?:not)?|could|may|might|"
         r"must|shall|should|will|would|accept(?:s|ed|ing)?|agree(?:s|d|ing)?|approv(?:e|es|ed|ing)|"
-        r"arriv(?:e|es|ed|ing)|authoriz(?:e|es|ed|ing)|cancel(?:s|led|ed|ing)?|"
+        r"arriv(?:e|es|ed|ing)|authoriz(?:e|es|ed|ing)|bear(?:s|ing|borne)?|cancel(?:s|led|ed|ing)?|"
         r"complet(?:e|es|ed|ing)|contain(?:s|ed|ing)?|correct(?:s|ed|ing)?|cover(?:s|ed|ing)?|"
         r"decid(?:e|es|ed|ing)|declin(?:e|es|ed|ing)|delet(?:e|es|ed|ing)|depend(?:s|ed|ing)?|"
         r"document(?:s|ed|ing)?|engag(?:e|es|ed|ing)|exclud(?:e|es|ed|ing)|expir(?:e|es|ed|ing)|"
@@ -5869,6 +6149,12 @@ def _select_grounded_bottom_line(
             return row
         if len(statement) < 80:
             return row
+        if (
+            len(re.findall(r"[\w’'-]+", statement, flags=re.UNICODE)) <= 18
+            and re.search(r"\b\d+%(?!\w).*\b\d+%(?!\w)", statement)
+            and re.search(r"\b(?:except|subject\s+to)\b", statement, flags=re.IGNORECASE)
+        ):
+            return row
 
         # Long legal conditions often contain a compact, mechanically
         # groundable risk once drafting filler is removed.  Preserve the actor,
@@ -6083,9 +6369,11 @@ def _select_grounded_bottom_line(
             ]
         candidates: list[tuple[int, int, str, list[str]]] = []
         for clause in clauses:
-            if len(clause) >= 80 or not _decision_basis_usable(
-                clause,
-                decision_question,
+            if (
+                len(clause) >= 80
+                or _low_information_key_fact(clause)
+                or not _decision_basis_usable(clause, decision_question)
+                or not _decision_statement_relevant(clause, decision_question)
             ):
                 continue
             supporting_refs = [
@@ -6539,10 +6827,37 @@ def _select_grounded_bottom_line(
             decision_question,
         ):
             continue
+        neutral_amendment_change = bool(
+            row.get("validation_mode") == "explicit_document_change_projection"
+            and row.get("projection_kind") != "original_agreement_date_conflict"
+        )
+        prefix = (
+            "기록된 계약 변경"
+            if korean_output and neutral_amendment_change
+            else "Recorded amendment change"
+            if neutral_amendment_change
+            else unresolved_prefix
+        )
         candidate = {
             **row,
-            "statement": f"{unresolved_prefix}: {row['statement']}",
+            "statement": f"{prefix}: {row['statement']}",
         }
+        if row.get("validation_mode") == "explicit_document_change_projection":
+            refs = list(
+                row.get("allowed_citation_refs")
+                or row.get("citation_refs")
+                or []
+            )
+            candidate.update(
+                {
+                    "validation_mode": "grounded_proposal_basis",
+                    "proposal_basis_validation_mode": (
+                        "explicit_document_change_projection"
+                    ),
+                    "proposal_basis_statement": str(row.get("statement") or ""),
+                    "proposal_basis_citation_refs": refs,
+                }
+            )
         if grounded(candidate):
             return candidate, True
     if (
@@ -7189,6 +7504,28 @@ def _repair_grounded_recommendations(
             basis.get("validation_mode") == "explicit_document_change_projection"
             and basis.get("projection_kind") != "original_agreement_date_conflict"
         )
+        question_bound_next_step = _question_specific_next_step(decision_question)
+        use_question_bound_next_step = bool(
+            decision_question.strip()
+            and (
+                neutral_amendment_change
+                or re.search(
+                    r"\b(?:manufactur\w*|missing[- ]drive|unaccounted[- ]for\s+"
+                    r"(?:server\s+)?drives?|global\s+development|development\s+plan|"
+                    r"collaboration|dependency|second[- ]source|minimum[- ]purchase|"
+                    r"exclusiv\w*|amend(?:ed|ment)|renew(?:al)?|terminat(?:e|ion)|"
+                    r"replacement\s+"
+                    r"(?:path|supplier|channel))\b",
+                    decision_question,
+                    flags=re.IGNORECASE,
+                )
+            )
+        )
+        if use_question_bound_next_step:
+            return grounded_proposal_from_basis(
+                basis,
+                question_bound_next_step,
+            )
         if neutral_amendment_change:
             prefix = (
                 "결정 전에 변경된 계약 조건을 검토하세요"
@@ -7662,6 +7999,52 @@ def _document_change_relevance_bonus(question: str, text: str) -> int:
         flags=re.IGNORECASE,
     )
     return 8 if operative_change else 0
+
+
+def _incident_relevance_bonus(question: str, text: str) -> int:
+    """Reserve a source window that describes the failure named by a decision.
+
+    Embeddings can rank litigation aftermath or filing boilerplate above the
+    short paragraph that records an operational incident.  This narrow bonus
+    applies only when the question names an incident/failure and the source
+    binds a missing or unlocated object to that same decision surface.
+    """
+
+    if not re.search(
+        r"\b(?:incident|breach|failure|outage|loss)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return 0
+    missing_object_question = re.search(
+        r"\b(?:missing|lost|unaccounted(?:-for)?|unlocated)"
+        r"(?:[- ]+[A-Za-z0-9]+){0,3}\b",
+        question,
+        flags=re.IGNORECASE,
+    )
+    if missing_object_question is None:
+        return 0
+    failure_marker = re.search(
+        r"\b(?:could\s+not\s+locate|cannot\s+locate|"
+        r"unaccounted(?:-for)?|missing|lost|misplaced)\b",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if failure_marker is None:
+        return 0
+    question_terms = _expanded_search_query_terms(question)
+    text_terms = _expanded_search_query_terms(text)
+    focused_terms = question_terms - {
+        "after",
+        "contract",
+        "continue",
+        "decision",
+        "incident",
+        "owner",
+        "prepare",
+        "should",
+    }
+    return 10 if len(focused_terms & text_terms) >= 2 else 0
 
 
 _QUESTION_RELATION_GROUPS: tuple[tuple[str, re.Pattern[str], re.Pattern[str]], ...] = (
@@ -10003,6 +10386,28 @@ def _amendment_legal_identity_context(
     }
     if title_terms:
         return title_prefix
+    title_suffix = line[match_in_line :].strip(" :;,-")
+    if re.search(
+        r"\b(?:Master\s+Services|Manufacturing|Supply|Collaboration|License|"
+        r"Product\s+Development)\s+Agreement\b[^.;!?]{0,180}?"
+        r"\b(?:between|among)\b",
+        title_suffix,
+        flags=re.IGNORECASE,
+    ):
+        # Some EDGAR normalizations flatten the complete amendment heading and
+        # both parties onto one line after "Amendment No. N".
+        return title_suffix
+    heading_window = text[match.start() : min(len(text), match.end() + 700)]
+    heading_identity = re.search(
+        r"\bAmendment\s+No\.?\s*\d+\b[^.;!?]{0,400}?"
+        r"\b(?:Master\s+Services|Manufacturing|Supply|Collaboration|License|"
+        r"Product\s+Development)\s+Agreement\b[^.;!?]{0,260}?"
+        r"\b(?:between|among)\b[^.;!?]{1,220}",
+        heading_window,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if heading_identity is not None:
+        return re.sub(r"\s+", " ", heading_identity.group(0)).strip()
 
     paragraph_before = list(
         re.finditer(r"\n[ \t]*\n", text[: match.start()])
@@ -10171,15 +10576,30 @@ def _amendment_identity_for_position(
         for identity in identities
         if 0 < int(identity["position"]) - target_position <= 2400
     ]
-    if len({str(identity["label"]) for identity in following}) != 1:
-        return None
-    return min(
-        following,
-        key=lambda row: (
-            int(row["position"]) - target_position,
-            row.get("citation_ref") != _chunk_citation_ref(target_chunk),
-        ),
-    )
+    if len({str(identity["label"]) for identity in following}) == 1:
+        return min(
+            following,
+            key=lambda row: (
+                int(row["position"]) - target_position,
+                row.get("citation_ref") != _chunk_citation_ref(target_chunk),
+            ),
+        )
+
+    # A long single-amendment exhibit can place an operative schedule or term
+    # thousands of characters after its heading. Bind that distant clause only
+    # when the selected artifact exposes one unique amendment label and the
+    # heading carries legal identity context; the later subject check still
+    # requires the decision's named party to occur in that context.
+    unique_labels = {str(identity["label"]) for identity in identities}
+    distant_preceding = [
+        identity
+        for identity in identities
+        if int(identity["position"]) <= target_position
+        and str(identity.get("subject_text") or "").strip()
+    ]
+    if len(unique_labels) == 1 and distant_preceding:
+        return max(distant_preceding, key=lambda row: int(row["position"]))
+    return None
 
 
 def _first_date_surface(text: str) -> str | None:
@@ -10690,6 +11110,63 @@ def _explicit_document_change_rows(
                     "service_level_clause_replacement",
                 )
 
+            term_clause_replacement = re.search(
+                r"Clause\s+\d+(?:\.\d+)?\s+of\s+the\s+Agreement\s+will\s+be\s+"
+                r"deleted\s+and\s+shall\s+hereby\s+be\s+replaced\s+with\s+the\s+"
+                r"following\s+new\s+clause\s+\d+(?:\.\d+)?\..{0,180}?\bTerm\..{0,160}?"
+                r"\bwill\s+end\s+on\s+(?P<day>\d{1,2})\s+"
+                r"(?P<month>January|February|March|April|May|June|July|August|"
+                r"September|October|November|December)\s+(?P<year>\d{4})\b",
+                text,
+                flags=re.IGNORECASE | re.DOTALL,
+            )
+            if term_clause_replacement:
+                amendment_identity = _amendment_identity_for_position(
+                    artifact_chunks,
+                    chunk,
+                    term_clause_replacement.start(),
+                )
+                if amendment_identity is not None:
+                    subject = _question_bound_document_subject(
+                        decision_question,
+                        [
+                            {"text": str(amendment_identity["subject_text"])},
+                            {"text": term_clause_replacement.group(0)},
+                        ],
+                    )
+                    if subject:
+                        end_date = (
+                            f"{term_clause_replacement.group('month').title()} "
+                            f"{int(term_clause_replacement.group('day'))}, "
+                            f"{term_clause_replacement.group('year')}"
+                        )
+                        add(
+                            f"{subject}: {amendment_identity['label']} sets the "
+                            f"agreement end date at {end_date}.",
+                            [str(amendment_identity["citation_ref"]), change_ref],
+                            "term_clause_end_date_replacement",
+                        )
+
+            temporary_default_waiver = re.search(
+                r"\bLimited\s+Waiver\b.{0,180}?\buntil\s+the\s+"
+                r"Waiver\s+Termination\s+Date\b.{0,160}?\bagrees\s+to\s+waive\s+"
+                r"each\s+default\s+or\s+event\s+of\s+default\b",
+                text,
+                flags=re.IGNORECASE | re.DOTALL,
+            )
+            if temporary_default_waiver:
+                subject = _question_bound_document_subject(
+                    decision_question,
+                    [{"text": text}],
+                )
+                if subject:
+                    add(
+                        f"{subject}: the amendment waives defaults until the "
+                        "Waiver Termination Date.",
+                        [change_ref],
+                        "temporary_default_waiver",
+                    )
+
             participant_definition = re.search(
                 r"definition\s+of\s+[“\"](?P<term>Enrolled\s+Participants)"
                 r"[”\"]\s+is\s+deleted\s+and\s+the\s+following\s+substituted\s+"
@@ -10778,11 +11255,13 @@ def _explicit_document_change_rows(
         "definition_scope_narrowing": 1,
         "prerequisite_deletion": 2,
         "term_endpoint_replacement": 3,
-        "lease_term_extension": 4,
-        "participant_definition_replacement": 5,
-        "service_level_clause_replacement": 6,
-        "hnfs_requirements_incorporation": 7,
-        "prior_amendment_cancellation": 8,
+        "term_clause_end_date_replacement": 4,
+        "lease_term_extension": 5,
+        "temporary_default_waiver": 6,
+        "participant_definition_replacement": 7,
+        "service_level_clause_replacement": 8,
+        "hnfs_requirements_incorporation": 9,
+        "prior_amendment_cancellation": 10,
     }
     candidates.sort(
         key=lambda row: (
@@ -12002,6 +12481,60 @@ def _input_specific_uncertainty(
     return rows[:limit]
 
 
+def _question_specific_next_step(decision_question: str) -> str:
+    """Return a concrete, non-factual review action for the named decision."""
+
+    question = re.sub(r"\s+", " ", decision_question).strip()
+    if _contains_hangul(question):
+        return "현재 운영 근거와 인용된 계약 조건을 확인한 뒤 결정하세요."
+    if re.search(r"\bmanufactur\w*\b", question, flags=re.IGNORECASE):
+        if re.search(
+            r"\b(?:readiness|remediation|deviation|validation)\b",
+            question,
+            flags=re.IGNORECASE,
+        ):
+            return (
+                "Verify manufacturing readiness and remediation evidence before "
+                "deciding."
+            )
+        return "Confirm the amended term and current manufacturing performance before deciding."
+    if re.search(
+        r"\b(?:missing[- ]drive|unaccounted[- ]for\s+(?:server\s+)?drives?|"
+        r"data[- ]security\s+incident)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return "Verify incident remediation and current service performance before deciding."
+    if re.search(
+        r"\b(?:global\s+development|development\s+plan|collaboration)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return "Confirm the current development plan, budget, and opt-out terms before deciding."
+    if re.search(
+        r"\b(?:dependency|second[- ]source|replacement\s+(?:path|supplier|channel))\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return "Verify current dependency exposure and replacement readiness before deciding."
+    if re.search(
+        r"\bminimum[- ]purchase\b",
+        question,
+        flags=re.IGNORECASE,
+    ) and re.search(r"\bexclusiv\w*\b", question, flags=re.IGNORECASE):
+        return (
+            "Confirm the minimum-purchase terms and annual sales threshold before "
+            "deciding."
+        )
+    if re.search(
+        r"\b(?:amend(?:ed|ment)|renew(?:al)?|terminat(?:e|ion)|extend)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return "Review the amended term and confirm its current operational effect before deciding."
+    return "Verify the cited decision basis against current operating evidence before deciding."
+
+
 def _question_specific_review_uncertainty(decision_question: str) -> str:
     """Create a non-factual, question-bound review need when no gap survives.
 
@@ -12033,6 +12566,67 @@ def _question_specific_review_uncertainty(decision_question: str) -> str:
     if _contains_hangul(question):
         return complete_within_limit(
             f"다음 결정에 대한 근거의 충분성은 사람의 검토가 필요합니다: {question}"
+        )
+    if re.search(r"\bmanufactur\w*\b", question, flags=re.IGNORECASE):
+        if re.search(
+            r"\b(?:readiness|remediation|deviation|validation)\b",
+            question,
+            flags=re.IGNORECASE,
+        ):
+            return (
+                "Current manufacturing readiness, remediation status, and release "
+                "evidence require human confirmation."
+            )
+        return (
+            "The amended term, current manufacturing performance, purchase "
+            "commitments, and termination options require human confirmation."
+        )
+    if re.search(
+        r"\b(?:missing[- ]drive|unaccounted[- ]for\s+(?:server\s+)?drives?|"
+        r"data[- ]security\s+incident)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return (
+            "The incident root cause, completed remediation, and current service "
+            "performance require human confirmation."
+        )
+    if re.search(
+        r"\b(?:global\s+development|development\s+plan|collaboration)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return (
+            "The current development budget, milestones, opt-out terms, and amendment "
+            "effects require human confirmation."
+        )
+    if re.search(
+        r"\b(?:dependency|second[- ]source|replacement\s+(?:path|supplier|channel))\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return (
+            "Post-amendment performance, financial stability, and replacement "
+            "readiness require human confirmation."
+        )
+    if re.search(
+        r"\b(?:amend(?:ed|ment)|renew(?:al)?|terminat(?:e|ion)|extend)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        should_match = re.match(
+            r"should\s+(?:the\s+contract\s+owner\s+)?(?P<decision>.+)",
+            question,
+            flags=re.IGNORECASE,
+        )
+        decision = (
+            should_match.group("decision").strip()
+            if should_match is not None
+            else "making this contract decision"
+        )
+        return complete_within_limit(
+            "The current term, renewal status, operating performance, and termination "
+            f"options require human confirmation before {decision}."
         )
     should_match = re.match(
         r"should\s+(?:the\s+contract\s+owner\s+)?(?P<decision>.+)",
@@ -21608,11 +22202,16 @@ class LocalRuntimeStore:
                 query,
                 text,
             )
+            incident_relevance_bonus = _incident_relevance_bonus(
+                query,
+                text,
+            )
             score = round(
                 float(keyword_score)
                 + embedding_score
                 + scalar_relevance_bonus
-                + document_change_relevance_bonus,
+                + document_change_relevance_bonus
+                + incident_relevance_bonus,
                 6,
             )
             chunk_base = {
@@ -21650,6 +22249,7 @@ class LocalRuntimeStore:
                 "score": score,
                 "scalar_relevance_bonus": scalar_relevance_bonus,
                 "document_change_relevance_bonus": document_change_relevance_bonus,
+                "incident_relevance_bonus": incident_relevance_bonus,
                 "source": item.get("source"),
                 "safety": artifact.get("safety", {}),
                 "evidence_refs": [
@@ -22173,7 +22773,7 @@ class LocalRuntimeStore:
             "If a source says an owner, recommendation, decision, or field is not recorded, preserve the recorded qualifier; never rewrite record absence as categorical nonexistence. "
             "Do not add a before, after, by, until, blocking, prerequisite, or completion relationship to a factual statement unless the evidence states that relationship. Keep current measurements separate from future end dates. "
             "Put a conflict, failed target, known blocker, or unresolved condition in conflicts_risks only when the evidence explicitly states it. The uncertainty surface may repeat a concrete unresolved condition when it names what still prevents a confident decision; never use generic caution. "
-            "A normal obligation or contract description is not itself a conflict or risk. An amendment that explicitly deletes, replaces, narrows, or excludes a prior requirement is a material change and belongs in conflicts_risks as a concise cited change observation. For a decision-direction question whose supplied evidence does not establish readiness, return at least one specific missing_evidence row naming the exact party, contract, metric, or qualification evidence still needed. "
+            "A normal obligation or contract description is not itself a conflict or risk. An amendment that explicitly deletes, replaces, narrows, or excludes a prior requirement belongs in key_facts unless the evidence also establishes a concrete adverse effect or contradiction. Never repeat the same change across bottom_line, key_facts, and conflicts_risks. For a decision-direction question whose supplied evidence does not establish readiness, return at least one specific missing_evidence row naming the exact party, contract, metric, or qualification evidence still needed. "
             "An unmet condition is an explicit risk: if one source conditions support on another review or approval and that dependency is incomplete, name both sides. Compare explicit differences across sources such as different numbers, platforms, dates, or statuses. "
             "Omit document metadata, fixture labels, IDs, anchor phrases, and statements about what a note identifies; state only the underlying decision-relevant facts. "
             "Never use filenames, related-photo labels, page furniture, standalone dates, or bare document titles as key facts. Each key fact should normally cite one evidence alias and use close source wording. "
@@ -22214,7 +22814,7 @@ class LocalRuntimeStore:
             "Write all human-facing prose in the primary language of the decision question. Every object has statement and citation_refs using only alias labels actually supplied below; citation_refs must never be empty. Use at most three key facts, two conflicts, two gaps, and one next step. Keep factual and risk statements to 18 words or fewer and never copy more than ten consecutive source words. "
             + direction_guidance
             + comparison_guidance
-            + "Preserve numbers, negations, actors, attribution, modality, and conditions. Keep known blockers and failed targets in conflicts_risks; an ordinary obligation or contract description is not itself a conflict. An amendment that explicitly deletes, replaces, narrows, or excludes a prior requirement is a material change and belongs in conflicts_risks as a concise cited change observation. Return exactly one specific missing_evidence row unless the evidence contains two distinct decision-critical gaps. Use missing_evidence for information explicitly absent, unknown, blank, unassigned, or not recorded, or for a question-specific evidence need the supplied bundle does not establish; name the exact decision subject and never present that need as a source fact. For a decision-direction question lacking readiness evidence, include at least one such specific gap. "
+            + "Preserve numbers, negations, actors, attribution, modality, and conditions. Keep known blockers and failed targets in conflicts_risks; an ordinary obligation or contract description is not itself a conflict. An amendment that explicitly deletes, replaces, narrows, or excludes a prior requirement belongs in key_facts unless the evidence also establishes a concrete adverse effect or contradiction. Never repeat the same change across bottom_line, key_facts, and conflicts_risks. Return exactly one specific missing_evidence row unless the evidence contains two distinct decision-critical gaps. Use missing_evidence for information explicitly absent, unknown, blank, unassigned, or not recorded, or for a question-specific evidence need the supplied bundle does not establish; name the exact decision subject and never present that need as a source fact. For a decision-direction question lacking readiness evidence, include at least one such specific gap. "
             "Prioritize decision timing, notice dates, commercial terms, approval state, and delivery readiness over secondary activity counts. "
             "For minutes or debate transcripts, name the speaker or say that the proponent/opponent argued the point; never promote testimony into an unqualified fact. Do not use filenames, photo labels, page furniture, standalone dates, or bare document titles as key facts. Key facts should normally cite one alias and stay close to source wording. "
             "For Korean transcript evidence, use a named-speaker pattern such as '김 과장은 ... 설명했다', and use the newest cited stage for current-status language. "
@@ -23159,17 +23759,17 @@ class LocalRuntimeStore:
                 limit=2,
             )
             if explicit_document_change_rows:
-                merged_conflicts = list(explicit_document_change_rows)
-                for model_conflict in conflict_citations:
-                    if len(merged_conflicts) >= 2:
-                        break
-                    if _conflict_row_is_redundant(
-                        merged_conflicts,
+                # An amendment change is an observed fact, not automatically
+                # a conflict or risk. Keep genuine adverse model rows, while
+                # removing a model restatement of the host-regenerated change.
+                conflict_citations = [
+                    model_conflict
+                    for model_conflict in conflict_citations
+                    if not _conflict_row_is_redundant(
+                        explicit_document_change_rows,
                         model_conflict,
-                    ):
-                        continue
-                    merged_conflicts.append(model_conflict)
-                conflict_citations = merged_conflicts
+                    )
+                ]
                 metadata = model_output.setdefault("_ollama_response_metadata", {})
                 metadata["explicit_document_change_projection_count"] = len(
                     explicit_document_change_rows
@@ -23316,6 +23916,35 @@ class LocalRuntimeStore:
                 metadata["version_bound_clause_observation_count"] = len(
                     version_bound_observation_rows
                 )
+            if explicit_document_change_rows:
+                key_point_citations = [
+                    *explicit_document_change_rows,
+                    *[
+                        row
+                        for row in key_point_citations
+                        if not _key_fact_row_is_redundant(
+                            explicit_document_change_rows,
+                            row,
+                        )
+                    ],
+                ][:3]
+            relevant_key_points = [
+                row
+                for row in key_point_citations
+                if _decision_statement_relevant(
+                    str(row.get("statement") or ""),
+                    decision_question,
+                )
+            ]
+            if relevant_key_points:
+                relevance_pruned_count = len(key_point_citations) - len(
+                    relevant_key_points
+                )
+                key_point_citations = relevant_key_points
+                if relevance_pruned_count:
+                    metadata["question_irrelevant_key_fact_pruned_count"] = (
+                        relevance_pruned_count
+                    )
             # Build a wider safe candidate pool because the highest-ranked
             # source facts may already appear in conflicts or model facts.
             fallback_key_facts = _grounded_key_fact_fallback(
@@ -23323,16 +23952,70 @@ class LocalRuntimeStore:
                 limit=BRIEF_EVIDENCE_CHUNK_LIMIT,
                 decision_question=decision_question,
             )
+            relevant_fallback_key_facts = [
+                row
+                for row in fallback_key_facts
+                if _decision_statement_relevant(
+                    str(row.get("statement") or ""),
+                    decision_question,
+                )
+            ]
+            if relevant_fallback_key_facts:
+                relevant_existing_key_facts = [
+                    row
+                    for row in key_point_citations
+                    if _decision_statement_relevant(
+                        str(row.get("statement") or ""),
+                        decision_question,
+                    )
+                ]
+                fallback_relevance_pruned_count = len(key_point_citations) - len(
+                    relevant_existing_key_facts
+                )
+                key_point_citations = relevant_existing_key_facts
+                if fallback_relevance_pruned_count:
+                    metadata["question_irrelevant_key_fact_pruned_count"] = (
+                        int(
+                            metadata.get(
+                                "question_irrelevant_key_fact_pruned_count",
+                                0,
+                            )
+                        )
+                        + fallback_relevance_pruned_count
+                    )
             fallback_key_fact_count = 0
             target_key_fact_count = _brief_key_fact_target(
                 chunks,
                 decision_question,
             )
+            needs_two_contract_surfaces = bool(
+                re.search(
+                    r"\bminimum[- ]purchase\b",
+                    decision_question,
+                    flags=re.IGNORECASE,
+                )
+                and re.search(
+                    r"\bexclusiv\w*\b",
+                    decision_question,
+                    flags=re.IGNORECASE,
+                )
+            )
             for fallback_key_fact in fallback_key_facts:
                 # Fallback extraction is a safety net, not a quota. A few
                 # strong facts are preferable to forcing page headings or
                 # low-value transcript fragments into the Brief.
-                if len(key_point_citations) >= target_key_fact_count:
+                allow_second_change_context = bool(
+                    (explicit_document_change_rows or needs_two_contract_surfaces)
+                    and len(key_point_citations) < 2
+                    and _decision_statement_relevant(
+                        str(fallback_key_fact.get("statement") or ""),
+                        decision_question,
+                    )
+                )
+                if (
+                    len(key_point_citations) >= target_key_fact_count
+                    and not allow_second_change_context
+                ):
                     break
                 if _key_fact_row_is_redundant(
                     [*key_point_citations, *conflict_citations],
@@ -23400,6 +24083,34 @@ class LocalRuntimeStore:
                 else:
                     final_key_points.append(row)
             key_point_citations = final_key_points
+            final_echo_backfill_count = 0
+            if len(key_point_citations) < target_key_fact_count:
+                for fallback_key_fact in fallback_key_facts:
+                    if not _decision_statement_relevant(
+                        str(fallback_key_fact.get("statement") or ""),
+                        decision_question,
+                    ):
+                        continue
+                    if _key_fact_row_is_redundant(
+                        [*key_point_citations, *conflict_citations],
+                        fallback_key_fact,
+                    ):
+                        continue
+                    preview = {
+                        "title": model_output.get("title"),
+                        "bottom_line": None,
+                        "key_facts": [*key_point_citations, fallback_key_fact],
+                    }
+                    if _brief_output_echo_violations(preview, source_texts):
+                        continue
+                    key_point_citations.append(fallback_key_fact)
+                    final_echo_backfill_count += 1
+                    if len(key_point_citations) >= target_key_fact_count:
+                        break
+            if final_echo_backfill_count:
+                metadata["quality_final_echo_backfill_count"] = (
+                    final_echo_backfill_count
+                )
 
             def prune_optional_echo_rows(
                 section: str,

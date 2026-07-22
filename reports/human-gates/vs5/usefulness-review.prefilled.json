@@ -12,10 +12,10 @@
       "packages/cornerstone_cli/briefing.py",
       "packages/cornerstone_cli/product_access.py"
     ],
-    "pipeline_sha256": "4706274bdf24d90a1a31c08edeb998fc26154221dc2c64b931ad6c0898459ff4",
+    "pipeline_sha256": "239f0da1fc163cd41c5c1b7725e3097a2a0dcb115af6fae01f47bfc7eac21e3b",
     "provider": "ollama"
   },
-  "prompt_retrieval_revision": "4706274bdf24d90a1a31c08edeb998fc26154221dc2c64b931ad6c0898459ff4",
+  "prompt_retrieval_revision": "239f0da1fc163cd41c5c1b7725e3097a2a0dcb115af6fae01f47bfc7eac21e3b",
   "source_report": "reports/scenario/vs5-citation-grounded-brief-2026-07-12.json",
   "minimum_reviewer_count": 2,
   "non_owner_reviewer_required": true,
@@ -23,58 +23,41 @@
     {
       "case_id": "edgar-omada-evernorth-msa",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_7e667264ec130a7b",
+      "brief_id": "brief_ae83556448ffa4cf",
       "brief_status": "evidence_backed",
       "title": "Should CornerStone continue with Evernorth or prepare a replacement channel plan?",
       "decision_question": "Should the contract owner continue the Evernorth relationship under the surviving statement-of-work terms or prepare a replacement channel plan?",
       "bottom_line": "Recorded amendment change: Section 1.6's replacement makes service-level guarantees depend on applicable statements of work.",
       "key_facts": [
-        "Evernorth (Omada Health) has scaled to more than 2,000 customers and served over one million members since launch.",
-        "Omada reports opportunity in new channels including Medicare Advantage, fully insured lines, health systems, and government programs as of December 2024."
-      ],
-      "conflicts_risks": [
         "Section 1.6's replacement makes service-level guarantees depend on applicable statements of work."
       ],
+      "conflicts_risks": [],
       "missing_evidence": [
-        "Current contract status, renewal date, and any pending termination notices between Evernorth and Omada are not established in the supplied evidence."
+        "Post-amendment performance, financial stability, and replacement readiness require human confirmation."
       ],
       "recommended_next_steps": [
-        "Review the amended term before deciding: Section 1.6's replacement makes service-level guarantees depend on applicable statements of work."
+        "Verify current dependency exposure and replacement readiness before deciding."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
           "statement": "Recorded amendment change: Section 1.6's replacement makes service-level guarantees depend on applicable statements of work.",
           "citation_refs": [
-            "evidence_chunk:chunk_3929a17f830afb84e390679e9569a8bb773ea8551cc950211c293dcf8264effc"
+            "evidence_chunk:chunk_d3bf5eaa75324f8bd25206562a5fe7e3e6eff8061f12bb90ba4a926b1adef990"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Evernorth (Omada Health) has scaled to more than 2,000 customers and served over one million members since launch.",
-          "citation_refs": [
-            "evidence_chunk:chunk_dc7fd0081184b3676061ecbedca7a3532e66e386c04192dfcce11ebb52720776"
-          ]
-        },
-        {
-          "section": "key_facts",
-          "statement": "Omada reports opportunity in new channels including Medicare Advantage, fully insured lines, health systems, and government programs as of December 2024.",
-          "citation_refs": [
-            "evidence_chunk:chunk_780e962c25bd83ccbc69ec8be8e376759392660697655d5932dca68f2b5c55a4"
-          ]
-        },
-        {
-          "section": "conflicts_risks",
           "statement": "Section 1.6's replacement makes service-level guarantees depend on applicable statements of work.",
           "citation_refs": [
-            "evidence_chunk:chunk_3929a17f830afb84e390679e9569a8bb773ea8551cc950211c293dcf8264effc"
+            "evidence_chunk:chunk_d3bf5eaa75324f8bd25206562a5fe7e3e6eff8061f12bb90ba4a926b1adef990"
           ]
         },
         {
           "section": "recommended_next_steps",
-          "statement": "Review the amended term before deciding: Section 1.6's replacement makes service-level guarantees depend on applicable statements of work.",
+          "statement": "Verify current dependency exposure and replacement readiness before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_3929a17f830afb84e390679e9569a8bb773ea8551cc950211c293dcf8264effc"
+            "evidence_chunk:chunk_d3bf5eaa75324f8bd25206562a5fe7e3e6eff8061f12bb90ba4a926b1adef990"
           ]
         }
       ],
@@ -176,14 +159,17 @@
     {
       "case_id": "edgar-composecure-amex-msa",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_5f75b05a7709aa13",
-      "brief_status": "draft",
-      "title": "Should AXP extend the Amexco agreement given termination and exclusivity terms?",
+      "brief_id": "brief_0d70bfd0358032f0",
+      "brief_status": "evidence_backed",
+      "title": "Should AXP extend the Amexco American Express agreement?",
       "decision_question": "Should the contract owner extend the American Express agreement given its termination, minimum-purchase, and exclusivity provisions?",
-      "bottom_line": "Hold: Exclusivity may be cancelled on future renewals if total annual sales fall below an undisclosed threshold.",
-      "key_facts": [],
+      "bottom_line": "Hold: Exclusivity may be cancelled on future renewals if total sales fall below an undisclosed annual threshold.",
+      "key_facts": [
+        "A July 15, 2021 amendment added an American Express section covering pricing and exclusivity terms.",
+        "AXP agrees to comply with required minimum-purchase obligations"
+      ],
       "conflicts_risks": [
-        "Exclusivity may be cancelled on future renewals if total annual sales fall below an undisclosed threshold."
+        "Exclusivity may be cancelled on future renewals if total sales fall below an undisclosed annual threshold."
       ],
       "missing_evidence": [
         "Minimum-purchase quantities are redacted in the supplied agreement.",
@@ -195,23 +181,38 @@
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: Exclusivity may be cancelled on future renewals if total annual sales fall below an undisclosed threshold.",
+          "statement": "Hold: Exclusivity may be cancelled on future renewals if total sales fall below an undisclosed annual threshold.",
           "citation_refs": [
-            "evidence_chunk:chunk_dc8c0d9ebf2c90aeb98d9f6b2fa6f331994da88121b627358475d238c8a2f3b5"
+            "evidence_chunk:chunk_167f24ada560375915ab924d4e10787ca53388b73682deb8ecb8d9a05b079f9b"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "A July 15, 2021 amendment added an American Express section covering pricing and exclusivity terms.",
+          "citation_refs": [
+            "evidence_chunk:chunk_167f24ada560375915ab924d4e10787ca53388b73682deb8ecb8d9a05b079f9b",
+            "evidence_chunk:chunk_185b8587b08b9a23ff665ae8d8cc7f3c5976423c094646d01530e124cf2f940c"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "AXP agrees to comply with required minimum-purchase obligations",
+          "citation_refs": [
+            "evidence_chunk:chunk_a708d458145ac97a39d6bd959bbc9ca2c3567c48a9008a7e6b70a4de417e1d49"
           ]
         },
         {
           "section": "conflicts_risks",
-          "statement": "Exclusivity may be cancelled on future renewals if total annual sales fall below an undisclosed threshold.",
+          "statement": "Exclusivity may be cancelled on future renewals if total sales fall below an undisclosed annual threshold.",
           "citation_refs": [
-            "evidence_chunk:chunk_dc8c0d9ebf2c90aeb98d9f6b2fa6f331994da88121b627358475d238c8a2f3b5"
+            "evidence_chunk:chunk_167f24ada560375915ab924d4e10787ca53388b73682deb8ecb8d9a05b079f9b"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Confirm the annual sales threshold governing exclusivity before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_dc8c0d9ebf2c90aeb98d9f6b2fa6f331994da88121b627358475d238c8a2f3b5"
+            "evidence_chunk:chunk_167f24ada560375915ab924d4e10787ca53388b73682deb8ecb8d9a05b079f9b"
           ]
         }
       ],
@@ -290,41 +291,41 @@
     {
       "case_id": "edgar-corelogic-ntt-msa",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_3af59a148bd0d500",
+      "brief_id": "brief_3a87db226fa863ee",
       "brief_status": "evidence_backed",
-      "title": "Should CoreLogic extend NTT DATA services via Amendments 4-6?",
+      "title": "Should CoreLogic extend NTT DATA services via Amendments 4–6?",
       "decision_question": "Should the contract owner extend the NTT DATA services relationship based on Amendments 4 through 6?",
-      "bottom_line": "Evidence does not yet establish a decision: Amendments add new SLA definitions (Schedule A-3.2) and replace the Service Level Matrix (Schedule A-3.1).",
+      "bottom_line": "Evidence does not yet establish a decision: 6 is effective October 17, 2018 between CoreLogic and NTT DATA Services, LLC",
       "key_facts": [
-        "Amendments add new SLA definitions (Schedule A-3.2) and replace the Service Level Matrix (Schedule A-3.1)."
+        "Amendment No. 6 is effective October 17, 2018 between CoreLogic and NTT DATA Services, LLC."
       ],
       "conflicts_risks": [],
       "missing_evidence": [
-        "Whether the ARC/RRC Settlement Agreement fully resolved all prior disputes between CoreLogic and NTT DATA, or whether unresolved issues remain that could affect future performance."
+        "The ARC/RRC Settlement Agreement dated October 17, 2018 is cited as the basis for Amendments 4–6 but its terms and whether those conditions were met are not established in any supplied record."
       ],
       "recommended_next_steps": [
-        "Use this cited fact as the decision baseline: Amendments add new SLA definitions (Schedule A-3.2) and replace the Service Level Matrix (Schedule A-3.1)."
+        "Use this cited fact as the decision baseline: Amendment No. 6 is effective October 17, 2018 between CoreLogic and NTT DATA Services, LLC."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Evidence does not yet establish a decision: Amendments add new SLA definitions (Schedule A-3.2) and replace the Service Level Matrix (Schedule A-3.1).",
+          "statement": "Evidence does not yet establish a decision: 6 is effective October 17, 2018 between CoreLogic and NTT DATA Services, LLC",
           "citation_refs": [
-            "evidence_chunk:chunk_c1a36160bf6bcf0a0f53b9425821dbe4f75c084ed2e2170c782c6e3b153ef8f4"
+            "evidence_chunk:chunk_33dc0009e2f10c7b635333b6d1c7478335b7a52def7b04e4624355604678208c"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Amendments add new SLA definitions (Schedule A-3.2) and replace the Service Level Matrix (Schedule A-3.1).",
+          "statement": "Amendment No. 6 is effective October 17, 2018 between CoreLogic and NTT DATA Services, LLC.",
           "citation_refs": [
-            "evidence_chunk:chunk_c1a36160bf6bcf0a0f53b9425821dbe4f75c084ed2e2170c782c6e3b153ef8f4"
+            "evidence_chunk:chunk_33dc0009e2f10c7b635333b6d1c7478335b7a52def7b04e4624355604678208c"
           ]
         },
         {
           "section": "recommended_next_steps",
-          "statement": "Use this cited fact as the decision baseline: Amendments add new SLA definitions (Schedule A-3.2) and replace the Service Level Matrix (Schedule A-3.1).",
+          "statement": "Use this cited fact as the decision baseline: Amendment No. 6 is effective October 17, 2018 between CoreLogic and NTT DATA Services, LLC.",
           "citation_refs": [
-            "evidence_chunk:chunk_c1a36160bf6bcf0a0f53b9425821dbe4f75c084ed2e2170c782c6e3b153ef8f4"
+            "evidence_chunk:chunk_33dc0009e2f10c7b635333b6d1c7478335b7a52def7b04e4624355604678208c"
           ]
         }
       ],
@@ -403,41 +404,49 @@
     {
       "case_id": "edgar-gogo-airspan-dependency",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_d74aab771de93c07",
+      "brief_id": "brief_3f2767e3b69464b6",
       "brief_status": "evidence_backed",
-      "title": "Should Gogo maintain Airspan dependency post-Chapter 11 and June 2024 amendment?",
+      "title": "Should Gogo maintain its Airspan supply relationship post-Chapter 11?",
       "decision_question": "Should the contract owner continue the Airspan dependency after the Chapter 11 event and June 2024 amendment?",
-      "bottom_line": "Evidence does not yet establish a decision: Airspan filed a Chapter 11 plan supplement on May 17, 2024 to reorganize under Case No. 24-10621.",
+      "bottom_line": "Evidence does not yet establish a decision: Airspan filed a Chapter 11 plan supplement on May 17, 2024 to reorganize under its Joint Prepackaged Plan.",
       "key_facts": [
-        "Airspan filed a Chapter 11 plan supplement on May 17, 2024 to reorganize under Case No. 24-10621."
+        "Airspan: the amendment waives defaults until the Waiver Termination Date.",
+        "Airspan filed a Chapter 11 plan supplement on May 17, 2024 to reorganize under its Joint Prepackaged Plan."
       ],
       "conflicts_risks": [],
       "missing_evidence": [
-        "Human review must confirm evidence for this decision: continue the Airspan dependency after the Chapter 11 event and June 2024 amendment."
+        "Post-amendment performance, financial stability, and replacement readiness require human confirmation."
       ],
       "recommended_next_steps": [
-        "Use this cited fact as the decision baseline: Airspan filed a Chapter 11 plan supplement on May 17, 2024 to reorganize under Case No. 24-10621."
+        "Verify current dependency exposure and replacement readiness before deciding."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Evidence does not yet establish a decision: Airspan filed a Chapter 11 plan supplement on May 17, 2024 to reorganize under Case No. 24-10621.",
+          "statement": "Evidence does not yet establish a decision: Airspan filed a Chapter 11 plan supplement on May 17, 2024 to reorganize under its Joint Prepackaged Plan.",
           "citation_refs": [
-            "evidence_chunk:chunk_2c3783e73ab8663eae3cbb9e8cd65d1c1b258d01be1eedbc98640ae47b7a08fd"
+            "evidence_chunk:chunk_cc87685cee8ca3947200fe51bf508f1df0a18ea4aeb373e8781114b961098962"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Airspan filed a Chapter 11 plan supplement on May 17, 2024 to reorganize under Case No. 24-10621.",
+          "statement": "Airspan: the amendment waives defaults until the Waiver Termination Date.",
           "citation_refs": [
-            "evidence_chunk:chunk_2c3783e73ab8663eae3cbb9e8cd65d1c1b258d01be1eedbc98640ae47b7a08fd"
+            "evidence_chunk:chunk_8f0707474b78bd0944efdfd07eac38b92c83df5edc729fea64b9124b557455cb"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "Airspan filed a Chapter 11 plan supplement on May 17, 2024 to reorganize under its Joint Prepackaged Plan.",
+          "citation_refs": [
+            "evidence_chunk:chunk_cc87685cee8ca3947200fe51bf508f1df0a18ea4aeb373e8781114b961098962"
           ]
         },
         {
           "section": "recommended_next_steps",
-          "statement": "Use this cited fact as the decision baseline: Airspan filed a Chapter 11 plan supplement on May 17, 2024 to reorganize under Case No. 24-10621.",
+          "statement": "Verify current dependency exposure and replacement readiness before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_2c3783e73ab8663eae3cbb9e8cd65d1c1b258d01be1eedbc98640ae47b7a08fd"
+            "evidence_chunk:chunk_cc87685cee8ca3947200fe51bf508f1df0a18ea4aeb373e8781114b961098962"
           ]
         }
       ],
@@ -539,51 +548,41 @@
     {
       "case_id": "edgar-emergent-astrazeneca-manufacturing",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_121055cafd1f9df8",
+      "brief_id": "brief_414d8e88a81cfc83",
       "brief_status": "evidence_backed",
-      "title": "Should CornerStone continue AstraZeneca manufacturing amid incomplete readiness?",
+      "title": "Should AstraZeneca continue manufacturing under incomplete readiness and remediation evidence?",
       "decision_question": "Should the contract owner continue AstraZeneca manufacturing while readiness and remediation evidence remains incomplete?",
-      "bottom_line": "Evidence does not yet establish a decision: The Agreement remains ratified",
+      "bottom_line": "Evidence does not yet establish a decision: Production shall use a cGMP-validated manufacturing process",
       "key_facts": [
-        "The Agreement remains ratified and confirmed with all terms in full force per Amendment effective date.",
-        "AstraZeneca shall pay Service Provider fees and costs set forth in the Product Schedule upon initiation and completion of activities."
+        "Production shall use a cGMP-validated manufacturing process"
       ],
-      "conflicts_risks": [
-        "Manufacturing risks include potential inability to manufacture products outside the United States due to international business practice laws."
-      ],
+      "conflicts_risks": [],
       "missing_evidence": [
-        "Human review must confirm evidence for this decision: continue AstraZeneca manufacturing while readiness and remediation evidence remains incomplete."
+        "Current manufacturing readiness, remediation status, and release evidence require human confirmation."
       ],
       "recommended_next_steps": [
-        "Review the cited evidence before deciding."
+        "Verify manufacturing readiness and remediation evidence before deciding."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Evidence does not yet establish a decision: The Agreement remains ratified",
+          "statement": "Evidence does not yet establish a decision: Production shall use a cGMP-validated manufacturing process",
           "citation_refs": [
-            "evidence_chunk:chunk_56019470de75e1fb4e3e97bbc16da2c89c8d0bba86dd701194b2c7721205592c"
+            "evidence_chunk:chunk_db36456ab145b98ea1359f459fb64328e719b836302704e78772a9ea796c7d43"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "The Agreement remains ratified and confirmed with all terms in full force per Amendment effective date.",
+          "statement": "Production shall use a cGMP-validated manufacturing process",
           "citation_refs": [
-            "evidence_chunk:chunk_56019470de75e1fb4e3e97bbc16da2c89c8d0bba86dd701194b2c7721205592c"
+            "evidence_chunk:chunk_db36456ab145b98ea1359f459fb64328e719b836302704e78772a9ea796c7d43"
           ]
         },
         {
-          "section": "key_facts",
-          "statement": "AstraZeneca shall pay Service Provider fees and costs set forth in the Product Schedule upon initiation and completion of activities.",
+          "section": "recommended_next_steps",
+          "statement": "Verify manufacturing readiness and remediation evidence before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_380ab9bb4b1dd2479b3705567f875fd909586de1d5567b73c8f482ce485536ac"
-          ]
-        },
-        {
-          "section": "conflicts_risks",
-          "statement": "Manufacturing risks include potential inability to manufacture products outside the United States due to international business practice laws.",
-          "citation_refs": [
-            "evidence_chunk:chunk_b78ca40f58a745c425dddf5eef36c49269d4889a2ac6e764d483c5a36607b612"
+            "evidence_chunk:chunk_db36456ab145b98ea1359f459fb64328e719b836302704e78772a9ea796c7d43"
           ]
         }
       ],
@@ -685,41 +684,52 @@
     {
       "case_id": "edgar-itci-lonza-manufacturing",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_7cf77c2424063969",
+      "brief_id": "brief_270a908a67c9da97",
       "brief_status": "evidence_backed",
       "title": "Should Lonza manufacturing services be continued under the amended agreement?",
       "decision_question": "Should the contract owner continue or extend Lonza manufacturing services under the amended agreement?",
-      "bottom_line": "Evidence does not yet establish a decision: The Lonza Agreement was originally dated January 10, 2017 between Lonza Ltd",
+      "bottom_line": "Recorded amendment change: Lonza: Amendment No. 1 sets the agreement end date at December 31, 2028.",
       "key_facts": [
-        "The Lonza Agreement was originally dated January 10, 2017 between Lonza Ltd and ITI Limited."
+        "Lonza: Amendment No. 1 sets the agreement end date at December 31, 2028.",
+        "Lonza agreed to manufacture and supply the API for lumateperone"
       ],
       "conflicts_risks": [],
       "missing_evidence": [
-        "Human review must confirm evidence for this decision: continue or extend Lonza manufacturing services under the amended agreement."
+        "The amended term, current manufacturing performance, purchase commitments, and termination options require human confirmation."
       ],
       "recommended_next_steps": [
-        "Use this cited fact as the decision baseline: The Lonza Agreement was originally dated January 10, 2017 between Lonza Ltd and ITI Limited."
+        "Confirm the amended term and current manufacturing performance before deciding."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Evidence does not yet establish a decision: The Lonza Agreement was originally dated January 10, 2017 between Lonza Ltd",
+          "statement": "Recorded amendment change: Lonza: Amendment No. 1 sets the agreement end date at December 31, 2028.",
           "citation_refs": [
-            "evidence_chunk:chunk_00b3b47084c02a7b94e60ffb51d72a968ab750280ff433e8e28556ef9fa4554e"
+            "evidence_chunk:chunk_54c97aa829247d4fa9c23b0e7817bfa88825cd0dcb42da8c007e761bb995f210",
+            "evidence_chunk:chunk_befdc24afe19b5b252e1f2f1583170bae567c24643f1abf40bb6a8a52a9c8f57"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "The Lonza Agreement was originally dated January 10, 2017 between Lonza Ltd and ITI Limited.",
+          "statement": "Lonza: Amendment No. 1 sets the agreement end date at December 31, 2028.",
           "citation_refs": [
-            "evidence_chunk:chunk_00b3b47084c02a7b94e60ffb51d72a968ab750280ff433e8e28556ef9fa4554e"
+            "evidence_chunk:chunk_54c97aa829247d4fa9c23b0e7817bfa88825cd0dcb42da8c007e761bb995f210",
+            "evidence_chunk:chunk_befdc24afe19b5b252e1f2f1583170bae567c24643f1abf40bb6a8a52a9c8f57"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "Lonza agreed to manufacture and supply the API for lumateperone",
+          "citation_refs": [
+            "evidence_chunk:chunk_cda24f6efdb1b3178094cf7913a4fe20ac6b4aa384eb0162104276f693b08ce2"
           ]
         },
         {
           "section": "recommended_next_steps",
-          "statement": "Use this cited fact as the decision baseline: The Lonza Agreement was originally dated January 10, 2017 between Lonza Ltd and ITI Limited.",
+          "statement": "Confirm the amended term and current manufacturing performance before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_00b3b47084c02a7b94e60ffb51d72a968ab750280ff433e8e28556ef9fa4554e"
+            "evidence_chunk:chunk_54c97aa829247d4fa9c23b0e7817bfa88825cd0dcb42da8c007e761bb995f210",
+            "evidence_chunk:chunk_befdc24afe19b5b252e1f2f1583170bae567c24643f1abf40bb6a8a52a9c8f57"
           ]
         }
       ],
@@ -798,53 +808,52 @@
     {
       "case_id": "edgar-scilex-oishi-itochu-development",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_d00215c8b9450874",
+      "brief_id": "brief_e4c2e786b4322cb5",
       "brief_status": "evidence_backed",
-      "title": "Oishi/Itochu Development Agreement Renewal Risk Assessment",
+      "title": "Should Scilex renegotiate with Oishi/Itochu or seek alternate supply before renewal?",
       "decision_question": "Should the contract owner renegotiate the Oishi and Itochu development relationship or establish alternate supply and intellectual-property arrangements before renewal?",
       "bottom_line": "Recorded amendment change: Oishi: Fifth Amendment cancels the Fourth Amendment's effect on the Development Agreement.",
       "key_facts": [
-        "The Product is a lidocaine tape product intended as a Bioequivalent pharmaceutical alternative to Lidoderm brand product."
+        "Oishi: Fifth Amendment cancels the Fourth Amendment's effect on the Development Agreement.",
+        "Neither Oishi nor Itochu has exercised its termination right as of the proxy statement date."
       ],
-      "conflicts_risks": [
-        "Oishi: Fifth Amendment cancels the Fourth Amendment's effect on the Development Agreement."
-      ],
+      "conflicts_risks": [],
       "missing_evidence": [
-        "The specific date when the Developers' right to terminate becomes irrevocable or any notice period requirements for exercising termination under the Product Development Agreement are not established."
+        "The current term, renewal status, operating performance, and termination options require human confirmation before renegotiate the Oishi and Itochu development relationship or establish alternate."
       ],
       "recommended_next_steps": [
-        "Review the amended term before deciding: Oishi: Fifth Amendment cancels the Fourth Amendment's effect on the Development Agreement."
+        "Review the amended term and confirm its current operational effect before deciding."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
           "statement": "Recorded amendment change: Oishi: Fifth Amendment cancels the Fourth Amendment's effect on the Development Agreement.",
           "citation_refs": [
-            "evidence_chunk:chunk_14c9cef5cf1553eadebc9c3f8821c8432c38b48124f7df4684799ac27187b737",
-            "evidence_chunk:chunk_3fe090982ecf8b1a2577e312623756270af213b7fa73a0c4d86d79b28532f8f9"
+            "evidence_chunk:chunk_bdd6864e05555419f73ef96eaa2cac0f59e846327b757659427acfca88a2ef24",
+            "evidence_chunk:chunk_c95bc4bf5962a59dc89109db4625efb19426e23483e7b7bd7c4bde1c283fdbd3"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "The Product is a lidocaine tape product intended as a Bioequivalent pharmaceutical alternative to Lidoderm brand product.",
+          "statement": "Oishi: Fifth Amendment cancels the Fourth Amendment's effect on the Development Agreement.",
           "citation_refs": [
-            "evidence_chunk:chunk_449c6c390c1f4db6c17cd64da71d87242357cfa2ddaedebeb15f996569d73953"
+            "evidence_chunk:chunk_bdd6864e05555419f73ef96eaa2cac0f59e846327b757659427acfca88a2ef24",
+            "evidence_chunk:chunk_c95bc4bf5962a59dc89109db4625efb19426e23483e7b7bd7c4bde1c283fdbd3"
           ]
         },
         {
-          "section": "conflicts_risks",
-          "statement": "Oishi: Fifth Amendment cancels the Fourth Amendment's effect on the Development Agreement.",
+          "section": "key_facts",
+          "statement": "Neither Oishi nor Itochu has exercised its termination right as of the proxy statement date.",
           "citation_refs": [
-            "evidence_chunk:chunk_14c9cef5cf1553eadebc9c3f8821c8432c38b48124f7df4684799ac27187b737",
-            "evidence_chunk:chunk_3fe090982ecf8b1a2577e312623756270af213b7fa73a0c4d86d79b28532f8f9"
+            "evidence_chunk:chunk_b59a11714ebfffb4cd21e60e265669e403b34eb21aac81b74e1f5cd597dfb3db"
           ]
         },
         {
           "section": "recommended_next_steps",
-          "statement": "Review the amended term before deciding: Oishi: Fifth Amendment cancels the Fourth Amendment's effect on the Development Agreement.",
+          "statement": "Review the amended term and confirm its current operational effect before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_14c9cef5cf1553eadebc9c3f8821c8432c38b48124f7df4684799ac27187b737",
-            "evidence_chunk:chunk_3fe090982ecf8b1a2577e312623756270af213b7fa73a0c4d86d79b28532f8f9"
+            "evidence_chunk:chunk_bdd6864e05555419f73ef96eaa2cac0f59e846327b757659427acfca88a2ef24",
+            "evidence_chunk:chunk_c95bc4bf5962a59dc89109db4625efb19426e23483e7b7bd7c4bde1c283fdbd3"
           ]
         }
       ],
@@ -946,7 +955,7 @@
     {
       "case_id": "edgar-savara-gema-supply",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_5850468e9c3144b7",
+      "brief_id": "brief_28eff7ffcdb0766f",
       "brief_status": "evidence_backed",
       "title": "Should SAVARA accelerate a qualified second source or remain dependent on GEMA?",
       "decision_question": "Should the contract owner remain dependent on GEMA manufacturing or accelerate a qualified second source?",
@@ -954,7 +963,7 @@
       "key_facts": [
         "All clinical and nonclinical trials to-date used material sourced from GEMA, the sole current drug substance manufacturer.",
         "A master services agreement with a second-source biomanufacturing company was executed in July 2022 for molgramostim drug substances.",
-        "If the product from second sources is not demonstrated comparable to clinical materials, commercialization from those sources will not be possible."
+        "If the product at second sources is not demonstrated comparable to clinical materials, commercialization from those sources will not be possible."
       ],
       "conflicts_risks": [],
       "missing_evidence": [
@@ -969,39 +978,39 @@
           "section": "bottom_line",
           "statement": "Evidence does not yet establish a decision: A master services agreement with a second-source biomanufacturing company was executed in July 2022 for molgramostim drug substances.",
           "citation_refs": [
-            "evidence_chunk:chunk_bbbfaf62edaa841fc8d1daf3452565e7f03a1ab1baaf5ad2a728da10a0095833",
-            "evidence_chunk:chunk_c04aad74cf7be312d93b5d420f7c704dd122ce537d249d39f01f46bd033097b7"
+            "evidence_chunk:chunk_563c7c24a0e415789e116f552ade5c4dd82f2376912a0550777fb41299b004fe",
+            "evidence_chunk:chunk_d4da28005cee5d1338a0071567ca6ab70cec47e19e7acc6d4f9ac72c3b4c1e7a"
           ]
         },
         {
           "section": "key_facts",
           "statement": "All clinical and nonclinical trials to-date used material sourced from GEMA, the sole current drug substance manufacturer.",
           "citation_refs": [
-            "evidence_chunk:chunk_acc19d76a52d78f3bb1aadcd544aca5394c1e2fa967435a10e1d89989fcc2e37"
+            "evidence_chunk:chunk_4d1cd643975f6cdb34c444cd22b27922e79e19a4e12fd646f3593faef4fdd601"
           ]
         },
         {
           "section": "key_facts",
           "statement": "A master services agreement with a second-source biomanufacturing company was executed in July 2022 for molgramostim drug substances.",
           "citation_refs": [
-            "evidence_chunk:chunk_bbbfaf62edaa841fc8d1daf3452565e7f03a1ab1baaf5ad2a728da10a0095833",
-            "evidence_chunk:chunk_c04aad74cf7be312d93b5d420f7c704dd122ce537d249d39f01f46bd033097b7"
+            "evidence_chunk:chunk_563c7c24a0e415789e116f552ade5c4dd82f2376912a0550777fb41299b004fe",
+            "evidence_chunk:chunk_d4da28005cee5d1338a0071567ca6ab70cec47e19e7acc6d4f9ac72c3b4c1e7a"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "If the product from second sources is not demonstrated comparable to clinical materials, commercialization from those sources will not be possible.",
+          "statement": "If the product at second sources is not demonstrated comparable to clinical materials, commercialization from those sources will not be possible.",
           "citation_refs": [
-            "evidence_chunk:chunk_439d2d4711995f45e471c6bcf65671c796b0c09c28c40f339ecb28da52af2e66",
-            "evidence_chunk:chunk_e530f884c348db445c464f4557dc3468e45f36875f950536024fd46521d8f763"
+            "evidence_chunk:chunk_65b639c96c5d52f21ceae6ae92654ec58ccc40d58f341e6c9a2cbd91f35cf8e0",
+            "evidence_chunk:chunk_cc80a9aa8e4477b8bd16ba028f3c40bb4f935c351961471b55d6cfe16bde6db4"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Verify the second source's readiness before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_bbbfaf62edaa841fc8d1daf3452565e7f03a1ab1baaf5ad2a728da10a0095833",
-            "evidence_chunk:chunk_c04aad74cf7be312d93b5d420f7c704dd122ce537d249d39f01f46bd033097b7"
+            "evidence_chunk:chunk_563c7c24a0e415789e116f552ade5c4dd82f2376912a0550777fb41299b004fe",
+            "evidence_chunk:chunk_d4da28005cee5d1338a0071567ca6ab70cec47e19e7acc6d4f9ac72c3b4c1e7a"
           ]
         }
       ],
@@ -1080,41 +1089,41 @@
     {
       "case_id": "edgar-healthnet-ibm-outsourcing",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_3081dae552f6db0c",
+      "brief_id": "brief_5030bfb924105374",
       "brief_status": "evidence_backed",
-      "title": "IBM Outsourcing Continuation vs. Transition After Missing-Drive Incident",
+      "title": "Should Health Net continue IBM outsourcing or transition after the missing-drive incident?",
       "decision_question": "As of the latest packet filing, should the contract owner continue IBM outsourcing or prepare a transition after the missing-drive incident?",
-      "bottom_line": "Evidence does not yet establish a decision: Exchange Commission (other than as provided in Item 201)",
+      "bottom_line": "Evidence does not yet establish a decision: IBM notified Health Net on January 21, 2011 that it could not locate several hard disk drives used in the Rancho Cordova data center.",
       "key_facts": [
-        "Exchange Commission (other than as provided in Item 201)"
+        "IBM notified Health Net on January 21, 2011 that it could not locate several hard disk drives used in the Rancho Cordova data center."
       ],
       "conflicts_risks": [],
       "missing_evidence": [
-        "The identity of the party responsible for the missing-drive incident and any contractual relationship between that party and Health Net/IBM is not established."
+        "The incident root cause, completed remediation, and current service performance require human confirmation."
       ],
       "recommended_next_steps": [
-        "Use this cited fact as the decision baseline: Exchange Commission (other than as provided in Item 201)"
+        "Verify incident remediation and current service performance before deciding."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Evidence does not yet establish a decision: Exchange Commission (other than as provided in Item 201)",
+          "statement": "Evidence does not yet establish a decision: IBM notified Health Net on January 21, 2011 that it could not locate several hard disk drives used in the Rancho Cordova data center.",
           "citation_refs": [
-            "evidence_chunk:chunk_dd2066bebee5a7f55172faaebf6e11de8aa96d3c0324c73a8464a81c8146e56d"
+            "evidence_chunk:chunk_5ea53d3ad30f1516026d809f0d32da684a898296e4d219078f832ad4ce681d25"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Exchange Commission (other than as provided in Item 201)",
+          "statement": "IBM notified Health Net on January 21, 2011 that it could not locate several hard disk drives used in the Rancho Cordova data center.",
           "citation_refs": [
-            "evidence_chunk:chunk_dd2066bebee5a7f55172faaebf6e11de8aa96d3c0324c73a8464a81c8146e56d"
+            "evidence_chunk:chunk_5ea53d3ad30f1516026d809f0d32da684a898296e4d219078f832ad4ce681d25"
           ]
         },
         {
           "section": "recommended_next_steps",
-          "statement": "Use this cited fact as the decision baseline: Exchange Commission (other than as provided in Item 201)",
+          "statement": "Verify incident remediation and current service performance before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_dd2066bebee5a7f55172faaebf6e11de8aa96d3c0324c73a8464a81c8146e56d"
+            "evidence_chunk:chunk_5ea53d3ad30f1516026d809f0d32da684a898296e4d219078f832ad4ce681d25"
           ]
         }
       ],
@@ -1193,45 +1202,50 @@
     {
       "case_id": "edgar-iteos-gsk-collaboration",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_de2efc77e1778a95",
+      "brief_id": "brief_fb2c1e74285fd189",
       "brief_status": "evidence_backed",
       "title": "Should iTeos continue its share of GSK global development under the amended collaboration?",
       "decision_question": "Should the contract owner continue iTeos's share of the GSK global development plan under the amended collaboration?",
-      "bottom_line": "Evidence does not yet establish a decision: 1 (Exhibit 10.14) was executed by both parties",
+      "bottom_line": "Evidence does not yet establish a decision: Development costs: GSK bears 60%; ITEOS 40%, except §3.4 and subject to §6.7",
       "key_facts": [
-        "Amendment No. 1 (Exhibit 10.14) was executed by both parties; the Agreement remains in full force."
+        "iTeos: Amendment No. 1 excludes products containing non-Licensed-Antibody ITEOS/Affiliate-owned or controlled ingredients from GSK's Licensed Product scope.",
+        "Development costs: GSK bears 60%; ITEOS 40%, except §3.4 and subject to §6.7"
       ],
-      "conflicts_risks": [
-        "iTeos: Amendment No. 1 excludes products containing non-Licensed-Antibody ITEOS/Affiliate-owned or controlled ingredients from GSK's Licensed Product scope."
-      ],
+      "conflicts_risks": [],
       "missing_evidence": [
-        "Human review must confirm evidence for this decision: continue iTeos's share of the GSK global development plan under the amended collaboration."
+        "Current status of each development milestone and whether iTeos has exercised its Section 6.7 opt-out right are not established."
       ],
       "recommended_next_steps": [
-        "Review the cited evidence before deciding."
+        "Confirm the current development plan, budget, and opt-out terms before deciding."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Evidence does not yet establish a decision: 1 (Exhibit 10.14) was executed by both parties",
+          "statement": "Evidence does not yet establish a decision: Development costs: GSK bears 60%; ITEOS 40%, except §3.4 and subject to §6.7",
           "citation_refs": [
-            "evidence_chunk:chunk_47383aab381cec05f17f05502f9ec8715eb972848e22b217ada9a5de101d4b49"
+            "evidence_chunk:chunk_5d05494a3f0ef262315c2829bdf85cb02256b5aa5d771462b79b896087de01c9"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Amendment No. 1 (Exhibit 10.14) was executed by both parties; the Agreement remains in full force.",
+          "statement": "iTeos: Amendment No. 1 excludes products containing non-Licensed-Antibody ITEOS/Affiliate-owned or controlled ingredients from GSK's Licensed Product scope.",
           "citation_refs": [
-            "evidence_chunk:chunk_47383aab381cec05f17f05502f9ec8715eb972848e22b217ada9a5de101d4b49",
-            "evidence_chunk:chunk_f1300ffd1a11ce603a57b3ddcd9d95d5d138bf311aebab270a7a795a70ff6a2f"
+            "evidence_chunk:chunk_986ea61f0f9f4eb49cdf17574287225c0cb705301546f04698927504a47728fa",
+            "evidence_chunk:chunk_87c26c60c074b063c1c014db55db9dd9b934c33242d57d334aac8690a659a421"
           ]
         },
         {
-          "section": "conflicts_risks",
-          "statement": "iTeos: Amendment No. 1 excludes products containing non-Licensed-Antibody ITEOS/Affiliate-owned or controlled ingredients from GSK's Licensed Product scope.",
+          "section": "key_facts",
+          "statement": "Development costs: GSK bears 60%; ITEOS 40%, except §3.4 and subject to §6.7",
           "citation_refs": [
-            "evidence_chunk:chunk_47383aab381cec05f17f05502f9ec8715eb972848e22b217ada9a5de101d4b49",
-            "evidence_chunk:chunk_f1300ffd1a11ce603a57b3ddcd9d95d5d138bf311aebab270a7a795a70ff6a2f"
+            "evidence_chunk:chunk_5d05494a3f0ef262315c2829bdf85cb02256b5aa5d771462b79b896087de01c9"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Confirm the current development plan, budget, and opt-out terms before deciding.",
+          "citation_refs": [
+            "evidence_chunk:chunk_5d05494a3f0ef262315c2829bdf85cb02256b5aa5d771462b79b896087de01c9"
           ]
         }
       ],
@@ -1337,16 +1351,16 @@
       "reviewer_role": null,
       "is_owner": true,
       "brief_ids": [
-        "brief_7e667264ec130a7b",
-        "brief_5f75b05a7709aa13",
-        "brief_3af59a148bd0d500",
-        "brief_d74aab771de93c07",
-        "brief_121055cafd1f9df8",
-        "brief_7cf77c2424063969",
-        "brief_d00215c8b9450874",
-        "brief_5850468e9c3144b7",
-        "brief_3081dae552f6db0c",
-        "brief_de2efc77e1778a95"
+        "brief_ae83556448ffa4cf",
+        "brief_0d70bfd0358032f0",
+        "brief_3a87db226fa863ee",
+        "brief_3f2767e3b69464b6",
+        "brief_414d8e88a81cfc83",
+        "brief_270a908a67c9da97",
+        "brief_e4c2e786b4322cb5",
+        "brief_28eff7ffcdb0766f",
+        "brief_5030bfb924105374",
+        "brief_fb2c1e74285fd189"
       ],
       "usefulness_rating_1_to_5": null,
       "rationale": null
@@ -1356,16 +1370,16 @@
       "reviewer_role": null,
       "is_owner": false,
       "brief_ids": [
-        "brief_7e667264ec130a7b",
-        "brief_5f75b05a7709aa13",
-        "brief_3af59a148bd0d500",
-        "brief_d74aab771de93c07",
-        "brief_121055cafd1f9df8",
-        "brief_7cf77c2424063969",
-        "brief_d00215c8b9450874",
-        "brief_5850468e9c3144b7",
-        "brief_3081dae552f6db0c",
-        "brief_de2efc77e1778a95"
+        "brief_ae83556448ffa4cf",
+        "brief_0d70bfd0358032f0",
+        "brief_3a87db226fa863ee",
+        "brief_3f2767e3b69464b6",
+        "brief_414d8e88a81cfc83",
+        "brief_270a908a67c9da97",
+        "brief_e4c2e786b4322cb5",
+        "brief_28eff7ffcdb0766f",
+        "brief_5030bfb924105374",
+        "brief_fb2c1e74285fd189"
       ],
       "usefulness_rating_1_to_5": null,
       "rationale": null
