@@ -98,6 +98,7 @@ from cornerstone_cli.vs5_verification import (
     SCENARIO_IDS,
     VERIFICATION_CONTRACT_FILES,
     _answer_review_identity,
+    _run_advisory_judge,
     _contains_all_answer_terms,
     _missing_evidence_structure_passes,
     _repeated_normalized_response_count,
@@ -126,6 +127,47 @@ SCOPE = {
 
 
 class Vs5DecisionBriefTest(unittest.TestCase):
+    def test_advisory_judge_records_full_distribution_without_pass_authority(self) -> None:
+        cases = [
+            {"case_id": f"case-{index}", "brief_id": f"brief-{index}"}
+            for index in range(6)
+        ]
+
+        def result_for(batch_ids: list[str]) -> dict[str, object]:
+            return {
+                "scores": [
+                    {
+                        "case_id": case_id,
+                        "faithfulness_score_1_to_5": 4,
+                        "usefulness_score_1_to_5": 3,
+                        "faithfulness_concerns": "No material concern found.",
+                        "usefulness_rationale": "Useful but still needs a clearer decision condition.",
+                    }
+                    for case_id in batch_ids
+                ]
+            }
+
+        with mock.patch(
+            "cornerstone_cli.vs5_verification._ollama_generate_json",
+            side_effect=[
+                result_for([f"case-{index}" for index in range(5)]),
+                result_for(["case-5"]),
+            ],
+        ) as generate:
+            result = _run_advisory_judge(
+                cases,
+                model_provider="ollama",
+                generation_model="ornith:9b",
+                ollama_url="http://127.0.0.1:11434",
+            )
+
+        self.assertEqual(generate.call_count, 2)
+        self.assertEqual(result["status"], "complete")
+        self.assertEqual(result["scored_case_count"], 6)
+        self.assertEqual(result["faithfulness_score_distribution"], {"4": 6})
+        self.assertEqual(result["usefulness_score_distribution"], {"3": 6})
+        self.assertFalse(result["can_flip_pass"])
+
     def test_concise_repair_triggers_for_overlong_brief_statement(self) -> None:
         model_output = {
             "bottom_line": {
@@ -171,6 +213,11 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertFalse(
             _complete_extracted_statement_surface(
                 "The supplied record does not establish the event in this"
+            )
+        )
+        self.assertFalse(
+            _complete_extracted_statement_surface(
+                "(a) Gogo or Airspan may terminate this Agreement"
             )
         )
         self.assertTrue(
@@ -228,6 +275,29 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             "Section 6.7 (ITEOS Opt-Out)",
         ):
             self.assertIn(term, allocation["answer"])
+
+        renewal_notice = _direct_complete_wording_answer_projection(
+            "How much advance written notice is required before a renewal date?",
+            [
+                {
+                    "evidence_chunk_id": "renewal-notice",
+                    "text": (
+                        "The Agreement automatically renews unless either Party "
+                        "provides written notice to the other Party at least 180 "
+                        "Days prior to the renewal date."
+                    ),
+                    "safety": {},
+                }
+            ],
+        )
+        self.assertEqual(
+            renewal_notice,
+            {
+                "answer": "At least 180 Days prior to the renewal date.",
+                "citation_refs": ["evidence_chunk:renewal-notice"],
+                "validation_mode": "direct_qualified_notice_projection",
+            },
+        )
 
     def test_complete_wording_projection_binds_ordinal_duration_to_numbered_source(
         self,
@@ -2678,8 +2748,9 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertEqual(
             [row["statement"] for row in change_rows],
             [
-                "Section 1.6's replacement makes service-level guarantees depend "
-                "on applicable statements of work."
+                "Section 1.6's replacement says service levels and performance "
+                "guarantees, if any, apply to named services and to other statements "
+                "of work only when they make Exhibit A applicable."
             ],
         )
         fallback = _grounded_key_fact_fallback(
@@ -2715,7 +2786,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                     "Clause 14.1 of the Agreement will be deleted and shall hereby "
                     "be replaced with the following new clause 14.1. 14.1 Term. "
                     "This Agreement shall commence on the Effective Date and will "
-                    "end on 31 December 2028, unless terminated earlier."
+                    "end on 31 December 2028, unless terminated earlier or extended "
+                    "by mutual written consent of the Parties."
                 ),
             },
         ]
@@ -2725,7 +2797,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             limit=10,
         )
         self.assertIn(
-            "Lonza: Amendment No. 1 sets the agreement end date at December 31, 2028.",
+            "Lonza: Amendment No. 1 sets the agreement end date at December 31, "
+            "2028, subject to earlier termination or extension by mutual written consent.",
             [row["statement"] for row in lonza_rows],
         )
 
@@ -2747,7 +2820,9 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 "text": (
                     "Limited Waiver. With effect from the date hereof until the "
                     "Waiver Termination Date, Gogo agrees to waive each default or "
-                    "event of default under the Airspan/Gogo Agreements."
+                    "event of default that has occurred or is purported to have "
+                    "occurred as of the date hereof under the Airspan/Gogo Agreements, "
+                    "whether known or unknown, contingent or matured."
                 ),
             },
         ]
@@ -2757,7 +2832,9 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             limit=10,
         )
         self.assertIn(
-            "Airspan: the amendment waives defaults until the Waiver Termination Date.",
+            "Airspan: until the Waiver Termination Date, the limited waiver covers "
+            "defaults that occurred or were purported as of the amendment date, "
+            "whether known or unknown, contingent or matured.",
             [row["statement"] for row in airspan_rows],
         )
 
@@ -3537,14 +3614,14 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         )
         self.assertEqual(
             brief["bottom_line"],
-            "Recorded amendment change: Bristol-Myers: Amendment No. 1 deletes "
-            "ITI's Qualified Study prerequisite before third-party licensing.",
+            "Hold pending confirmation of territory, scope, and termination rights. "
+            "Basis: Bristol-Myers: Amendment No. 1 deletes ITI's Qualified Study "
+            "prerequisite before third-party licensing.",
         )
         self.assertEqual(
             brief["recommended_next_steps"],
             [
-                "Review the amended term and confirm its current operational effect "
-                "before deciding."
+                "Confirm territory, scope, and termination rights before deciding."
             ],
         )
         change_row = next(
@@ -3926,8 +4003,43 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         )
         self.assertEqual(
             contract_next_step,
-            "Confirm the minimum-purchase terms and annual sales threshold before deciding.",
+            "Confirm volume, pricing, and exclusivity thresholds before deciding.",
         )
+
+    def test_question_specific_review_need_names_decision_critical_dimensions(self) -> None:
+        cases = [
+            (
+                "Should the owner continue the provider after its Chapter 11 event?",
+                ("facility", "conditions", "contingency"),
+            ),
+            (
+                "Should the owner continue manufacturing while readiness and remediation evidence is incomplete?",
+                ("pricing", "remediation", "regulatory"),
+            ),
+            (
+                "Should the owner continue outsourcing after the missing-drive incident?",
+                ("root cause", "remediation", "exit cost"),
+            ),
+            (
+                "Should the owner continue the global development plan under the collaboration?",
+                ("trial outcomes", "milestones"),
+            ),
+            (
+                "Should the owner continue the administrative-services arrangement?",
+                ("service levels", "pricing", "performance"),
+            ),
+            (
+                "Should the owner remain dependent on a manufacturer or qualify a second source?",
+                ("validation", "inspection", "second-source"),
+            ),
+        ]
+
+        for question, required_terms in cases:
+            with self.subTest(question=question):
+                uncertainty = _question_specific_review_uncertainty(question).lower()
+                for term in required_terms:
+                    self.assertIn(term, uncertainty)
+                self.assertLessEqual(len(uncertainty), 200)
 
     def test_grounded_conflicts_reject_lowercase_clause_tail(self) -> None:
         chunk = {
@@ -6989,7 +7101,7 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertTrue(changed)
         self.assertEqual(
             repaired[0]["statement"],
-            "Review the amended term and confirm its current operational effect before deciding.",
+            "Confirm territory, scope, and termination rights before deciding.",
         )
         self.assertNotIn(amendment_basis["statement"], repaired[0]["statement"])
 
@@ -7067,6 +7179,23 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             _relationship_compatible(
                 "Contract assets were $15.7 million as of June 30, 2024.",
                 [paired_source],
+            )
+        )
+
+        potential_source = (
+            "A master services agreement was executed with a company to serve as "
+            "a potential second source manufacturer."
+        )
+        self.assertFalse(
+            _relationship_compatible(
+                "The company is a second-source manufacturer.",
+                [potential_source],
+            )
+        )
+        self.assertTrue(
+            _relationship_compatible(
+                "The company is a potential second-source manufacturer.",
+                [potential_source],
             )
         )
 
@@ -8908,6 +9037,24 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             _brief_key_fact_target(long_chunks[:2], "Should we renew?"),
             1,
         )
+        self.assertEqual(
+            _brief_key_fact_target(
+                [
+                    {
+                        "artifact_id": "agreement",
+                        "evidence_chunk_id": "agreement-term",
+                        "text": "The agreement renews annually.",
+                    },
+                    {
+                        "artifact_id": "performance",
+                        "evidence_chunk_id": "performance-result",
+                        "text": "Current service performance is 98 percent.",
+                    },
+                ],
+                "Should the owner renew the services agreement?",
+            ),
+            2,
+        )
 
     def test_key_fact_dedup_keeps_new_scalar_and_drops_evidence_boilerplate(self) -> None:
         existing = [
@@ -9783,6 +9930,31 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertEqual(
             {row["statement"] for row in combined_rows},
             {row["statement"] for row in rows},
+        )
+
+        potential_rows = _grounded_key_fact_fallback(
+            [
+                {
+                    "artifact_id": "savara-10k",
+                    "evidence_chunk_id": "potential-source",
+                    "text": (
+                        "In July 2022, we executed a master services agreement with "
+                        "an additional third-party biomanufacturing company to serve "
+                        "as a potential second source manufacturer of molgramostim "
+                        "drug substances to mitigate approvability risk."
+                    ),
+                    "safety": {},
+                }
+            ],
+            limit=3,
+            decision_question=question,
+        )
+        self.assertEqual(
+            [row["statement"] for row in potential_rows],
+            [
+                "A master services agreement was executed in July 2022 with a "
+                "potential second-source manufacturer for molgramostim drug substance."
+            ],
         )
 
     def test_echo_guard_enforces_ten_consecutive_source_word_limit(self) -> None:

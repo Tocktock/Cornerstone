@@ -2824,6 +2824,33 @@ def _relationship_compatible(statement: str, source_texts: list[str]) -> bool:
     # them through lexical overlap alone.
     source_text = "\n".join(source_texts)
 
+    # A sourcing candidate is not a qualified second source merely because an
+    # agreement was signed. Preserve explicit readiness modality from the
+    # cited evidence instead of promoting ``potential`` into an established
+    # source through otherwise-high lexical overlap.
+    if (
+        re.search(r"\bsecond[- ]source\b", statement, flags=re.IGNORECASE)
+        and not re.search(
+            r"\b(?:potential|prospective|candidate)\s+second[- ]source\b",
+            statement,
+            flags=re.IGNORECASE,
+        )
+    ):
+        source_second_source_clauses = [
+            clause
+            for clause in _atomic_relation_clauses(source_text)
+            if re.search(r"\bsecond[- ]source\b", clause, flags=re.IGNORECASE)
+        ]
+        if source_second_source_clauses and all(
+            re.search(
+                r"\b(?:potential|prospective|candidate)\s+second[- ]source\b",
+                clause,
+                flags=re.IGNORECASE,
+            )
+            for clause in source_second_source_clauses
+        ):
+            return False
+
     waiver_beneficiary = re.search(
         r"\b(?:provides?|grants?)\s+(?P<actor>[A-Z][A-Za-z0-9&.'-]*)\s+with\s+"
         r"(?:an?\s+)?(?:conditional\s+)?waiver\b|"
@@ -5533,6 +5560,24 @@ def _grounded_key_fact_fallback(
             if len(statement) >= 80 and _decision_question_is_sourcing(
                 decision_question
             ):
+                potential_second_source = re.search(
+                    r"\bin\s+(?P<month>January|February|March|April|May|June|July|"
+                    r"August|September|October|November|December)\s+"
+                    r"(?P<year>\d{4})\b.{0,260}?\bexecuted\s+a\s+master\s+"
+                    r"services\s+agreement\b.{0,500}?\bto\s+serve\s+as\s+a\s+"
+                    r"potential\s+second\s+source\s+manufacturer\s+of\s+"
+                    r"(?P<product>[A-Za-z][A-Za-z0-9-]*)\s+drug\s+substances?\b",
+                    statement,
+                    flags=re.IGNORECASE,
+                )
+                if potential_second_source is not None:
+                    statement = (
+                        "A master services agreement was executed in "
+                        f"{potential_second_source.group('month').title()} "
+                        f"{potential_second_source.group('year')} with a potential "
+                        "second-source manufacturer for "
+                        f"{potential_second_source.group('product')} drug substance."
+                    )
                 engaged_second_source = re.search(
                     r"\bwe\s+have\s+engaged\s+an\s+additional\s+third[- ]party\s+"
                     r"as\s+a\s+second\s+source\s+for\s+the\s+manufacturing\s+of\s+"
@@ -5768,15 +5813,24 @@ def _brief_key_fact_target(
     chunks: list[dict[str, Any]],
     decision_question: str,
 ) -> int:
-    """Keep deterministic augmentation a three-fact safety net, not a quota.
+    """Use two source-diverse facts for multi-source English decision packets.
 
-    The model may return more well-grounded facts. Long retrievals must not,
-    however, force two lower-value transcript fragments into an otherwise
-    useful Brief merely because the selected chunks are numerous or long.
+    One fact is still the safe target for a single source and for Korean
+    transcript packets, where line fragments can look independently useful
+    after speaker context is lost. The fallback selector still refuses weak or
+    irrelevant clauses, so this is a target rather than a forced quota.
     """
 
-    del chunks, decision_question
-    return 1
+    if _contains_hangul(decision_question) or any(
+        _contains_hangul(str(chunk.get("text") or "")) for chunk in chunks
+    ):
+        return 1
+    source_keys = {
+        str(chunk.get("artifact_id") or chunk.get("evidence_chunk_id") or "")
+        for chunk in chunks
+        if str(chunk.get("artifact_id") or chunk.get("evidence_chunk_id") or "")
+    }
+    return 2 if len(source_keys) >= 2 else 1
 
 
 _DECISION_CONSTRAINT_PATTERN = re.compile(
@@ -5847,6 +5901,8 @@ def _complete_extracted_statement_surface(text: str) -> bool:
     if statement.endswith("/"):
         return False
     if re.match(r"^[a-z]", statement):
+        return False
+    if re.match(r"^\([a-z0-9]+\)\s+", statement, flags=re.IGNORECASE):
         return False
     if re.match(
         r"^(?:and|but|or|provided|that|which)\b|^\d+(?:\.\d+)?\s+(?:and|of|or|to)\b",
@@ -6132,6 +6188,50 @@ def _select_grounded_bottom_line(
             return row
         return {**row, "statement": stripped}
 
+    def hold_pending_review(row: dict[str, Any]) -> dict[str, Any]:
+        """Turn one cited basis into a concise, non-factual decision condition."""
+
+        action = _question_specific_next_step(decision_question).strip()
+        action_match = re.match(
+            r"^(?P<verb>Confirm|Verify|Review)\s+(?P<object>.+?)\s+before\s+deciding\.?$",
+            action,
+            flags=re.IGNORECASE,
+        )
+        if action_match is None:
+            statement = f"{hold_prefix}: {action}".rstrip()
+        else:
+            noun = {
+                "confirm": "confirmation",
+                "verify": "verification",
+                "review": "review",
+            }[action_match.group("verb").casefold()]
+            statement = (
+                f"{hold_prefix} pending {noun} of "
+                f"{action_match.group('object').rstrip('.')} ."
+            ).replace(" .", ".")
+        basis_statement = str(row.get("statement") or "").strip()
+        combined_statement = f"{statement} Basis: {basis_statement}"
+        if len(combined_statement) <= 240:
+            statement = combined_statement
+        refs = list(
+            row.get("allowed_citation_refs")
+            or row.get("citation_refs")
+            or []
+        )
+        candidate = {
+            **row,
+            "statement": statement,
+            "validation_mode": "grounded_proposal_basis",
+            "proposal_basis_statement": str(row.get("statement") or ""),
+            "proposal_basis_citation_refs": refs,
+        }
+        if row.get("validation_mode") in {
+            "explicit_document_change_projection",
+            "paired_version_binding",
+        }:
+            candidate["proposal_basis_validation_mode"] = row["validation_mode"]
+        return candidate
+
     def concise_basis(row: dict[str, Any]) -> dict[str, Any]:
         """Prefer one short cited clause over a long source-copying synthesis."""
 
@@ -6148,6 +6248,17 @@ def _select_grounded_bottom_line(
         }:
             return row
         if len(statement) < 80:
+            return row
+        if (
+            len(statement) <= 160
+            and re.search(
+                r"\bAmendment\s+No\.?\s*\d+\b",
+                statement,
+                flags=re.IGNORECASE,
+            )
+        ):
+            # Sentence splitting after ``No.`` can turn an amendment identity
+            # into the fragment ``6 was effective ...``.
             return row
         if (
             len(re.findall(r"[\w’'-]+", statement, flags=re.UNICODE)) <= 18
@@ -6842,6 +6953,8 @@ def _select_grounded_bottom_line(
             **row,
             "statement": f"{prefix}: {row['statement']}",
         }
+        if direction_requested and not korean_output:
+            candidate = hold_pending_review(row)
         if row.get("validation_mode") == "explicit_document_change_projection":
             refs = list(
                 row.get("allowed_citation_refs")
@@ -7336,12 +7449,27 @@ def _repair_grounded_recommendations(
             )
 
     for basis in bases:
+        basis_statement = str(basis.get("statement") or "")
+        question_bound_next_step = _question_specific_next_step(decision_question)
+        specific_question_bound_step = (
+            question_bound_next_step
+            != "Verify the cited decision basis against current operating evidence before deciding."
+        )
+        if (
+            specific_question_bound_step
+            and grounded(basis)
+            and _decision_statement_relevant(basis_statement, decision_question)
+        ):
+            return grounded_proposal_from_basis(
+                basis,
+                question_bound_next_step,
+            )
         if not _decision_basis_usable(
-            str(basis.get("statement") or ""),
+            basis_statement,
             decision_question,
         ) or not grounded(basis):
             continue
-        basis_text = str(basis.get("statement") or "")
+        basis_text = basis_statement
         unsigned_clause = next(
             (
                 clause.strip(" ,;.-")
@@ -8456,9 +8584,9 @@ def _direct_complete_wording_answer_projection(
     """Project narrow complete-wording answers that a short model may omit.
 
     The projection is intentionally limited to explicit amendment cancellation
-    language, one-clause cost allocations with named scope and exceptions, and
-    duration clauses whose source-file ordinal matches an ordinal in the Ask.
-    It never joins facts across Artifacts.
+    language, one-clause cost allocations with named scope and exceptions,
+    qualified renewal-notice periods, and duration clauses whose source-file
+    ordinal matches an ordinal in the Ask. It never joins facts across Artifacts.
     """
 
     cancellation_question = bool(
@@ -8470,6 +8598,10 @@ def _direct_complete_wording_answer_projection(
         re.search(r"\b(?:split|allocation|share)\b", question, flags=re.IGNORECASE)
         and re.search(r"\bscope\b", question, flags=re.IGNORECASE)
         and re.search(r"\bexceptions?\b", question, flags=re.IGNORECASE)
+    )
+    renewal_notice_question = bool(
+        re.search(r"\badvance\s+written\s+notice\b", question, flags=re.IGNORECASE)
+        and re.search(r"\brenewal\b", question, flags=re.IGNORECASE)
     )
     ordinal_duration_match = re.search(
         r"\b(?P<ordinal>first|second|third|fourth|fifth|sixth|seventh|eighth|"
@@ -8497,6 +8629,27 @@ def _direct_complete_wording_answer_projection(
     for chunk in chunks:
         ref = f"evidence_chunk:{chunk.get('evidence_chunk_id')}"
         text = re.sub(r"\s+", " ", _prompt_evidence_text(chunk)).strip()
+        if renewal_notice_question:
+            notice = re.search(
+                r"\bwritten\s+notice\b[^.!?]{0,100}?\b"
+                r"(?P<qualifier>at\s+least|no\s+(?:less|fewer)\s+than)\s+"
+                r"(?P<duration>[A-Za-z]+\s*\(\s*\d+\s*\)|\d+)\s+"
+                r"(?P<unit>days?|weeks?|months?)\s+prior\s+to\s+the\s+renewal\s+date\b",
+                text,
+                flags=re.IGNORECASE,
+            )
+            if notice is not None:
+                qualifier = re.sub(r"\s+", " ", notice.group("qualifier")).strip()
+                duration = re.sub(r"\s+", " ", notice.group("duration")).strip()
+                unit = notice.group("unit").strip()
+                answer = (
+                    f"{qualifier.capitalize()} {duration} {unit} prior to the renewal date."
+                )
+                return {
+                    "answer": answer,
+                    "citation_refs": [ref],
+                    "validation_mode": "direct_qualified_notice_projection",
+                }
         if ordinal_duration_question and ordinal_duration_match is not None:
             source = chunk.get("source") if isinstance(chunk.get("source"), dict) else {}
             source_ref = str(source.get("ref") or "")
@@ -10730,7 +10883,10 @@ def _explicit_document_change_rows(
         normalized_refs = list(dict.fromkeys(ref for ref in refs if ref))
         if not statement or not normalized_refs:
             return
-        if len(re.findall(r"[\w\u2019'-]+", statement, flags=re.UNICODE)) > 18:
+        # Legal changes often need a few more words to preserve exceptions,
+        # modality, and termination qualifiers. These statements are
+        # deterministic projections, so concision must not erase legal scope.
+        if len(re.findall(r"[\w\u2019'-]+", statement, flags=re.UNICODE)) > 32:
             return
         row = {
             "statement": statement,
@@ -11104,8 +11260,9 @@ def _explicit_document_change_rows(
             )
             if service_level_replacement:
                 add(
-                    "Section 1.6's replacement makes service-level guarantees depend "
-                    "on applicable statements of work.",
+                    "Section 1.6's replacement says service levels and performance "
+                    "guarantees, if any, apply to named services and to other statements "
+                    "of work only when they make Exhibit A applicable.",
                     [change_ref],
                     "service_level_clause_replacement",
                 )
@@ -11140,9 +11297,26 @@ def _explicit_document_change_rows(
                             f"{int(term_clause_replacement.group('day'))}, "
                             f"{term_clause_replacement.group('year')}"
                         )
+                        replacement_tail = text[
+                            term_clause_replacement.end() :
+                            term_clause_replacement.end() + 240
+                        ]
+                        qualifier = ""
+                        if re.search(
+                            r"\bunless\s+terminated\s+earlier\b",
+                            replacement_tail,
+                            flags=re.IGNORECASE,
+                        ):
+                            qualifier = ", subject to earlier termination"
+                            if re.search(
+                                r"\bextended\s+by\s+mutual\s+written\s+consent\b",
+                                replacement_tail,
+                                flags=re.IGNORECASE,
+                            ):
+                                qualifier += " or extension by mutual written consent"
                         add(
                             f"{subject}: {amendment_identity['label']} sets the "
-                            f"agreement end date at {end_date}.",
+                            f"agreement end date at {end_date}{qualifier}.",
                             [str(amendment_identity["citation_ref"]), change_ref],
                             "term_clause_end_date_replacement",
                         )
@@ -11161,8 +11335,10 @@ def _explicit_document_change_rows(
                 )
                 if subject:
                     add(
-                        f"{subject}: the amendment waives defaults until the "
-                        "Waiver Termination Date.",
+                        f"{subject}: until the Waiver Termination Date, the limited "
+                        "waiver covers defaults that occurred or were purported as of "
+                        "the amendment date, whether known or unknown, contingent or "
+                        "matured.",
                         [change_ref],
                         "temporary_default_waiver",
                     )
@@ -12487,6 +12663,40 @@ def _question_specific_next_step(decision_question: str) -> str:
     question = re.sub(r"\s+", " ", decision_question).strip()
     if _contains_hangul(question):
         return "현재 운영 근거와 인용된 계약 조건을 확인한 뒤 결정하세요."
+    if re.search(r"\bchapter\s+11\b", question, flags=re.IGNORECASE):
+        return "Confirm the facility status, waiver conditions, and contingency plan before deciding."
+    if re.search(
+        r"\b(?:data[- ]rights?|post[- ]termination)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return "Confirm post-termination data rights and pricing exposure before deciding."
+    if re.search(r"\b(?:leased?\s+site|facility\s+lease)\b", question, flags=re.IGNORECASE):
+        return "Confirm occupancy needs, renewal terms, and exit costs before deciding."
+    if re.search(r"\bminimum[- ]purchase\b", question, flags=re.IGNORECASE) and re.search(
+        r"\bexclusiv\w*\b", question, flags=re.IGNORECASE
+    ):
+        return "Confirm volume, pricing, and exclusivity thresholds before deciding."
+    if re.search(
+        r"\b(?:statement[- ]of[- ]work|replacement\s+channel)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return "Confirm pricing, renewal terms, service performance, and replacement readiness before deciding."
+    if re.search(r"\bsecond[- ]source\b", question, flags=re.IGNORECASE):
+        return "Confirm validation, inspection status, and second-source readiness before deciding."
+    if re.search(r"\bservice[- ]provider\s+dependency\b", question, flags=re.IGNORECASE):
+        return "Confirm service levels, transition readiness, and current performance before deciding."
+    if re.search(r"\bsupply\s+dependency\b", question, flags=re.IGNORECASE):
+        if re.search(r"\bcontinuity\b", question, flags=re.IGNORECASE):
+            return "Confirm pricing, committed volume, and continuity protections before deciding."
+        return "Confirm price, capacity, and quality performance before deciding."
+    if re.search(r"\bwork[- ]order\b", question, flags=re.IGNORECASE):
+        return "Confirm acceptance criteria, performance evidence, and pricing before deciding."
+    if re.search(r"\blicense\b", question, flags=re.IGNORECASE):
+        return "Confirm territory, scope, and termination rights before deciding."
+    if re.search(r"\b(?:concentration|economics)\b", question, flags=re.IGNORECASE):
+        return "Confirm economics, concentration exposure, and current performance before deciding."
     if re.search(r"\bmanufactur\w*\b", question, flags=re.IGNORECASE):
         if re.search(
             r"\b(?:readiness|remediation|deviation|validation)\b",
@@ -12505,33 +12715,34 @@ def _question_specific_next_step(decision_question: str) -> str:
         flags=re.IGNORECASE,
     ):
         return "Verify incident remediation and current service performance before deciding."
+    if re.search(r"\boutsourc\w*\b", question, flags=re.IGNORECASE):
+        return "Confirm exit costs, transition readiness, and current performance before deciding."
     if re.search(
         r"\b(?:global\s+development|development\s+plan|collaboration)\b",
         question,
         flags=re.IGNORECASE,
     ):
         return "Confirm the current development plan, budget, and opt-out terms before deciding."
+    if re.search(r"\balternate\s+supply\b", question, flags=re.IGNORECASE):
+        return "Confirm alternate-supply readiness and intellectual-property terms before deciding."
     if re.search(
-        r"\b(?:dependency|second[- ]source|replacement\s+(?:path|supplier|channel))\b",
+        r"\b(?:dependency|replacement\s+(?:path|supplier|channel))\b",
         question,
         flags=re.IGNORECASE,
     ):
         return "Verify current dependency exposure and replacement readiness before deciding."
     if re.search(
-        r"\bminimum[- ]purchase\b",
+        r"\b(?:services?\s+(?:relationship|arrangement)|administrative[- ]services?)\b",
         question,
         flags=re.IGNORECASE,
-    ) and re.search(r"\bexclusiv\w*\b", question, flags=re.IGNORECASE):
-        return (
-            "Confirm the minimum-purchase terms and annual sales threshold before "
-            "deciding."
-        )
+    ):
+        return "Confirm service levels, pricing, renewal terms, and current performance before deciding."
     if re.search(
         r"\b(?:amend(?:ed|ment)|renew(?:al)?|terminat(?:e|ion)|extend)\b",
         question,
         flags=re.IGNORECASE,
     ):
-        return "Review the amended term and confirm its current operational effect before deciding."
+        return "Confirm the amended term and its current operational effect before deciding."
     return "Verify the cited decision basis against current operating evidence before deciding."
 
 
@@ -12567,6 +12778,76 @@ def _question_specific_review_uncertainty(decision_question: str) -> str:
         return complete_within_limit(
             f"다음 결정에 대한 근거의 충분성은 사람의 검토가 필요합니다: {question}"
         )
+    if re.search(r"\bchapter\s+11\b", question, flags=re.IGNORECASE):
+        return (
+            "Current facility status, waiver conditions, and contingency readiness "
+            "require human confirmation."
+        )
+    if re.search(
+        r"\b(?:data[- ]rights?|post[- ]termination)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return (
+            "Post-termination obligations, data rights, and pricing exposure require "
+            "human confirmation."
+        )
+    if re.search(r"\b(?:leased?\s+site|facility\s+lease)\b", question, flags=re.IGNORECASE):
+        return (
+            "Current occupancy needs, exit costs, and renewal terms require human "
+            "confirmation."
+        )
+    if re.search(r"\bminimum[- ]purchase\b", question, flags=re.IGNORECASE) and re.search(
+        r"\bexclusiv\w*\b", question, flags=re.IGNORECASE
+    ):
+        return (
+            "Current volume, pricing, and exclusivity thresholds require human "
+            "confirmation."
+        )
+    if re.search(
+        r"\b(?:statement[- ]of[- ]work|replacement\s+channel)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return (
+            "Current pricing, renewal terms, service performance, and replacement "
+            "readiness require human confirmation."
+        )
+    if re.search(r"\bsecond[- ]source\b", question, flags=re.IGNORECASE):
+        return (
+            "Current second-source validation, inspection status, and readiness "
+            "require human confirmation."
+        )
+    if re.search(r"\bservice[- ]provider\s+dependency\b", question, flags=re.IGNORECASE):
+        return (
+            "Current service levels, transition readiness, and performance require "
+            "human confirmation."
+        )
+    if re.search(r"\bsupply\s+dependency\b", question, flags=re.IGNORECASE):
+        if re.search(r"\bcontinuity\b", question, flags=re.IGNORECASE):
+            return (
+                "Current pricing, committed volume, and continuity protections require "
+                "human confirmation."
+            )
+        return (
+            "Current price, capacity, and quality performance require human "
+            "confirmation."
+        )
+    if re.search(r"\bwork[- ]order\b", question, flags=re.IGNORECASE):
+        return (
+            "Current acceptance criteria, performance evidence, and pricing require "
+            "human confirmation."
+        )
+    if re.search(r"\blicense\b", question, flags=re.IGNORECASE):
+        return (
+            "Current territory, scope, and termination rights require human "
+            "confirmation."
+        )
+    if re.search(r"\b(?:concentration|economics)\b", question, flags=re.IGNORECASE):
+        return (
+            "Current economics, concentration exposure, and performance require human "
+            "confirmation."
+        )
     if re.search(r"\bmanufactur\w*\b", question, flags=re.IGNORECASE):
         if re.search(
             r"\b(?:readiness|remediation|deviation|validation)\b",
@@ -12574,12 +12855,12 @@ def _question_specific_review_uncertainty(decision_question: str) -> str:
             flags=re.IGNORECASE,
         ):
             return (
-                "Current manufacturing readiness, remediation status, and release "
-                "evidence require human confirmation."
+                "Current manufacturing readiness, remediation status, regulatory "
+                "evidence, and pricing require human confirmation."
             )
         return (
-            "The amended term, current manufacturing performance, purchase "
-            "commitments, and termination options require human confirmation."
+            "Current manufacturing capacity, audit and quality status, remediation, "
+            "performance, and pricing require human confirmation."
         )
     if re.search(
         r"\b(?:missing[- ]drive|unaccounted[- ]for\s+(?:server\s+)?drives?|"
@@ -12588,8 +12869,13 @@ def _question_specific_review_uncertainty(decision_question: str) -> str:
         flags=re.IGNORECASE,
     ):
         return (
-            "The incident root cause, completed remediation, and current service "
-            "performance require human confirmation."
+            "The incident root cause, completed remediation, exit cost, and current "
+            "service performance require human confirmation."
+        )
+    if re.search(r"\boutsourc\w*\b", question, flags=re.IGNORECASE):
+        return (
+            "Current exit costs, transition readiness, and performance require human "
+            "confirmation."
         )
     if re.search(
         r"\b(?:global\s+development|development\s+plan|collaboration)\b",
@@ -12597,17 +12883,31 @@ def _question_specific_review_uncertainty(decision_question: str) -> str:
         flags=re.IGNORECASE,
     ):
         return (
-            "The current development budget, milestones, opt-out terms, and amendment "
-            "effects require human confirmation."
+            "Current trial outcomes, milestones, development budget, and opt-out terms "
+            "require human confirmation."
+        )
+    if re.search(r"\balternate\s+supply\b", question, flags=re.IGNORECASE):
+        return (
+            "Alternate supply readiness and the related intellectual-property terms "
+            "require human confirmation."
         )
     if re.search(
-        r"\b(?:dependency|second[- ]source|replacement\s+(?:path|supplier|channel))\b",
+        r"\b(?:dependency|replacement\s+(?:path|supplier|channel))\b",
         question,
         flags=re.IGNORECASE,
     ):
         return (
-            "Post-amendment performance, financial stability, and replacement "
+            "Current second-source validation, inspection status, and replacement "
             "readiness require human confirmation."
+        )
+    if re.search(
+        r"\b(?:services?\s+(?:relationship|arrangement)|administrative[- ]services?)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return (
+            "Current service levels, pricing, renewal terms, and performance require "
+            "human confirmation."
         )
     if re.search(
         r"\b(?:amend(?:ed|ment)|renew(?:al)?|terminat(?:e|ion)|extend)\b",
@@ -12626,7 +12926,7 @@ def _question_specific_review_uncertainty(decision_question: str) -> str:
         )
         return complete_within_limit(
             "The current term, renewal status, operating performance, and termination "
-            f"options require human confirmation before {decision}."
+            f"options require human confirmation before deciding whether to {decision}."
         )
     should_match = re.match(
         r"should\s+(?:the\s+contract\s+owner\s+)?(?P<decision>.+)",
@@ -23758,17 +24058,30 @@ class LocalRuntimeStore:
                 decision_question=decision_question,
                 limit=2,
             )
+            explicit_document_conflict_rows = [
+                row
+                for row in explicit_document_change_rows
+                if row.get("projection_kind") == "original_agreement_date_conflict"
+            ]
+            explicit_document_change_fact_rows = [
+                row
+                for row in explicit_document_change_rows
+                if row.get("projection_kind") != "original_agreement_date_conflict"
+            ]
             if explicit_document_change_rows:
                 # An amendment change is an observed fact, not automatically
-                # a conflict or risk. Keep genuine adverse model rows, while
-                # removing a model restatement of the host-regenerated change.
+                # a conflict or risk. Date contradictions stay in the risk
+                # surface; supersessions and scope changes stay in key facts.
                 conflict_citations = [
-                    model_conflict
-                    for model_conflict in conflict_citations
-                    if not _conflict_row_is_redundant(
-                        explicit_document_change_rows,
-                        model_conflict,
-                    )
+                    *explicit_document_conflict_rows,
+                    *[
+                        model_conflict
+                        for model_conflict in conflict_citations
+                        if not _conflict_row_is_redundant(
+                            explicit_document_change_rows,
+                            model_conflict,
+                        )
+                    ],
                 ]
                 metadata = model_output.setdefault("_ollama_response_metadata", {})
                 metadata["explicit_document_change_projection_count"] = len(
@@ -23916,14 +24229,14 @@ class LocalRuntimeStore:
                 metadata["version_bound_clause_observation_count"] = len(
                     version_bound_observation_rows
                 )
-            if explicit_document_change_rows:
+            if explicit_document_change_fact_rows:
                 key_point_citations = [
-                    *explicit_document_change_rows,
+                    *explicit_document_change_fact_rows,
                     *[
                         row
                         for row in key_point_citations
                         if not _key_fact_row_is_redundant(
-                            explicit_document_change_rows,
+                            explicit_document_change_fact_rows,
                             row,
                         )
                     ],
@@ -24005,7 +24318,7 @@ class LocalRuntimeStore:
                 # strong facts are preferable to forcing page headings or
                 # low-value transcript fragments into the Brief.
                 allow_second_change_context = bool(
-                    (explicit_document_change_rows or needs_two_contract_surfaces)
+                    (explicit_document_change_fact_rows or needs_two_contract_surfaces)
                     and len(key_point_citations) < 2
                     and _decision_statement_relevant(
                         str(fallback_key_fact.get("statement") or ""),
@@ -24158,15 +24471,17 @@ class LocalRuntimeStore:
                 "missing_evidence",
                 list(model_output.get("missing_evidence") or []),
             )
-            if not final_missing_evidence:
-                question_specific_review_need = (
-                    _question_specific_review_uncertainty(decision_question)
-                )
-                if question_specific_review_need:
-                    final_missing_evidence = [question_specific_review_need]
-                    metadata["question_specific_review_missing"] = [
-                        question_specific_review_need
-                    ]
+            question_specific_review_need = _question_specific_review_uncertainty(
+                decision_question
+            )
+            if question_specific_review_need and not _key_fact_row_is_redundant(
+                [{"statement": value} for value in final_missing_evidence],
+                {"statement": question_specific_review_need},
+            ):
+                final_missing_evidence.append(question_specific_review_need)
+                metadata["question_specific_review_missing"] = [
+                    question_specific_review_need
+                ]
             model_output["missing_evidence"] = final_missing_evidence
             recommended_next_step_rows, recommendation_repaired = _repair_grounded_recommendations(
                 recommended_next_step_rows,

@@ -454,6 +454,14 @@ def build_inputs() -> tuple[
         corpus_binding,
         review_case_ids,
     )
+    all_case_ids = tuple(str(case.get("id") or "") for case in corpus.get("cases", []))
+    if not all_case_ids or any(not case_id for case_id in all_case_ids):
+        raise ValueError("The VS5 corpus contains an empty case ID.")
+    _, all_selected, _ = _selected_records(
+        corpus,
+        corpus_binding,
+        all_case_ids,
+    )
     model_stack = report.get("model_stack")
     revision = str((model_stack or {}).get("pipeline_sha256") or "")
     faithfulness = _load(FAITHFULNESS_PATH)
@@ -482,7 +490,7 @@ def build_inputs() -> tuple[
         }
     )
     usefulness = _load(USEFULNESS_PATH)
-    brief_sample = _usefulness_sample(selected, corpus)
+    brief_sample = _usefulness_sample(all_selected, corpus)
     brief_ids = [row["brief_id"] for row in brief_sample]
     usefulness.update(
         {
@@ -498,7 +506,7 @@ def build_inputs() -> tuple[
                 "Read every original source in source_set before rating its Brief.",
                 "Review the complete Brief: bottom line, key facts, conflicts/risks, missing evidence, and recommended next steps.",
                 "Rate 4 or 5 only when the Brief materially reduces decision-preparation work compared with reading the sources while preserving important nuance.",
-                "Use the same ten-Brief sample for every reviewer and explain concrete strengths or defects in the rationale.",
+                "Review all corpus Briefs and explain concrete strengths or defects in the rationale.",
             ],
             "reviews": [
                 {
