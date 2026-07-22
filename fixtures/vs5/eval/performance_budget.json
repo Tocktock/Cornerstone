@@ -4,10 +4,10 @@
   "reference_machine": "Apple M5 Pro MacBook Pro, 18 cores, 48 GB RAM",
   "model_stack": {"provider": "ollama", "generation_model": "ornith:9b", "embedding_model": "qwen3-embedding:0.6b"},
   "corpus_manifest_sha256": "4f293e55439f043d46d40b0db223cedf70a2038e09c7219d8bc3128fe4c993db",
-  "prompt_retrieval_revision": "239f0da1fc163cd41c5c1b7725e3097a2a0dcb115af6fae01f47bfc7eac21e3b",
-  "pilot_measurements_seconds": {"three_source_brief": 33.68, "three_source_answer": 14.083},
+  "prompt_retrieval_revision": "5dabae252114900f1b24a3f9daf5a7b2c42e0cdeb9f0be86d66f3ac85e4e802d",
+  "pilot_measurements_seconds": {"three_source_brief": 35.17, "three_source_answer": 14.034},
   "combined_operation_p95_budget_seconds": 45.0,
   "minimum_full_corpus_sample_count": 50,
-  "refreeze_reason": "The July 22 refreeze binds the corrected 25-case SEC corpus and the final ornith:9b pipeline after adding fail-closed fragment guards, decision-relevant fallback projections, post-echo fact backfill, question-bound review actions, and the existing concise Brief repair. A fresh three-source HealthNet pilot on the final pipeline measured 33.68 seconds for Brief and 14.083 seconds for an evidence-backed answerable Ask. The 45-second regression budget remains unchanged; the canonical 50-operation run must still demonstrate the final p95 and the ten-minute first-value contract remains unchanged.",
+  "refreeze_reason": "The July 23 refreeze binds the corrected 25-case SEC corpus and the ornith:9b pipeline after adding decision-specific retrieval facets, fail-closed temporal and relationship guards, concise source-bound exposure projections, and question-bound review actions. The three-source HealthNet pilot measured 35.17 seconds for Brief and 14.034 seconds for an evidence-backed answerable Ask immediately before the final deterministic-only appendix, uncertainty-cap, and wording projections, which add no model calls. The 45-second regression budget remains unchanged; the canonical 50-operation run must measure this exact final pipeline and the ten-minute first-value contract remains unchanged.",
   "invalidation_rule": "Re-measure and re-freeze when the model, prompt scheme, retrieval pipeline, corpus, or reference machine changes."
 }

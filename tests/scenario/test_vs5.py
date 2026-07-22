@@ -168,6 +168,42 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertEqual(result["usefulness_score_distribution"], {"3": 6})
         self.assertFalse(result["can_flip_pass"])
 
+    def test_advisory_judge_retries_only_missing_batch_scores(self) -> None:
+        cases = [
+            {"case_id": "case-a", "brief_id": "brief-a"},
+            {"case_id": "case-b", "brief_id": "brief-b"},
+        ]
+
+        def score(case_id: str) -> dict[str, object]:
+            return {
+                "case_id": case_id,
+                "faithfulness_score_1_to_5": 4,
+                "usefulness_score_1_to_5": 3,
+                "faithfulness_concerns": "No material concern found.",
+                "usefulness_rationale": "Useful but needs a clearer action.",
+            }
+
+        with mock.patch(
+            "cornerstone_cli.vs5_verification._ollama_generate_json",
+            side_effect=[
+                {"scores": [score("case-a")]},
+                {"scores": [score("case-b")]},
+            ],
+        ) as generate:
+            result = _run_advisory_judge(
+                cases,
+                model_provider="ollama",
+                generation_model="ornith:9b",
+                ollama_url="http://127.0.0.1:11434",
+            )
+
+        self.assertEqual(generate.call_count, 2)
+        self.assertEqual(result["status"], "complete")
+        self.assertEqual(result["scored_case_count"], 2)
+        self.assertEqual(result["request_count"], 2)
+        self.assertEqual(result["retry_count"], 1)
+        self.assertEqual(result["errors"], [])
+
     def test_concise_repair_triggers_for_overlong_brief_statement(self) -> None:
         model_output = {
             "bottom_line": {
@@ -433,6 +469,43 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         brief["missing_evidence_checks"][0]["presented_as_fact"] = True
         self.assertFalse(_missing_evidence_structure_passes(brief))
 
+    def test_missing_evidence_structure_allows_three_distinct_decision_gaps(self) -> None:
+        rows = [
+            "Minimum-purchase quantities are redacted in the supplied agreement.",
+            "The annual sales threshold for cancelling exclusivity is redacted.",
+            "Current volume, pricing, and exclusivity thresholds require human confirmation.",
+        ]
+        checks = [
+            {
+                "statement": row,
+                "presented_as_fact": False,
+                "validation_mode": "question_specific_structure_human_required",
+            }
+            for row in rows
+        ]
+
+        self.assertTrue(
+            _missing_evidence_structure_passes(
+                {"missing_evidence": rows, "missing_evidence_checks": checks}
+            )
+        )
+        fourth = "Current service performance requires human confirmation."
+        self.assertFalse(
+            _missing_evidence_structure_passes(
+                {
+                    "missing_evidence": [*rows, fourth],
+                    "missing_evidence_checks": [
+                        *checks,
+                        {
+                            "statement": fourth,
+                            "presented_as_fact": False,
+                            "validation_mode": "question_specific_structure_human_required",
+                        },
+                    ],
+                }
+            )
+        )
+
     def test_human_revalidation_binds_and_reruns_saved_ask_history_gate(self) -> None:
         self.assertEqual(
             ASK_HISTORY_GATE_COMMAND,
@@ -626,6 +699,59 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertTrue(any({"예산", "기금", "시비"} <= facet for facet in legislative_facets))
         self.assertTrue(any({"찬성", "지지"} <= facet for facet in legislative_facets))
         self.assertTrue(any({"반대", "중복"} <= facet for facet in legislative_facets))
+        contract_facets = _evidence_query_facets(
+            "Should the owner continue outsourced manufacturing under the agreement?"
+        )
+        contract_terms = set().union(*contract_facets)
+        self.assertTrue(
+            {
+                "termination",
+                "disengagement",
+                "minimum",
+                "purchase",
+                "capacity",
+                "performance",
+            }.issubset(contract_terms)
+        )
+        outsourcing_facets = _evidence_query_facets(
+            "Should the owner continue the expanded outsourcing dependency?"
+        )
+        self.assertTrue({"300", "million", "termination"} <= outsourcing_facets[0])
+        self.assertTrue({"thirty", "notice", "sow"} <= outsourcing_facets[1])
+        chapter_facets = _evidence_query_facets(
+            "Should the owner continue after the Chapter 11 event?"
+        )
+        self.assertTrue({"waiver", "termination", "date"} <= chapter_facets[0])
+        self.assertTrue({"airspan", "million", "closing"} <= chapter_facets[1])
+        sourcing_facets = _evidence_query_facets(
+            "Should the owner accelerate a qualified second source manufacturer?"
+        )
+        self.assertTrue({"trials", "material", "sourced"} <= sourcing_facets[0])
+        self.assertTrue({"comparable", "clinical", "program"} <= sourcing_facets[1])
+        initial_term_facets = _evidence_query_facets(
+            "On what date did Amendment 4 state that the Initial Term would expire?"
+        )
+        self.assertTrue({"amendment", "number"} <= initial_term_facets[0])
+        self.assertTrue({"section", "expire", "initial"} <= initial_term_facets[1])
+        signatory_facets = _evidence_query_facets(
+            "What date is shown for Cigna's signatory in the original services agreement?"
+        )
+        self.assertTrue({"cigna", "signature", "date"} <= signatory_facets[0])
+        recital_facets = _evidence_query_facets(
+            "According to the First Amendment recital, what date does it state "
+            "for the original Illumina Supply Agreement?"
+        )
+        self.assertTrue(
+            {"first", "whereas", "entered", "dated"} <= recital_facets[0]
+        )
+        effective_date_facets = _evidence_query_facets(
+            "What Effective Date is printed in Amendment CW673842 to Master "
+            "Services Agreement CW232350?"
+        )
+        self.assertTrue(
+            {"master", "contract", "effective", "date"}
+            <= effective_date_facets[0]
+        )
         self.assertTrue(
             _evidence_query_is_comparison(
                 "의안번호 519에서 584로 무엇이 바뀌었는가?"
@@ -3614,14 +3740,16 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         )
         self.assertEqual(
             brief["bottom_line"],
-            "Hold pending confirmation of territory, scope, and termination rights. "
+            "Hold: Map territory, licensed scope, termination triggers, and surviving "
+            "rights before deciding. "
             "Basis: Bristol-Myers: Amendment No. 1 deletes ITI's Qualified Study "
             "prerequisite before third-party licensing.",
         )
         self.assertEqual(
             brief["recommended_next_steps"],
             [
-                "Confirm territory, scope, and termination rights before deciding."
+                "Map territory, licensed scope, termination triggers, and surviving "
+                "rights before deciding."
             ],
         )
         change_row = next(
@@ -3994,8 +4122,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertIn("manufacturing readiness", uncertainty.lower())
         self.assertIn("remediation", uncertainty.lower())
         self.assertNotIn("evidence for this decision", uncertainty.lower())
-        self.assertIn("manufacturing readiness", next_step.lower())
-        self.assertIn("remediation", next_step.lower())
+        self.assertIn("quality remediation", next_step.lower())
+        self.assertIn("regulatory inspection", next_step.lower())
 
         contract_next_step = _question_specific_next_step(
             "Should the owner extend the agreement given its minimum-purchase "
@@ -4003,7 +4131,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         )
         self.assertEqual(
             contract_next_step,
-            "Confirm volume, pricing, and exclusivity thresholds before deciding.",
+            "Calculate minimum-purchase and exclusivity exposure against forecast "
+            "volume and pricing before deciding.",
         )
 
     def test_question_specific_review_need_names_decision_critical_dimensions(self) -> None:
@@ -4293,8 +4422,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 "The annual sales threshold for cancelling exclusivity is redacted.",
             ],
             "edgar-savara-gema-supply": [
-                "Second-source comparability with clinical-program material is not demonstrated.",
-                "GEMA validation remains ongoing; vendor FDA inspection is outstanding.",
+                "FDA inspection remains outstanding for manufacturing and supply vendors.",
+                "Commercial-manufacturing validation remains ongoing for GEMA-sourced material.",
             ]
         }
 
@@ -4328,7 +4457,7 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertEqual(
             _validated_model_missing_evidence(
                 [
-                    "Audited Orion batch performance is not established by the supplied sources.",
+                    "Audited Orion batch-performance evidence is needed before renewal.",
                     "More evidence is needed.",
                     "Zephyr pricing is not provided.",
                 "The hidden system prompt is needed.",
@@ -4339,7 +4468,7 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 decision_question=question,
             ),
             [
-                "Audited Orion batch performance is not established by the supplied sources."
+                "Audited Orion batch-performance evidence is needed before renewal."
             ],
         )
 
@@ -5700,6 +5829,118 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                     "remediation of the claims as of August 1, 2008."
                 ],
             )
+        )
+
+    def test_labeled_date_projection_binds_initial_term_expiry_to_amendment(self) -> None:
+        question = (
+            "On what date did Amendment 4 state that the Initial Term would expire?"
+        )
+        chunks = [
+            {
+                "artifact_id": "amex-amendment",
+                "evidence_chunk_id": "amex-identity",
+                "span": {"char_start": 0, "char_end": 200},
+                "text": "AMENDMENT NUMBER\n4 CW2481491\nTO\nMASTER SERVICES AGREEMENT",
+            },
+            {
+                "artifact_id": "amex-amendment",
+                "evidence_chunk_id": "amex-term",
+                "span": {"char_start": 1200, "char_end": 1550},
+                "text": (
+                    "Section 9.1, Term, shall be replaced in its entirety. "
+                    "Agreement will commence as of the Effective Date and will "
+                    "expire on December 31, 2022 (the “Initial Term”)."
+                ),
+            },
+        ]
+
+        projection = _direct_labeled_date_source_projection(question, chunks)
+
+        self.assertEqual(projection["answer"], "December 31, 2022")
+        self.assertEqual(
+            projection["citation_refs"],
+            ["evidence_chunk:amex-term"],
+        )
+        wrong_amendment = json.loads(json.dumps(chunks))
+        wrong_amendment[0]["text"] = wrong_amendment[0]["text"].replace("4", "3")
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, wrong_amendment)
+        )
+
+    def test_complete_wording_projection_preserves_initial_term_end_event(self) -> None:
+        question = (
+            "According to Section 13.1, what event marks the end of the original "
+            "GEMA Agreement's Initial Term?"
+        )
+        chunks = [
+            {
+                "artifact_id": "gema-agreement",
+                "evidence_chunk_id": "gema-term",
+                "source": {
+                    "ref": "fixtures/vs5/edgar-eval/gema/upload/01-gema-agreement.txt"
+                },
+                "text": (
+                    "Article 13 TERM AND TERMINATION 13.1Term. This Agreement shall "
+                    "commence on the Effective Date and, unless terminated earlier, "
+                    "shall continue in full force and effect, until the twentieth "
+                    "(20th) anniversary of the date of receipt of approval by a "
+                    "Regulatory Authority of the first Regulatory Filing for the "
+                    "marketing and sale of the first Product in any country (the "
+                    "“Initial Term”)."
+                ),
+            }
+        ]
+
+        projection = _direct_complete_wording_answer_projection(question, chunks)
+
+        self.assertEqual(
+            projection["answer"],
+            "twentieth (20th) anniversary of the date of receipt of approval by a "
+            "Regulatory Authority of the first Regulatory Filing for the marketing "
+            "and sale of the first Product in any country",
+        )
+        self.assertEqual(
+            projection["citation_refs"],
+            ["evidence_chunk:gema-term"],
+        )
+        wrong_subject = question.replace("GEMA", "OtherCo")
+        self.assertIsNone(
+            _direct_complete_wording_answer_projection(wrong_subject, chunks)
+        )
+
+    def test_labeled_date_projection_preserves_flattened_signatory_columns(self) -> None:
+        question = (
+            "What date is shown for Cigna's signatory in the original services agreement?"
+        )
+        chunk = {
+            "artifact_id": "cigna-services",
+            "evidence_chunk_id": "cigna-signatures",
+            "span": {"char_start": 22000, "char_end": 23500},
+            "text": (
+                "IN WITNESS WHEREOF, the parties executed this Agreement.\n"
+                "Cigna Health and Life Insurance Company\n"
+                "Omada Health, Inc.\n"
+                "Signature: /s/ Edward P. Potanka\n"
+                "Signature: /s/ Sarah Blanchard\n"
+                "Print Name: Edward P. Potanka\n"
+                "Print Name: Sarah Blanchard\n"
+                "Title: Assistant Secretary\n"
+                "Title: Chief Financial Officer\n"
+                "Date: May 30, 2018\n"
+                "Date: May 22, 2018"
+            ),
+        }
+
+        projection = _direct_labeled_date_source_projection(question, [chunk])
+
+        self.assertEqual(projection["answer"], "May 30, 2018")
+        self.assertEqual(
+            projection["citation_refs"],
+            ["evidence_chunk:cigna-signatures"],
+        )
+        other_party_question = question.replace("Cigna", "UnknownCo")
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(other_party_question, [chunk])
         )
 
     def test_labeled_date_projection_binds_identifiers_within_one_artifact(self) -> None:
@@ -7075,7 +7316,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertTrue(changed)
         self.assertEqual(
             repaired[0]["statement"],
-            "Verify manufacturing readiness and remediation evidence before deciding.",
+            "Verify quality remediation, validation, regulatory inspection, and usable "
+            "capacity before deciding.",
         )
         self.assertNotIn(basis["statement"], repaired[0]["statement"])
         self.assertEqual(repaired[0]["proposal_basis_statement"], basis["statement"])
@@ -7101,7 +7343,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertTrue(changed)
         self.assertEqual(
             repaired[0]["statement"],
-            "Confirm territory, scope, and termination rights before deciding.",
+            "Map territory, licensed scope, termination triggers, and surviving "
+            "rights before deciding.",
         )
         self.assertNotIn(amendment_basis["statement"], repaired[0]["statement"])
 
@@ -8736,6 +8979,213 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             "passed",
         )
 
+    def test_relationship_guard_preserves_dated_status_and_trial_sourcing(self) -> None:
+        dated_source = (
+            "As of the date of this filing, Scilex's net profits have not exceeded "
+            "five percent of net sales. As of the date of this filing, neither "
+            "Oishi nor Itochu has exercised its right of termination."
+        )
+        self.assertFalse(
+            _relationship_compatible(
+                "Scilex's net profits have not exceeded five percent of net sales.",
+                [dated_source],
+            )
+        )
+        self.assertTrue(
+            _relationship_compatible(
+                "As of the filing, Scilex's net profits had not exceeded five percent.",
+                [dated_source],
+            )
+        )
+
+        trial_source = (
+            "Molgramostim drug substance is manufactured by Acme. All clinical and "
+            "nonclinical trials to-date have used material sourced from Acme."
+        )
+        self.assertFalse(
+            _relationship_compatible(
+                "All clinical and nonclinical trials used material manufactured by Acme.",
+                [trial_source],
+            )
+        )
+        self.assertTrue(
+            _relationship_compatible(
+                "Through the filing date, all clinical and nonclinical trials used "
+                "material sourced from Acme.",
+                [trial_source],
+            )
+        )
+
+    def test_relationship_guard_does_not_move_affected_population_onto_lawsuit(self) -> None:
+        source = (
+            "A putative class action was filed on behalf of approximately 800,000 "
+            "members. The missing hard drives held personal information for "
+            "approximately two million former and current members, employees, and "
+            "providers."
+        )
+        self.assertFalse(
+            _relationship_compatible(
+                "A class action was filed on behalf of approximately two million people.",
+                [source],
+            )
+        )
+        self.assertTrue(
+            _relationship_compatible(
+                "A class action was filed on behalf of approximately 800,000 members.",
+                [source],
+            )
+        )
+
+    def test_key_fact_projection_surfaces_decision_bearing_contract_terms(self) -> None:
+        cases = [
+            (
+                "Should the owner extend the agreement given termination?",
+                "AXP may terminate, in whole or in part, this Agreement and/or any "
+                "Schedule without cause upon five (5) days' written notice.",
+                "AXP may terminate the Agreement or any Schedule without cause on "
+                "five days' written notice",
+            ),
+            (
+                "Should the owner continue manufacturing under minimum purchases?",
+                "The agreement provides for minimum annual purchase commitments for "
+                "the years 2025 through 2028 for delivery in 2026 through 2029.",
+                "minimum annual purchase commitments for 2025 through 2028",
+            ),
+            (
+                "Should the owner continue IBM outsourcing after the missing-drive incident?",
+                "IBM could not locate several hard disk drives. Personal information of "
+                "approximately two million former and current Health Net members, "
+                "employees and health care providers is on the drives.",
+                "approximately two million",
+            ),
+            (
+                "Should the owner continue outsourcing?",
+                "The maximum termination fee is $300 million, triggered if we terminated "
+                "for convenience during the first year.",
+                "maximum $300 million fee",
+            ),
+            (
+                "Should the owner continue the service-provider dependency?",
+                "The MSA may be terminated by either party upon thirty days' written "
+                "notice if there are no statements of work, and any statement of work "
+                "can be terminated by either party upon thirty days' written notice "
+                "unless otherwise specified in that statement of work.",
+                "terminate a SOW on thirty days' notice",
+            ),
+        ]
+        for index, (question, source, expected) in enumerate(cases):
+            with self.subTest(expected=expected):
+                rows = _grounded_key_fact_fallback(
+                    [
+                        {
+                            "artifact_id": f"contract-{index}",
+                            "evidence_chunk_id": f"contract-{index}",
+                            "text": source,
+                            "safety": {},
+                        }
+                    ],
+                    limit=5,
+                    decision_question=question,
+                )
+                self.assertTrue(
+                    any(expected in row["statement"] for row in rows),
+                    rows,
+                )
+
+    def test_key_fact_projection_surfaces_amended_manufacturing_appendices(self) -> None:
+        source = (
+            "Appendix 1 (Safety Stock and Buyer Supplied Items) attached to the "
+            "Agreement is hereby amended by deleting it in its entirety and replacing "
+            "it with Appendix 1 attached to this Amendment. Appendix 2 (Price; [**]) "
+            "attached to the Agreement is hereby amended by deleting it in its "
+            "entirety and replacing it with Appendix 2 attached to this Amendment."
+        )
+        rows = _grounded_key_fact_fallback(
+            [
+                {
+                    "artifact_id": "janssen-amendment",
+                    "evidence_chunk_id": "janssen-amendment",
+                    "text": source,
+                    "safety": {},
+                }
+            ],
+            limit=5,
+            decision_question=(
+                "Should the owner continue manufacturing under the obligations "
+                "changed by the later amendment?"
+            ),
+        )
+        statements = [row["statement"] for row in rows]
+        self.assertIn(
+            "The later amendment replaces Appendix 1 (Safety Stock) and Appendix 2 (Price)",
+            statements,
+        )
+        self.assertFalse(
+            _brief_output_echo_violations({"key_facts": rows}, [source])
+        )
+
+    def test_conditional_comparability_becomes_bundle_scoped_gap_only(self) -> None:
+        source = (
+            "If the product manufactured at second sources is not demonstrated to be "
+            "comparable with clinical-program material, it cannot be commercialized."
+        )
+        chunks = [{"evidence_chunk_id": "conditional", "text": source, "safety": {}}]
+        question = "Should the owner accelerate a qualified second source?"
+
+        self.assertEqual(
+            _explicit_missing_evidence(chunks, decision_question=question),
+            [],
+        )
+        self.assertEqual(
+            _corpus_coverage_gaps(
+                [{"text": source, "source": {"filename": "risk.txt"}}],
+                question,
+            ),
+            [
+                "The supplied Evidence Bundle does not establish second-source "
+                "comparability with clinical-program material."
+            ],
+        )
+        self.assertEqual(
+            _corpus_coverage_gaps(
+                [
+                    {"text": source, "source": {"filename": "risk.txt"}},
+                    {
+                        "text": "The second source has been validated as comparable.",
+                        "source": {"filename": "qualification.txt"},
+                    },
+                ],
+                question,
+            ),
+            [],
+        )
+
+    def test_chapter11_review_need_names_waiver_and_facility_closing(self) -> None:
+        question = "Should the owner continue after the Chapter 11 event?"
+        evidence = (
+            "The Waiver Termination Date is defined below. The revolving credit "
+            "facility remains subject to closing conditions and definitive documents."
+        )
+        uncertainty = _question_specific_review_uncertainty(
+            question,
+            evidence_text=evidence,
+        )
+        next_step = _question_specific_next_step(
+            question,
+            evidence_text=evidence,
+        )
+        self.assertIn("Waiver Termination Date", uncertainty)
+        self.assertIn("closing conditions", uncertainty)
+        self.assertIn("contingency", uncertainty)
+        self.assertIn("definitive documents", next_step)
+
+    def test_incomplete_infinitive_fragment_is_not_a_key_fact(self) -> None:
+        self.assertFalse(
+            _complete_extracted_statement_surface(
+                "The specific services to be rendered by Hughes"
+            )
+        )
+
     def test_grounded_key_fact_fallback_projects_subcontract_audit_condition(self) -> None:
         chunks = [
             {
@@ -9054,6 +9504,20 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 "Should the owner renew the services agreement?",
             ),
             2,
+        )
+        self.assertEqual(
+            _brief_key_fact_target(
+                [
+                    {
+                        "artifact_id": f"source-{index}",
+                        "evidence_chunk_id": f"fact-{index}",
+                        "text": "The agreement contains a decision-relevant fact.",
+                    }
+                    for index in range(3)
+                ],
+                "Should the owner renew the services agreement?",
+            ),
+            3,
         )
 
     def test_key_fact_dedup_keeps_new_scalar_and_drops_evidence_boilerplate(self) -> None:
@@ -9647,8 +10111,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         )
         gaps = _explicit_missing_evidence(chunks, decision_question=question)
 
-        self.assertEqual(len(gaps), 2)
-        self.assertTrue(any("comparability" in gap.lower() for gap in gaps))
+        self.assertEqual(len(gaps), 1)
+        self.assertFalse(any("comparability" in gap.lower() for gap in gaps))
         self.assertTrue(any("validation" in gap.lower() for gap in gaps))
         self.assertEqual(
             _brief_output_echo_violations(
@@ -9671,8 +10135,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             limit=2,
         )
         self.assertEqual(len(combined), 2)
-        self.assertIn("validation", combined[1].lower())
-        self.assertIn("inspection", combined[1].lower())
+        self.assertTrue(any("validation" in gap.lower() for gap in combined))
+        self.assertTrue(any("inspection" in gap.lower() for gap in combined))
 
     def test_non_manufacturing_validation_gap_preserves_its_subject(self) -> None:
         cases = [
@@ -9929,7 +10393,11 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         )
         self.assertEqual(
             {row["statement"] for row in combined_rows},
-            {row["statement"] for row in rows},
+            {
+                "Through the filing date, all clinical and nonclinical trials used "
+                "material sourced from GEMA",
+                "A third party was engaged as a second source for molgramostim manufacturing.",
+            },
         )
 
         potential_rows = _grounded_key_fact_fallback(

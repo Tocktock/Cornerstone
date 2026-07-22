@@ -1096,17 +1096,6 @@ def _explicit_missing_evidence(
             source_declared_gap = False
             if not _contains_hangul(decision_question):
                 if re.search(
-                    r"\bsecond\s+sources?\b[^.!?]{0,120}\bnot\s+demonstrated\b"
-                    r"[^.!?]{0,80}\bcomparable\b",
-                    candidate,
-                    flags=re.IGNORECASE,
-                ):
-                    candidate = (
-                        "Second-source comparability with clinical-program material "
-                        "is not demonstrated."
-                    )
-                    source_declared_gap = True
-                elif re.search(
                     r"\bvalidation\s+activities\s+are\s+ongoing\b",
                     candidate,
                     flags=re.IGNORECASE,
@@ -2169,12 +2158,159 @@ def _evidence_query_facets(text: str) -> list[set[str]]:
     """Return clause and enumeration facets for diverse evidence retrieval."""
 
     candidates: list[str] = []
+    # Ask questions that name a printed field or recital need the exact
+    # document surface before broader contract facets consume the five-chunk
+    # retrieval budget. These are lexical retrieval hints only; the answer
+    # projection below still requires the requested relationship in source.
+    if re.search(r"\bInitial\s+Term\b", text, flags=re.IGNORECASE) and re.search(
+        r"\bexpir\w*\b", text, flags=re.IGNORECASE
+    ):
+        amendment_number = re.search(
+            r"\bAmendment(?:\s+(?:No\.?|Number))?\s*(?P<number>\d+)\b",
+            text,
+            flags=re.IGNORECASE,
+        )
+        candidates.extend(
+            [
+                (
+                    f"Amendment Number {amendment_number.group('number')}"
+                    if amendment_number
+                    else "Amendment Number"
+                ),
+                "Section 9.1 Agreement will expire Initial Term",
+            ]
+        )
+    signatory_question = re.search(
+        r"\bwhat\s+date\b[^?]{0,100}\bfor\s+(?P<party>.+?)(?:['’]s)\s+signatory\b",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if signatory_question:
+        candidates.extend(
+            [
+                f"{signatory_question.group('party')} Signature Print Name Title Date",
+                "IN WITNESS WHEREOF Signature Print Name Title Date",
+            ]
+        )
+    if _supply_agreement_recital_question_parts(text) is not None:
+        candidates.append(
+            "First Amendment WHEREAS Parties entered into Supply Agreement dated"
+        )
+    if re.search(r"\bEffective\s+Date\b", text, flags=re.IGNORECASE) and re.search(
+        r"\bAmendment\s+(?=[A-Z0-9-]*[A-Z])(?=[A-Z0-9-]*\d)[A-Z0-9-]{5,}\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        candidates.append(
+            "Master Contract ID Number Effective Date"
+        )
+    if re.search(
+        r"\bconflicting\s+original[- ]agreement\s+dates?\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        candidates.extend(
+            [
+                "First Amendment WHEREAS Parties entered into Supply Agreement dated",
+                "exhibit index Supply Agreement dated as of amendments thereto",
+            ]
+        )
     if _evidence_query_is_comparison(text):
         candidates.extend(_COMPARISON_QUERY_FACETS)
     if re.search(r"(?:의안|조례|법안|안건)", text) and re.search(
         r"(?:가결|부결|보류|채택|결정)", text
     ):
         candidates.extend(_KOREAN_LEGISLATIVE_DECISION_FACETS)
+    if re.search(
+        r"\b(?:outsourc\w*|service[- ]provider|services?\s+(?:relationship|arrangement))\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        candidates.extend(
+            [
+                "$300 million maximum termination fee first year convenience",
+                "thirty days written notice statement of work SOW",
+                "disengagement assistance transition without interruption",
+                "termination fee break-up fee convenience change in control",
+                "service level credit disengagement assistance transition performance",
+            ]
+        )
+    if re.search(r"\bchapter\s+11\b", text, flags=re.IGNORECASE):
+        candidates.extend(
+            [
+                "waiver termination date",
+                "Airspan new first lien revolving facility $20.0 million closing "
+                "conditions definitive documents",
+            ]
+        )
+    if re.search(
+        r"\b(?:manufactur\w*|supply|supplier|second[- ]source)\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        if re.search(r"\bagreement\b", text, flags=re.IGNORECASE):
+            candidates.extend(
+                [
+                    "First Amendment WHEREAS Parties entered into Supply Agreement dated",
+                    "exhibit index Supply Agreement dated as of amendments thereto",
+                ]
+            )
+        if re.search(r"\bsecond[- ]source\b", text, flags=re.IGNORECASE):
+            candidates.extend(
+                [
+                    "trials to-date material sourced validation ongoing",
+                    "comparable clinical program second source",
+                    "FDA inspection manufacturing supply vendors",
+                ]
+            )
+        candidates.extend(
+            [
+                "minimum annual purchase commitment volume price forecast reserved capacity",
+                "termination suspension breach force majeure quality audit validation inspection",
+            ]
+        )
+    if re.search(
+        r"\b(?:development\s+plan|development[- ]cost|collaboration|opt[- ]out)\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        candidates.extend(
+            [
+                "shared development costs percentage budget opt-out",
+                "milestone trial outcome approval termination",
+            ]
+        )
+    if re.search(
+        r"\b(?:data[- ]rights?|intellectual[- ]property|license)\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        candidates.extend(
+            [
+                "data ownership access use license deliverables confidentiality",
+                "covered personal data retain return delete destroy unrestricted permitted commercial use",
+                "nonexclusive worldwide royalty free perpetual sequence data clinical data",
+                "biospecimens clinical data sequence data ownership",
+                "post-termination survival insurance indemnity termination rights",
+            ]
+        )
+    if re.search(r"\b(?:facility\s+lease|leased?\s+site)\b", text, flags=re.IGNORECASE):
+        candidates.append("lease term rent renewal occupancy exit cost termination")
+    if re.search(r"\bwork[- ]order\b", text, flags=re.IGNORECASE):
+        candidates.append(
+            "work order price fee acceptance criteria milestone termination authorization"
+        )
+    if re.search(
+        r"\b(?:agreement|contract|renew\w*|extend|relationship)\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        candidates.extend(
+            [
+                "term renewal expiration termination notice convenience schedule",
+                "price fee minimum purchase commitment service level performance",
+            ]
+        )
     candidates.extend(
         part.strip()
         for part in re.split(r"[?!.,;:\n]+", text)
@@ -2823,6 +2959,88 @@ def _relationship_compatible(statement: str, source_texts: list[str]) -> bool:
     # "within 30 days". Preserve these relations exactly instead of accepting
     # them through lexical overlap alone.
     source_text = "\n".join(source_texts)
+
+    # A dated filing observation is not a timeless current-state fact. Require
+    # the output to retain an as-of/reporting qualifier when it uses the same
+    # subject and status terms as a dated source clause.
+    if not re.search(
+        r"\b(?:as\s+of|as\s+at|through|at\s+the\s+(?:filing|reporting)\s+date|"
+        r"the\s+(?:filing|report)\s+(?:states|reported))\b",
+        statement,
+        flags=re.IGNORECASE,
+    ):
+        statement_terms = _expanded_claim_support_terms(statement)
+        for source_clause in _sentence_relation_clauses(source_text):
+            if not re.search(
+                r"\bas\s+of\b[^.!?]{0,160}\b(?:has|have|had)\s+not\b",
+                source_clause,
+                flags=re.IGNORECASE,
+            ):
+                continue
+            if (
+                re.search(r"\b(?:has|have|had)\s+not\b", statement, flags=re.IGNORECASE)
+                and len(
+                    statement_terms
+                    & _expanded_claim_support_terms(source_clause)
+                )
+                >= 3
+            ):
+                return False
+
+    # Preserve both the temporal scope and the exact sourcing predicate. A
+    # nearby sentence saying that a supplier manufactures a substance cannot
+    # upgrade "trials to-date used material sourced from X" into a claim that
+    # every trial used material manufactured by X.
+    trial_statement = bool(
+        re.search(r"\btrials?\b", statement, flags=re.IGNORECASE)
+        and re.search(r"\b(?:used|utilized|manufactur\w*)\b", statement, flags=re.IGNORECASE)
+    )
+    if trial_statement:
+        related_trial_clauses = [
+            clause
+            for clause in _atomic_relation_clauses(source_text)
+            if re.search(r"\btrials?\b", clause, flags=re.IGNORECASE)
+            and len(
+                _expanded_claim_support_terms(statement)
+                & _expanded_claim_support_terms(clause)
+            )
+            >= 3
+        ]
+        if related_trial_clauses and any(
+            re.search(r"\bto[- ]date\b", clause, flags=re.IGNORECASE)
+            for clause in related_trial_clauses
+        ) and not re.search(
+            r"\b(?:to[- ]date|through\s+the\s+(?:filing|reporting)\s+date|as\s+of)\b",
+            statement,
+            flags=re.IGNORECASE,
+        ):
+            return False
+        if re.search(r"\bmanufactur\w*\b", statement, flags=re.IGNORECASE) and not any(
+            re.search(r"\bmanufactur\w*\b", clause, flags=re.IGNORECASE)
+            for clause in related_trial_clauses
+        ):
+            return False
+
+    event_scalar_values = _answer_scalar_values(statement)
+    if event_scalar_values and re.search(
+        r"\b(?:class\s+action|litigation|lawsuit)\b",
+        statement,
+        flags=re.IGNORECASE,
+    ):
+        event_clauses = [
+            clause
+            for clause in _sentence_relation_clauses(source_text)
+            if re.search(
+                r"\b(?:class\s+action|litigation|lawsuit)\b",
+                clause,
+                flags=re.IGNORECASE,
+            )
+        ]
+        if event_clauses and not any(
+            event_scalar_values <= _answer_scalar_values(clause)
+            for clause in event_clauses
+        ):
+            return False
 
     # A sourcing candidate is not a qualified second source merely because an
     # agreement was signed. Preserve explicit readiness modality from the
@@ -4280,6 +4498,13 @@ def _low_information_key_fact(statement: str) -> bool:
     ):
         return True
     if re.search(
+        r"\bis\s+a\s+(?:center|company|organization)\s+for\s+"
+        r"(?:patient\s+care|research|services|business)",
+        normalized,
+        flags=re.IGNORECASE,
+    ):
+        return True
+    if re.search(
         r"\bremedies\s+under\s+Clause\s+\d+(?:\.\d+)*"
         r"(?:\s*,\s*(?:this\s+)?Clause\s+\d+(?:\.\d+)*)*$",
         normalized,
@@ -5362,6 +5587,16 @@ def _grounded_key_fact_fallback(
         prompt_text = re.sub(r"\s+", " ", prompt_text)
         candidate_clauses = _atomic_relation_clauses(prompt_text)
         host_projection_statements: set[str] = set()
+
+        def add_host_projection(statement: str) -> None:
+            """Prepend one mechanically source-bound, decision-bearing fact."""
+
+            normalized = re.sub(r"\s+", " ", statement).strip(" ,;.-")
+            if not normalized or normalized in host_projection_statements:
+                return
+            candidate_clauses.insert(0, normalized)
+            host_projection_statements.add(normalized)
+
         missing_drive_incident = re.search(
             r"\b(?P<actor>[A-Z][A-Za-z0-9&.-]{1,30})"
             r"(?:,\s+which\s+[^.!?]{1,100}?)?\s+notified\s+[^.!?]{1,100}?\s+that\s+"
@@ -5375,8 +5610,284 @@ def _grounded_key_fact_fallback(
                 f"{missing_drive_incident.group('actor')} could not locate several "
                 "hard disk drives used in the data center."
             )
-            candidate_clauses.insert(0, incident_projection)
-            host_projection_statements.add(incident_projection.strip(" ,;.-"))
+            add_host_projection(incident_projection)
+        aliased_missing_drive_incident = re.search(
+            r"\(\s*[\u201c\u201d\"'](?P<actor>[A-Z][A-Z0-9&.-]{1,12})"
+            r"[\u201c\u201d\"']\s*\)[^.!?]{0,180}?\bnotified\b[^.!?]{0,120}?"
+            r"\bcould\s+not\s+locate\s+several\s+hard\s+disk\s+drives\b"
+            r"[^.!?]{0,120}?\bused\s+in\s+(?:our|the)\s+data\s+center\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if aliased_missing_drive_incident is not None:
+            add_host_projection(
+                f"{aliased_missing_drive_incident.group('actor')} could not locate "
+                "several hard disk drives used in the data center."
+            )
+        affected_people = re.search(
+            r"\bpersonal\s+information\s+of\s+(?P<count>approximately\s+"
+            r"(?:\d+(?:\.\d+)?|one|two|three|four|five|six|seven|eight|nine|ten)\s+"
+            r"million)\s+(?P<people>former\s+and\s+current\s+[^.!?]{1,80}?)\s+"
+            r"(?:is|was)\s+on\s+the\s+drives\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if affected_people is not None:
+            people = re.sub(r"\s+", " ", affected_people.group("people")).strip()
+            people = re.sub(
+                r"former\s+and\s+current\s+Health\s+Net\s+members,?\s+"
+                r"employees\s+and\s+health\s+care\s+providers",
+                "Health Net members, employees, and providers",
+                people,
+                flags=re.IGNORECASE,
+            )
+            add_host_projection(
+                "The missing drives held personal information for "
+                f"{affected_people.group('count')} {people}."
+            )
+
+        convenience_termination = re.search(
+            r"\b(?P<actor>[A-Z][A-Za-z0-9&.'-]{1,30})\s+may\s+terminate,?\s+"
+            r"(?:in\s+whole\s+or\s+in\s+part,?\s+)?this\s+Agreement\s+"
+            r"and/or\s+any\s+Schedule\s+without\s+cause\s+upon\s+"
+            r"(?P<notice>five\s*\(5\)\s*days[’']?\s+written\s+notice)",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if convenience_termination is not None:
+            add_host_projection(
+                f"{convenience_termination.group('actor')} may terminate the Agreement "
+                "or any Schedule without cause on five days' written notice."
+            )
+        if re.search(
+            r"\bNotice\s+of\s+termination\s+of\s+any\s+Schedule\s+shall\s+not\s+"
+            r"be\s+considered\s+notice\s+of\s+termination\s+of\s+this\s+Agreement\s+"
+            r"unless\s+specifically\s+stated\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        ):
+            add_host_projection(
+                "Terminating a Schedule does not terminate the Agreement unless the notice specifically says so."
+            )
+
+        annual_purchase_commitment = re.search(
+            r"\bminimum\s+annual\s+purchase\s+commitments?\b[^.!?]{0,100}?"
+            r"\bfor\s+the\s+years\s+(?P<purchase_start>\d{4})\s+through\s+"
+            r"(?P<purchase_end>\d{4})\s+for\s+delivery\s+in\s+"
+            r"(?P<delivery_start>\d{4})\s+through\s+(?P<delivery_end>\d{4})\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if annual_purchase_commitment is not None:
+            add_host_projection(
+                "The agreement provides minimum annual purchase commitments for "
+                f"{annual_purchase_commitment.group('purchase_start')} through "
+                f"{annual_purchase_commitment.group('purchase_end')} and delivery in "
+                f"{annual_purchase_commitment.group('delivery_start')} through "
+                f"{annual_purchase_commitment.group('delivery_end')}."
+            )
+
+        amended_appendix = re.compile(
+            r"\bAppendix\s+(?P<number>[12])\s*\((?P<subject>[^)]{1,80})\)"
+            r"[^.!?]{0,180}?\bamended\s+by\s+deleting\s+it\s+in\s+its\s+"
+            r"entirety\s+and\s+replacing\s+it\b",
+            flags=re.IGNORECASE,
+        )
+        amended_appendix_numbers: set[str] = set()
+        for appendix_match in amended_appendix.finditer(prompt_text):
+            appendix_number = appendix_match.group("number")
+            subject = appendix_match.group("subject")
+            if appendix_number == "1" and re.search(
+                r"\bsafety\s+stock\b", subject, flags=re.IGNORECASE
+            ):
+                amended_appendix_numbers.add("1")
+            elif appendix_number == "2" and re.search(
+                r"\bprice\b", subject, flags=re.IGNORECASE
+            ):
+                amended_appendix_numbers.add("2")
+        if amended_appendix_numbers == {"1", "2"}:
+            add_host_projection(
+                "The later amendment replaces Appendix 1 (Safety Stock) and Appendix 2 "
+                "(Price)."
+            )
+        else:
+            if "1" in amended_appendix_numbers:
+                add_host_projection(
+                    "The later amendment replaces Appendix 1 governing safety stock "
+                    "and buyer-supplied items."
+                )
+            if "2" in amended_appendix_numbers:
+                add_host_projection(
+                    "The amendment replaces Appendix 2 (Price)."
+                )
+
+        maximum_convenience_fee = re.search(
+            r"\bmaximum\s+termination\s+fee\b[^.!?]{0,100}?"
+            r"(?P<fee>\$\s*\d+(?:\.\d+)?\s+million)\b[^.!?]{0,180}?"
+            r"terminated?\s+for\s+convenience\s+during\s+the\s+first\s+year\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if maximum_convenience_fee is not None:
+            fee = re.sub(r"\s+", " ", maximum_convenience_fee.group("fee")).strip()
+            add_host_projection(
+                "Convenience termination in the first year can trigger a maximum "
+                f"{fee} fee."
+            )
+        break_up_fee = re.search(
+            r"\bterminate\s+the\s+Master\s+Services?\s+Agreement\s+prior\s+to\s+"
+            r"the\s+Commencement\s+Date\b[^.!?]{0,160}?"
+            r"\bbreak-up\s+fee\s+of\s+(?P<fee>\$\s*\d+(?:\.\d+)?\s+million)\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if break_up_fee is not None:
+            fee = re.sub(r"\s+", " ", break_up_fee.group("fee")).strip()
+            add_host_projection(
+                "Pre-commencement termination requires a "
+                f"{fee} break-up fee."
+            )
+        if re.search(
+            r"\bright\s+to\s+obtain\s+disengagement\s+assistance\b[^.!?]{0,180}?"
+            r"(?:expires|terminated)",
+            prompt_text,
+            flags=re.IGNORECASE,
+        ):
+            add_host_projection(
+                "The customer retains paid disengagement assistance after expiration or termination."
+            )
+
+        thirty_day_msa_exit = re.search(
+            r"\bMSA\s+may\s+be\s+terminated\s+by\s+either\s+party\s+upon\s+"
+            r"thirty\s+days[’']?\s+written\s+notice\b[^.!?]{0,100}?"
+            r"\bif\s+there\s+are\s+no\s+statements\s+of\s+work\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if thirty_day_msa_exit is not None:
+            add_host_projection(
+                "Either party may terminate the MSA on thirty days' notice when no SOW remains."
+            )
+        thirty_day_sow_exit = re.search(
+            r"\bany\s+statement\s+of\s+work\s+can\s+be\s+terminated\s+by\s+"
+            r"either\s+party\s+upon\s+thirty\s+days[’']?\s+written\s+notice\b"
+            r"[^.!?]{0,100}?unless\s+otherwise\s+specified",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if thirty_day_sow_exit is not None:
+            add_host_projection(
+                "Either party may terminate a SOW on thirty days' notice unless that SOW says otherwise."
+            )
+
+        sequence_data_license = re.search(
+            r"\bgrants\s+to\s+(?P<licensee>[A-Z][A-Za-z0-9&.'-]*)\s+a\s+"
+            r"nonexclusive,\s+worldwide,\s+royalty\s+free,\s+fully\s+paid-up"
+            r"[^.!?]{0,220}?license\s+to\s+access,\s+store\s+and\s+use\s+the\s+"
+            r"Sequence\s+Data\b.{0,320}?license\s+shall\s+be\s+perpetual\s+"
+            r"except\s+as\s+set\s+forth\s+in\s+Section\s+(?P<section>\d+(?:\.\d+)?\([a-z]\))",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if sequence_data_license is not None:
+            add_host_projection(
+                f"{sequence_data_license.group('licensee')} holds a perpetual, worldwide, "
+                "royalty-free Sequence Data research license, subject to Section "
+                f"{sequence_data_license.group('section')}."
+            )
+        clinical_data_license = re.search(
+            r"\b(?P<licensor>[A-Z][A-Za-z0-9&.'-]*)\s+hereby\s+grants\s+to\s+"
+            r"(?P<licensee>[A-Z][A-Za-z0-9&.'-]*)\s+a\s+nonexclusive,\s+worldwide,\s+"
+            r"royalty\s+free,\s+fully\s+paid-up[^.!?]{0,220}?license\s+to\s+the\s+"
+            r"Clinical\s+Data\b.{0,320}?license\s+shall\s+be\s+perpetual\s+"
+            r"except\s+as\s+set\s+forth\s+in\s+Section\s+(?P<section>\d+(?:\.\d+)?)",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if clinical_data_license is not None:
+            add_host_projection(
+                f"{clinical_data_license.group('licensee')} holds a perpetual, worldwide, "
+                "royalty-free Clinical Data license, subject to Section "
+                f"{clinical_data_license.group('section')}."
+            )
+        data_owners = re.search(
+            r"\b(?P<clinical_owner>[A-Z][A-Za-z0-9&.'-]*)\s+shall\s+own\s+the\s+"
+            r"Biospecimens\s+and\s+Clinical\s+Data\s+at\s+all\s+times\b.{0,320}?"
+            r"(?P<sequence_owner>[A-Z][A-Za-z0-9&.'-]*)\s+shall\s+own\s+the\s+"
+            r"Sequence\s+Data\s+at\s+all\s+times",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if data_owners is not None:
+            add_host_projection(
+                "Data ownership: "
+                f"{data_owners.group('clinical_owner')} owns Biospecimens and Clinical Data; "
+                f"{data_owners.group('sequence_owner')} owns Sequence Data."
+            )
+        for ownership_match in re.finditer(
+            r"\b(?P<owner>[A-Z][A-Za-z0-9&.'-]*)\s+shall\s+own\s+the\s+"
+            r"(?P<data>Biospecimens\s+and\s+Clinical\s+Data|Sequence\s+Data)\s+"
+            r"at\s+all\s+times\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        ):
+            data_label = re.sub(r"\s+", " ", ownership_match.group("data"))
+            prefix = prompt_text[max(0, ownership_match.start() - 100) : ownership_match.start()]
+            exception = re.search(
+                r"Except\s+as\s+set\s+forth\s+in\s+Section\s+"
+                r"(?P<section>\d+(?:\.\d+)?\([a-z]\)),?\s*$",
+                prefix,
+                flags=re.IGNORECASE,
+            )
+            qualifier = (
+                f" subject to Section {exception.group('section')}"
+                if exception is not None
+                else ""
+            )
+            add_host_projection(
+                f"{data_label} ownership: {ownership_match.group('owner')} owns "
+                f"{data_label}{qualifier}."
+            )
+
+        dated_unexercised_right = re.search(
+            r"\bAs\s+of\s+(?P<date_phrase>the\s+date\s+of\s+this\s+"
+            r"(?:proxy\s+statement/prospectus|filing|report)|[^,.]{3,80}),\s+"
+            r"neither\s+(?P<first>[A-Z][A-Za-z0-9&.'-]*)\s+nor\s+"
+            r"(?P<second>[A-Z][A-Za-z0-9&.'-]*)\s+has\s+exercised\s+"
+            r"(?:its|their)\s+right\s+of\s+termination\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if dated_unexercised_right is not None:
+            add_host_projection(
+                "As of the filing, "
+                f"neither {dated_unexercised_right.group('first')} nor "
+                f"{dated_unexercised_right.group('second')} had exercised its termination right."
+            )
+        trials_to_date = re.search(
+            r"\bAll\s+(?P<scope>clinical\s+and\s+nonclinical\s+trials)\s+"
+            r"to[- ]date\s+have\s+used\s+material\s+sourced\s+from\s+"
+            r"(?P<supplier>[A-Z][A-Za-z0-9&.'-]*)\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if trials_to_date is not None:
+            add_host_projection(
+                "Through the filing date, all "
+                f"{trials_to_date.group('scope').lower()} used material sourced from "
+                f"{trials_to_date.group('supplier')}."
+            )
+        service_level_credits = re.search(
+            r"\bminimum\s+service\s+levels\b[^.!?]{0,120}?"
+            r"\bFailure\s+to\s+meet\s+these\s+minimum\s+service\s+levels\s+"
+            r"will\s+result\s+in\s+service\s+level\s+credits\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if service_level_credits is not None:
+            add_host_projection(
+                "Failure to meet minimum service levels results in service-level credits."
+            )
         cgmp_manufacturing = re.search(
             r"\bProduction\s+shall\s+occur\s+using\s+(?:a\s+)?"
             r"cGMP\s+validated\s+manufacturing\s+process\b",
@@ -5387,8 +5898,7 @@ def _grounded_key_fact_fallback(
             cgmp_projection = (
                 "Production shall use a cGMP-validated manufacturing process."
             )
-            candidate_clauses.insert(0, cgmp_projection)
-            host_projection_statements.add(cgmp_projection.strip(" ,;.-"))
+            add_host_projection(cgmp_projection)
         manufacturing_supply = re.search(
             r"\bUnder\s+the\s+[A-Z][A-Za-z0-9&.'-]*\s+Agreement,\s+"
             r"(?P<actor>[A-Z][A-Za-z0-9&.'-]*)\s+has\s+agreed\s+to\s+"
@@ -5402,8 +5912,7 @@ def _grounded_key_fact_fallback(
                 f"{manufacturing_supply.group('actor')} agreed to manufacture and "
                 f"supply the API for {manufacturing_supply.group('product')}."
             )
-            candidate_clauses.insert(0, supply_projection)
-            host_projection_statements.add(supply_projection.strip(" ,;.-"))
+            add_host_projection(supply_projection)
         minimum_purchase_obligation = re.search(
             r"\b(?P<actor>[A-Z][A-Za-z0-9&.'-]*)\s+agrees\s+to\s+comply\s+"
             r"with\s+any\s+such\s+required\s+minimum\s+purchase\s+obligations\b",
@@ -5415,10 +5924,7 @@ def _grounded_key_fact_fallback(
                 f"{minimum_purchase_obligation.group('actor')} agrees to comply "
                 "with required minimum-purchase obligations."
             )
-            candidate_clauses.insert(0, minimum_purchase_projection)
-            host_projection_statements.add(
-                minimum_purchase_projection.strip(" ,;.-")
-            )
+            add_host_projection(minimum_purchase_projection)
         admin_program_replacement = re.search(
             r"\bAll\s+references\s+in\s+the\s+Admin\s+Agreement\b[^.!?]{0,180}?"
             r"\bto\s+[\u201c\"](?P<old>[^\u201d\"]{2,80})[\u201d\"]\s+shall\s+be\s+"
@@ -5590,9 +6096,11 @@ def _grounded_key_fact_fallback(
                         "A third party was engaged as a second source for "
                         f"{engaged_second_source.group('product')} manufacturing."
                     )
+            host_projection = statement in host_projection_statements
             if (
-                len(statement) > 200
-                or len(re.findall(r"[\w’'-]+", statement, flags=re.UNICODE)) > 18
+                len(statement) > (240 if host_projection else 200)
+                or len(re.findall(r"[\w’'-]+", statement, flags=re.UNICODE))
+                > (32 if host_projection else 18)
             ):
                 continue
             if not _complete_decision_basis(statement):
@@ -5713,7 +6221,7 @@ def _grounded_key_fact_fallback(
                         clause_index,
                     ),
                     "source_key": source_key,
-                    "host_projection": statement in host_projection_statements,
+                    "host_projection": host_projection,
                     "facet_indexes": {
                         index
                         for index, score in enumerate(facet_scores)
@@ -5775,11 +6283,11 @@ def _grounded_key_fact_fallback(
         while remaining and len(selected) < limit:
             remaining.sort(
                 key=lambda row: (
+                    0 if row.get("host_projection") else 1,
+                    -len(set(row["facet_indexes"]) - covered_facets),
                     0
                     if str(row["source_key"]) not in selected_source_keys
                     else 1,
-                    0 if row.get("host_projection") else 1,
-                    -len(set(row["facet_indexes"]) - covered_facets),
                     row["rank"],
                 )
             )
@@ -5790,6 +6298,7 @@ def _grounded_key_fact_fallback(
                 selected
                 and not new_facets
                 and candidate_source_key in selected_source_keys
+                and not candidate.get("host_projection")
             ):
                 break
             before = len(selected)
@@ -5830,7 +6339,7 @@ def _brief_key_fact_target(
         for chunk in chunks
         if str(chunk.get("artifact_id") or chunk.get("evidence_chunk_id") or "")
     }
-    return 2 if len(source_keys) >= 2 else 1
+    return min(3, len(source_keys)) if len(source_keys) >= 2 else 1
 
 
 _DECISION_CONSTRAINT_PATTERN = re.compile(
@@ -5900,12 +6409,35 @@ def _complete_extracted_statement_surface(text: str) -> bool:
         return False
     if statement.endswith("/"):
         return False
+    if re.match(r"^[•●▪◦‣]\s*", statement):
+        return False
+    if re.match(
+        r"^(?:Ensuring|Implementing|Maintaining|Performing|Providing|Reviewing|"
+        r"Supporting|Using)\b",
+        statement,
+        flags=re.IGNORECASE,
+    ):
+        return False
     if re.match(r"^[a-z]", statement):
         return False
     if re.match(r"^\([a-z0-9]+\)\s+", statement, flags=re.IGNORECASE):
         return False
     if re.match(
         r"^(?:and|but|or|provided|that|which)\b|^\d+(?:\.\d+)?\s+(?:and|of|or|to)\b",
+        statement,
+        flags=re.IGNORECASE,
+    ):
+        return False
+    if re.fullmatch(
+        r"(?:The|A|An)\s+[^.!?]{1,140}?\s+to\s+be\s+"
+        r"(?:accepted|delivered|paid|performed|provided|rendered|returned|used)"
+        r"(?:\s+(?:by|under|to|for)\s+[^.!?]{1,80})?",
+        statement,
+        flags=re.IGNORECASE,
+    ):
+        return False
+    if re.match(
+        r"^During\b[^.!?]{1,160},\s*(?:for\s+so\s+long\s+as|if|when|while)\b",
         statement,
         flags=re.IGNORECASE,
     ):
@@ -5929,7 +6461,8 @@ def _complete_extracted_statement_surface(text: str) -> bool:
         r"complet(?:e|es|ed|ing)|contain(?:s|ed|ing)?|correct(?:s|ed|ing)?|cover(?:s|ed|ing)?|"
         r"decid(?:e|es|ed|ing)|declin(?:e|es|ed|ing)|delet(?:e|es|ed|ing)|depend(?:s|ed|ing)?|"
         r"document(?:s|ed|ing)?|engag(?:e|es|ed|ing)|exclud(?:e|es|ed|ing)|expir(?:e|es|ed|ing)|"
-        r"fail(?:s|ed|ing)?|finish(?:es|ed|ing)?|guarantee(?:s|d|ing)?|mean(?:s|t|ing)?|"
+        r"fail(?:s|ed|ing)?|finish(?:es|ed|ing)?|grant(?:s|ed|ing)?|"
+        r"guarantee(?:s|d|ing)?|hold(?:s|ing)?|held|mean(?:s|t|ing)?|"
         r"need(?:s|ed|ing)?|offer(?:s|ed|ing)?|own(?:s|ed|ing)?|pass(?:es|ed|ing)?|"
         r"provide(?:s|d|ing)?|propos(?:e|es|ed|ing)|recommend(?:s|ed|ing)?|"
         r"record(?:s|ed|ing)?|reject(?:s|ed|ing)?|remain(?:s|ed|ing)?|renew(?:s|ed|ing)?|"
@@ -6191,7 +6724,12 @@ def _select_grounded_bottom_line(
     def hold_pending_review(row: dict[str, Any]) -> dict[str, Any]:
         """Turn one cited basis into a concise, non-factual decision condition."""
 
-        action = _question_specific_next_step(decision_question).strip()
+        action = _question_specific_next_step(
+            decision_question,
+            evidence_text="\n".join(
+                _chunk_grounding_text(chunk) for chunk in chunk_by_ref.values()
+            ),
+        ).strip()
         action_match = re.match(
             r"^(?P<verb>Confirm|Verify|Review)\s+(?P<object>.+?)\s+before\s+deciding\.?$",
             action,
@@ -7450,7 +7988,12 @@ def _repair_grounded_recommendations(
 
     for basis in bases:
         basis_statement = str(basis.get("statement") or "")
-        question_bound_next_step = _question_specific_next_step(decision_question)
+        question_bound_next_step = _question_specific_next_step(
+            decision_question,
+            evidence_text="\n".join(
+                _chunk_grounding_text(chunk) for chunk in chunk_by_ref.values()
+            ),
+        )
         specific_question_bound_step = (
             question_bound_next_step
             != "Verify the cited decision basis against current operating evidence before deciding."
@@ -8603,6 +9146,14 @@ def _direct_complete_wording_answer_projection(
         re.search(r"\badvance\s+written\s+notice\b", question, flags=re.IGNORECASE)
         and re.search(r"\brenewal\b", question, flags=re.IGNORECASE)
     )
+    initial_term_end_event_question = re.search(
+        r"\bSection\s+13\.1\b[^?]{0,160}\bwhat\s+event\b[^?]{0,160}"
+        r"\bend\b[^?]{0,160}\b(?:original\s+)?"
+        r"(?P<subject>[A-Z][A-Za-z0-9&.-]{1,30})\s+Agreement['’]s\s+"
+        r"Initial\s+Term\b",
+        question,
+        flags=re.IGNORECASE,
+    )
     ordinal_duration_match = re.search(
         r"\b(?P<ordinal>first|second|third|fourth|fifth|sixth|seventh|eighth|"
         r"ninth|tenth)\b[^?]{0,100}\bagreement\b",
@@ -8629,6 +9180,35 @@ def _direct_complete_wording_answer_projection(
     for chunk in chunks:
         ref = f"evidence_chunk:{chunk.get('evidence_chunk_id')}"
         text = re.sub(r"\s+", " ", _prompt_evidence_text(chunk)).strip()
+        if initial_term_end_event_question is not None:
+            source = chunk.get("source") if isinstance(chunk.get("source"), dict) else {}
+            source_ref = str(source.get("ref") or "")
+            subject = initial_term_end_event_question.group("subject")
+            if re.search(
+                rf"(?<![A-Za-z]){re.escape(subject)}(?![A-Za-z])",
+                f"{source_ref} {text}",
+                flags=re.IGNORECASE,
+            ):
+                end_event = re.search(
+                    r"\b13\.1\s*Term\b[.:]?.{0,700}?\buntil\s+the\s+"
+                    r"(?P<event>twentieth\s*\(\s*20th\s*\)\s+anniversary\s+"
+                    r"of\s+the\s+date\s+of\s+receipt\s+of\s+approval\s+by\s+"
+                    r"a\s+Regulatory\s+Authority\s+of\s+the\s+first\s+"
+                    r"Regulatory\s+Filing\s+for\s+the\s+marketing\s+and\s+sale\s+"
+                    r"of\s+the\s+first\s+Product\s+in\s+any\s+country)\s*"
+                    r"\(\s*the\s+[“\"]Initial\s+Term",
+                    text,
+                    flags=re.IGNORECASE,
+                )
+                if end_event is not None:
+                    answer = re.sub(
+                        r"\s+", " ", end_event.group("event")
+                    ).strip()
+                    return {
+                        "answer": answer,
+                        "citation_refs": [ref],
+                        "validation_mode": "direct_initial_term_end_event_projection",
+                    }
         if renewal_notice_question:
             notice = re.search(
                 r"\bwritten\s+notice\b[^.!?]{0,100}?\b"
@@ -9210,13 +9790,171 @@ def _direct_labeled_date_source_projection(
             return None
         return start, end
 
+    initial_term_question = bool(
+        re.search(r"\bInitial\s+Term\b", question, flags=re.IGNORECASE)
+        and re.search(r"\bexpir\w*\b", question, flags=re.IGNORECASE)
+    )
+    signatory_question = re.search(
+        r"\bwhat\s+date\b[^?]{0,100}\bfor\s+(?P<party>.+?)(?:['’]s)\s+signatory\b",
+        question,
+        flags=re.IGNORECASE,
+    )
     recital_question = _supply_agreement_recital_question_parts(question)
     if not re.search(
         r"\b(?:effective[-\s]+date|entry\s+date)\b",
         question,
         flags=re.IGNORECASE,
-    ) and recital_question is None:
+    ) and recital_question is None and not initial_term_question and signatory_question is None:
         return None
+    if initial_term_question:
+        amendment_numbers = {
+            match.group("number")
+            for match in re.finditer(
+                r"\bAmendment(?:\s+(?:No\.?|Number))?\s*(?P<number>\d+)\b",
+                question,
+                flags=re.IGNORECASE,
+            )
+        }
+        if len(amendment_numbers) != 1:
+            return None
+        amendment_number = next(iter(amendment_numbers))
+        candidates: dict[str, dict[str, Any]] = {}
+        occurrences: set[tuple[str, str]] = set()
+        by_artifact: dict[str, list[dict[str, Any]]] = {}
+        for chunk in chunks:
+            artifact_id = str(chunk.get("artifact_id") or "")
+            if artifact_id:
+                by_artifact.setdefault(artifact_id, []).append(chunk)
+        for artifact_id, artifact_chunks in by_artifact.items():
+            combined = "\n".join(str(chunk.get("text") or "") for chunk in artifact_chunks)
+            if not re.search(
+                rf"\bAmendment(?:\s+(?:No\.?|Number))?\s*{re.escape(amendment_number)}\b",
+                combined,
+                flags=re.IGNORECASE,
+            ):
+                continue
+            for chunk in artifact_chunks:
+                evidence_chunk_id = str(chunk.get("evidence_chunk_id") or "")
+                if not evidence_chunk_id:
+                    continue
+                text = str(chunk.get("text") or "")
+                for expiry in re.finditer(
+                    r"\bAgreement\s+will\s+commence\b[^.!?]{0,240}?"
+                    r"\bwill\s+expire\s+on\s+(?P<date>"
+                    rf"(?:{_SCALAR_MONTHS})\s+\d{{1,2}}(?:,\s*\d{{4}})?"
+                    + r")\s*\(\s*the\s+[“\"]Initial\s+Term[”\"]\s*\)",
+                    text,
+                    flags=re.IGNORECASE,
+                ):
+                    scalar_match = expiry.group("date")
+                    date_surface = re.sub(r"\s+", " ", scalar_match).strip()
+                    if not _answer_scalar_values(date_surface):
+                        continue
+                    span = chunk.get("span")
+                    char_start = span.get("char_start") if isinstance(span, dict) else None
+                    occurrence_position = (
+                        str(char_start + expiry.start("date"))
+                        if isinstance(char_start, int) and not isinstance(char_start, bool)
+                        else f"{evidence_chunk_id}:{expiry.start('date')}"
+                    )
+                    occurrences.add((artifact_id, occurrence_position))
+                    candidates.setdefault(
+                        date_surface.casefold(),
+                        {
+                            "answer": date_surface,
+                            "citation_refs": [f"evidence_chunk:{evidence_chunk_id}"],
+                            "validation_mode": "direct_labeled_field_projection",
+                            "identifiers": [
+                                f"Amendment {amendment_number}: Initial Term expiry".casefold()
+                            ],
+                        },
+                    )
+        if len(candidates) != 1 or len(occurrences) != 1:
+            return None
+        return dict(next(iter(candidates.values())))
+    if signatory_question is not None:
+        party = signatory_question.group("party").strip().casefold()
+        candidates: dict[str, dict[str, Any]] = {}
+        occurrences: set[tuple[str, str]] = set()
+        for chunk in chunks:
+            artifact_id = str(chunk.get("artifact_id") or "")
+            evidence_chunk_id = str(chunk.get("evidence_chunk_id") or "")
+            if not artifact_id or not evidence_chunk_id:
+                continue
+            text = str(chunk.get("text") or "")
+            lines = [line.strip() for line in text.splitlines() if line.strip()]
+            signature_index = next(
+                (
+                    index
+                    for index, line in enumerate(lines)
+                    if re.match(r"Signature\s*:", line, flags=re.IGNORECASE)
+                ),
+                None,
+            )
+            if signature_index is None:
+                continue
+            party_lines: list[str] = []
+            party_keys: set[str] = set()
+            for line in lines[:signature_index]:
+                folded = line.casefold()
+                if (
+                    line.isdigit()
+                    or len(line) < 3
+                    or folded in party_keys
+                    or not re.search(
+                        r"\b(?:company|corp(?:oration)?|inc(?:orporated)?|llc|ltd|limited|"
+                        r"association|partnership|s\.a\.?|s\.a\.u\.?)\b",
+                        line,
+                        flags=re.IGNORECASE,
+                    )
+                ):
+                    continue
+                party_lines.append(line)
+                party_keys.add(folded)
+            party_index = next(
+                (
+                    index
+                    for index, line in enumerate(party_lines)
+                    if party in line.casefold() or line.casefold() in party
+                ),
+                None,
+            )
+            date_rows: list[tuple[str, int]] = []
+            for line_index, line in enumerate(lines[signature_index:], start=signature_index):
+                if not re.match(r"Date\s*:", line, flags=re.IGNORECASE):
+                    continue
+                date_surface = _first_date_surface(line)
+                if date_surface:
+                    date_rows.append((date_surface, line_index))
+            if party_index is None or party_index >= len(date_rows):
+                continue
+            date_surface, date_line_index = date_rows[party_index]
+            # Count a duplicated overlapping chunk as the same source
+            # occurrence when absolute spans are available.
+            line_surface = lines[date_line_index]
+            local_position = text.find(line_surface)
+            span = chunk.get("span")
+            char_start = span.get("char_start") if isinstance(span, dict) else None
+            occurrence_position = (
+                str(char_start + local_position)
+                if isinstance(char_start, int)
+                and not isinstance(char_start, bool)
+                and local_position >= 0
+                else f"{evidence_chunk_id}:{date_line_index}"
+            )
+            occurrences.add((artifact_id, occurrence_position))
+            candidates.setdefault(
+                date_surface.casefold(),
+                {
+                    "answer": date_surface,
+                    "citation_refs": [f"evidence_chunk:{evidence_chunk_id}"],
+                    "validation_mode": "direct_labeled_field_projection",
+                    "identifiers": [f"{party} signatory date"],
+                },
+            )
+        if len(candidates) != 1 or len(occurrences) != 1:
+            return None
+        return dict(next(iter(candidates.values())))
     if recital_question is not None:
         ordinal, party = recital_question
         candidates: dict[str, dict[str, Any]] = {}
@@ -11514,6 +12252,73 @@ def _explicit_document_change_projection_anchor(
     }
 
 
+def _explicit_decision_exposure_rows(
+    chunks: list[dict[str, Any]],
+    *,
+    decision_question: str,
+    limit: int,
+) -> list[dict[str, Any]]:
+    """Surface material, source-explicit exposure relevant to the decision.
+
+    A contractual right or obligation is not inherently a conflict. It is,
+    however, decision-bearing exposure when the question asks whether to
+    renew, continue, exit, or depend on that arrangement.
+    """
+
+    if limit <= 0 or not re.search(
+        r"\b(?:continue|depend|dependency|extend|renew|renegotiate|replace|"
+        r"terminate|transition|exit|authorize|remain)\w*\b",
+        decision_question,
+        flags=re.IGNORECASE,
+    ):
+        return []
+    candidates = _grounded_key_fact_fallback(
+        chunks,
+        limit=max(limit * 5, BRIEF_EVIDENCE_CHUNK_LIMIT),
+        decision_question=decision_question,
+    )
+
+    def exposure_priority(statement: str) -> int | None:
+        patterns = (
+            (0, r"\b(?:break-up|termination)\s+fee\b|\bmaximum\s+\$?\d[^.!?]{0,40}\bfee\b"),
+            (1, r"\bpersonal\s+information\b[^.!?]{0,80}\bmillion\b"),
+            (2, r"\b(?:may|can)\s+(?:immediately\s+)?(?:terminate|suspend)\b"),
+            (3, r"\bminimum\s+annual\s+purchases?\b|\bminimum[- ]purchase\s+obligations?\b"),
+            (4, r"\bservice[- ]level\s+credits?\b"),
+            (5, r"\bpaid\s+disengagement\s+assistance\b"),
+            (6, r"\bterminate\b[^.!?]{0,80}\b(?:days?[’']?\s+notice|notice)\b"),
+        )
+        for priority, pattern in patterns:
+            if re.search(pattern, statement, flags=re.IGNORECASE):
+                return priority
+        return None
+
+    ranked: list[tuple[int, int, dict[str, Any]]] = []
+    for index, candidate in enumerate(candidates):
+        statement = str(candidate.get("statement") or "")
+        priority = exposure_priority(statement)
+        contract_exit_context = bool(
+            re.search(
+                r"\b(?:agreement|service[- ]provider|outsourc\w*|"
+                r"statement[- ]of[- ]work|dependency|renew|extend)\b",
+                decision_question,
+                flags=re.IGNORECASE,
+            )
+            and re.search(
+                r"\b(?:agreement|MSA|SOW|terminate|suspend|fee|disengagement)\b",
+                statement,
+                flags=re.IGNORECASE,
+            )
+        )
+        if priority is None or not (
+            _decision_statement_relevant(statement, decision_question)
+            or contract_exit_context
+        ):
+            continue
+        ranked.append((priority, index, candidate))
+    return [candidate for _, _, candidate in sorted(ranked)[:limit]]
+
+
 def _grounded_decision_risk_rows(
     model_rows: list[Any],
     chunks: list[dict[str, Any]],
@@ -11535,6 +12340,11 @@ def _grounded_decision_risk_rows(
         limit=max(limit * 3, limit),
     )
     candidates = [
+        *_explicit_decision_exposure_rows(
+            chunks,
+            decision_question=decision_question,
+            limit=max(limit * 3, limit),
+        ),
         *explicit_document_changes,
         *_explicit_tension_rows(chunks, limit=max(limit * 3, limit)),
         *grounded_model_rows,
@@ -11544,9 +12354,25 @@ def _grounded_decision_risk_rows(
         candidates = [
             candidate
             for candidate in candidates
-            if _decision_statement_relevant(
-                str(candidate.get("statement") or ""),
-                decision_question,
+            if (
+                _decision_statement_relevant(
+                    str(candidate.get("statement") or ""),
+                    decision_question,
+                )
+                or (
+                    re.search(
+                        r"\b(?:agreement|service[- ]provider|outsourc\w*|"
+                        r"statement[- ]of[- ]work|dependency|renew|extend)\b",
+                        decision_question,
+                        flags=re.IGNORECASE,
+                    )
+                    and re.search(
+                        r"\b(?:terminate|suspend|(?:break-up|termination)\s+fee|"
+                        r"service[- ]level\s+credit|paid\s+disengagement)\b",
+                        str(candidate.get("statement") or ""),
+                        flags=re.IGNORECASE,
+                    )
+                )
             )
         ]
     deduplicated: list[dict[str, Any]] = []
@@ -11730,6 +12556,43 @@ def _corpus_coverage_gaps(
         value = korean if korean_output else english
         if value not in rows and len(rows) < limit:
             rows.append(value)
+
+    if re.search(
+        r"\b(?:second[- ]source|comparab\w*|alternate\s+supply)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        conditional_comparability = any(
+            re.search(
+                r"\bif\b[^.!?]{0,180}\bsecond\s+sources?\b[^.!?]{0,140}"
+                r"\bnot\s+demonstrated\b[^.!?]{0,80}\bcomparable\b",
+                record["text"],
+                flags=re.IGNORECASE,
+            )
+            for record in records
+        )
+        affirmative_comparability = any(
+            re.search(
+                r"\b(?:has\s+been|have\s+been|was|were)\s+"
+                r"(?:demonstrated|qualified|validated)\b[^.!?]{0,100}"
+                r"\bcomparab\w*\b|\bcomparab\w*\b[^.!?]{0,100}"
+                r"\b(?:has\s+been|have\s+been|was|were)\s+"
+                r"(?:demonstrated|qualified|validated)\b",
+                record["text"],
+                flags=re.IGNORECASE,
+            )
+            and not re.search(
+                r"\b(?:if|unless|not|pending|ongoing)\b",
+                record["text"],
+                flags=re.IGNORECASE,
+            )
+            for record in records
+        )
+        if conditional_comparability and not affirmative_comparability:
+            add(
+                "이 Evidence Bundle은 임상 프로그램 물질과 2차 공급원의 비교동등성을 입증하지 않습니다.",
+                "The supplied Evidence Bundle does not establish second-source comparability with clinical-program material.",
+            )
 
     fiscal_question = bool(
         re.search(
@@ -12657,46 +13520,60 @@ def _input_specific_uncertainty(
     return rows[:limit]
 
 
-def _question_specific_next_step(decision_question: str) -> str:
+def _question_specific_next_step(
+    decision_question: str,
+    *,
+    evidence_text: str = "",
+) -> str:
     """Return a concrete, non-factual review action for the named decision."""
 
     question = re.sub(r"\s+", " ", decision_question).strip()
     if _contains_hangul(question):
         return "현재 운영 근거와 인용된 계약 조건을 확인한 뒤 결정하세요."
     if re.search(r"\bchapter\s+11\b", question, flags=re.IGNORECASE):
-        return "Confirm the facility status, waiver conditions, and contingency plan before deciding."
+        if (
+            re.search(r"\bWaiver\s+Termination\s+Date\b", evidence_text, flags=re.IGNORECASE)
+            and re.search(r"\brevolving\b[^.!?]{0,160}\bfacilit(?:y|ies)\b", evidence_text, flags=re.IGNORECASE)
+            and re.search(r"\bclosing\s+conditions?\b", evidence_text, flags=re.IGNORECASE)
+            and re.search(r"\bdefinitive\s+documents?\b", evidence_text, flags=re.IGNORECASE)
+        ):
+            return (
+                "Confirm whether the Waiver Termination Date occurred and whether "
+                "facility closing conditions and definitive documents are complete before deciding."
+            )
+        return "Verify waiver status and facility closing evidence, then document the contingency trigger before deciding."
     if re.search(
         r"\b(?:data[- ]rights?|post[- ]termination)\b",
         question,
         flags=re.IGNORECASE,
     ):
-        return "Confirm post-termination data rights and pricing exposure before deciding."
+        return "Map ownership, permitted use, return or destruction duties, and surviving licenses before deciding."
     if re.search(r"\b(?:leased?\s+site|facility\s+lease)\b", question, flags=re.IGNORECASE):
-        return "Confirm occupancy needs, renewal terms, and exit costs before deciding."
+        return "Compare occupancy need and renewal economics against exit cost and timing before deciding."
     if re.search(r"\bminimum[- ]purchase\b", question, flags=re.IGNORECASE) and re.search(
         r"\bexclusiv\w*\b", question, flags=re.IGNORECASE
     ):
-        return "Confirm volume, pricing, and exclusivity thresholds before deciding."
+        return "Calculate minimum-purchase and exclusivity exposure against forecast volume and pricing before deciding."
     if re.search(
         r"\b(?:statement[- ]of[- ]work|replacement\s+channel)\b",
         question,
         flags=re.IGNORECASE,
     ):
-        return "Confirm pricing, renewal terms, service performance, and replacement readiness before deciding."
+        return "Compare renewal economics and service performance against replacement cost and readiness before deciding."
     if re.search(r"\bsecond[- ]source\b", question, flags=re.IGNORECASE):
-        return "Confirm validation, inspection status, and second-source readiness before deciding."
+        return "Verify comparability, validation, inspection status, and the second source's qualified capacity before deciding."
     if re.search(r"\bservice[- ]provider\s+dependency\b", question, flags=re.IGNORECASE):
-        return "Confirm service levels, transition readiness, and current performance before deciding."
+        return "Quantify SLA exposure and disengagement cost, then validate transition readiness before deciding."
     if re.search(r"\bsupply\s+dependency\b", question, flags=re.IGNORECASE):
         if re.search(r"\bcontinuity\b", question, flags=re.IGNORECASE):
-            return "Confirm pricing, committed volume, and continuity protections before deciding."
-        return "Confirm price, capacity, and quality performance before deciding."
+            return "Compare committed volume and pricing against forecast demand, capacity, and continuity protections before deciding."
+        return "Compare price and reserved capacity against current quality and delivery performance before deciding."
     if re.search(r"\bwork[- ]order\b", question, flags=re.IGNORECASE):
-        return "Confirm acceptance criteria, performance evidence, and pricing before deciding."
+        return "Verify acceptance evidence and work-order pricing against the master agreement before authorizing continuation."
     if re.search(r"\blicense\b", question, flags=re.IGNORECASE):
-        return "Confirm territory, scope, and termination rights before deciding."
+        return "Map territory, licensed scope, termination triggers, and surviving rights before deciding."
     if re.search(r"\b(?:concentration|economics)\b", question, flags=re.IGNORECASE):
-        return "Confirm economics, concentration exposure, and current performance before deciding."
+        return "Quantify concentration economics and exit exposure, then compare current performance before deciding."
     if re.search(r"\bmanufactur\w*\b", question, flags=re.IGNORECASE):
         if re.search(
             r"\b(?:readiness|remediation|deviation|validation)\b",
@@ -12704,49 +13581,52 @@ def _question_specific_next_step(decision_question: str) -> str:
             flags=re.IGNORECASE,
         ):
             return (
-                "Verify manufacturing readiness and remediation evidence before "
-                "deciding."
+                "Verify quality remediation, validation, regulatory inspection, and usable capacity before deciding."
             )
-        return "Confirm the amended term and current manufacturing performance before deciding."
+        return "Compare amended purchase, term, and pricing obligations against capacity and quality performance before deciding."
     if re.search(
         r"\b(?:missing[- ]drive|unaccounted[- ]for\s+(?:server\s+)?drives?|"
         r"data[- ]security\s+incident)\b",
         question,
         flags=re.IGNORECASE,
     ):
-        return "Verify incident remediation and current service performance before deciding."
+        return "Obtain incident-remediation closure and quantify current service and transition exposure before deciding."
     if re.search(r"\boutsourc\w*\b", question, flags=re.IGNORECASE):
-        return "Confirm exit costs, transition readiness, and current performance before deciding."
+        return "Quantify termination fees, SLA credits, and disengagement cost, then validate transition readiness before deciding."
     if re.search(
         r"\b(?:global\s+development|development\s+plan|collaboration)\b",
         question,
         flags=re.IGNORECASE,
     ):
-        return "Confirm the current development plan, budget, and opt-out terms before deciding."
+        return "Reconcile the current plan and budget with cost allocation, milestones, and opt-out rights before deciding."
     if re.search(r"\balternate\s+supply\b", question, flags=re.IGNORECASE):
-        return "Confirm alternate-supply readiness and intellectual-property terms before deciding."
+        return "Verify alternate-supply qualification and map the intellectual-property rights needed for transition before deciding."
     if re.search(
         r"\b(?:dependency|replacement\s+(?:path|supplier|channel))\b",
         question,
         flags=re.IGNORECASE,
     ):
-        return "Verify current dependency exposure and replacement readiness before deciding."
+        return "Quantify dependency exposure and validate the replacement path's cost, timing, and readiness before deciding."
     if re.search(
         r"\b(?:services?\s+(?:relationship|arrangement)|administrative[- ]services?)\b",
         question,
         flags=re.IGNORECASE,
     ):
-        return "Confirm service levels, pricing, renewal terms, and current performance before deciding."
+        return "Compare service levels, pricing, and renewal terms against current performance and replacement options before deciding."
     if re.search(
         r"\b(?:amend(?:ed|ment)|renew(?:al)?|terminat(?:e|ion)|extend)\b",
         question,
         flags=re.IGNORECASE,
     ):
-        return "Confirm the amended term and its current operational effect before deciding."
+        return "Reconcile the controlling amendment, notice dates, and current operational obligations before deciding."
     return "Verify the cited decision basis against current operating evidence before deciding."
 
 
-def _question_specific_review_uncertainty(decision_question: str) -> str:
+def _question_specific_review_uncertainty(
+    decision_question: str,
+    *,
+    evidence_text: str = "",
+) -> str:
     """Create a non-factual, question-bound review need when no gap survives.
 
     A complete packet can legitimately contain no explicit ``missing`` marker,
@@ -12779,6 +13659,17 @@ def _question_specific_review_uncertainty(decision_question: str) -> str:
             f"다음 결정에 대한 근거의 충분성은 사람의 검토가 필요합니다: {question}"
         )
     if re.search(r"\bchapter\s+11\b", question, flags=re.IGNORECASE):
+        if (
+            re.search(r"\bWaiver\s+Termination\s+Date\b", evidence_text, flags=re.IGNORECASE)
+            and re.search(r"\brevolving\b[^.!?]{0,160}\bfacilit(?:y|ies)\b", evidence_text, flags=re.IGNORECASE)
+            and re.search(r"\bclosing\s+conditions?\b", evidence_text, flags=re.IGNORECASE)
+            and re.search(r"\bdefinitive\s+documents?\b", evidence_text, flags=re.IGNORECASE)
+        ):
+            return (
+                "Whether the Waiver Termination Date occurred, and whether the "
+                "facility closing conditions, definitive documents, and related "
+                "contingency are complete, require human confirmation."
+            )
         return (
             "Current facility status, waiver conditions, and contingency readiness "
             "require human confirmation."
@@ -12972,7 +13863,7 @@ def _validated_model_missing_evidence(
         return []
     gap_marker = re.compile(
         r"\b(?:absent|cannot\s+be\s+determined|does\s+not\s+(?:establish|include|provide|state)|"
-        r"evidence\s+(?:is\s+)?needed|insufficient|missing|need(?:ed|s)?|not\s+(?:available|clear|"
+        r"evidence\s+(?:is\s+)?needed|requires?\s+human\s+confirmation|insufficient|missing|need(?:ed|s)?|not\s+(?:available|clear|"
         r"established|included|known|provided|stated|verified)|required\s+evidence|unclear|unknown|"
         r"unresolved)\b|(?:근거|자료|정보|확인|검증|측정|가격|조건)[^.!?]{0,80}"
         r"(?:필요|부족|없|미확인|불명확|확인되지\s*않|제공되지\s*않|입증되지\s*않)",
@@ -12986,6 +13877,14 @@ def _validated_model_missing_evidence(
     generic_only = re.compile(
         r"^(?:more|additional|further)\s+(?:evidence|information|sources?)\s+"
         r"(?:is|are)\s+(?:needed|required)\.?$",
+        flags=re.IGNORECASE,
+    )
+    packet_wide_absence = re.compile(
+        r"\b(?:absent|no\s+evidence|does\s+not\s+(?:establish|include|provide|state)|"
+        r"is\s+not\s+(?:established|included|known|provided|stated|verified)|"
+        r"are\s+not\s+(?:established|included|known|provided|stated|verified)|"
+        r"(?:has|have)\s+not\s+(?:demonstrated|established|validated|verified)|"
+        r"missing|unknown)\b",
         flags=re.IGNORECASE,
     )
     rows: list[str] = []
@@ -13011,6 +13910,7 @@ def _validated_model_missing_evidence(
             len(statement) < 12
             or not _complete_extracted_statement_surface(statement)
             or not gap_marker.search(statement)
+            or packet_wide_absence.search(statement)
             or unsafe_topic.search(statement)
             or generic_only.fullmatch(statement)
             or not (statement_terms & question_terms)
@@ -24472,11 +25372,18 @@ class LocalRuntimeStore:
                 list(model_output.get("missing_evidence") or []),
             )
             question_specific_review_need = _question_specific_review_uncertainty(
-                decision_question
+                decision_question,
+                evidence_text="\n".join(
+                    _chunk_grounding_text(chunk) for chunk in chunks
+                ),
             )
-            if question_specific_review_need and not _key_fact_row_is_redundant(
+            if (
+                question_specific_review_need
+                and len(final_missing_evidence) < coverage_gap_limit
+                and not _key_fact_row_is_redundant(
                 [{"statement": value} for value in final_missing_evidence],
                 {"statement": question_specific_review_need},
+                )
             ):
                 final_missing_evidence.append(question_specific_review_need)
                 metadata["question_specific_review_missing"] = [

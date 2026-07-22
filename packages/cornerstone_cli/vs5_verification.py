@@ -180,64 +180,90 @@ def _run_advisory_judge(
 
     scores_by_id: dict[str, dict[str, Any]] = {}
     errors: list[str] = []
+    request_count = 0
+    retry_count = 0
     for start in range(0, len(cases), batch_size):
         batch = cases[start : start + batch_size]
-        batch_ids = {str(case.get("case_id") or "") for case in batch}
-        try:
-            output = _ollama_generate_json(
-                ollama_url,
-                model=generation_model,
-                prompt=_advisory_judge_prompt(batch),
-                json_schema=ADVISORY_JUDGE_JSON_SCHEMA,
-            )
-        except RuntimeError as error:
-            errors.append(f"batch_{start // batch_size + 1}: {error}")
-            continue
-        raw_scores = output.get("scores") if isinstance(output, dict) else None
-        if not isinstance(raw_scores, list):
-            errors.append(f"batch_{start // batch_size + 1}: missing_scores")
-            continue
-        for raw_score in raw_scores:
-            if not isinstance(raw_score, dict):
-                continue
-            case_id = str(raw_score.get("case_id") or "")
-            faithfulness = raw_score.get("faithfulness_score_1_to_5")
-            usefulness = raw_score.get("usefulness_score_1_to_5")
-            if (
-                case_id not in batch_ids
-                or case_id in scores_by_id
-                or not isinstance(faithfulness, int)
-                or isinstance(faithfulness, bool)
-                or not 1 <= faithfulness <= 5
-                or not isinstance(usefulness, int)
-                or isinstance(usefulness, bool)
-                or not 1 <= usefulness <= 5
-                or not _substantive_text(
-                    raw_score.get("faithfulness_concerns"),
-                    minimum_characters=4,
+        batch_by_id = {
+            str(case.get("case_id") or ""): case for case in batch
+        }
+        last_error = "missing_scores"
+        for attempt in range(2):
+            pending = [
+                case
+                for case_id, case in batch_by_id.items()
+                if case_id not in scores_by_id
+            ]
+            if not pending:
+                break
+            request_count += 1
+            if attempt:
+                retry_count += 1
+            try:
+                output = _ollama_generate_json(
+                    ollama_url,
+                    model=generation_model,
+                    prompt=_advisory_judge_prompt(pending),
+                    json_schema=ADVISORY_JUDGE_JSON_SCHEMA,
                 )
-                or not _substantive_text(
-                    raw_score.get("usefulness_rationale"),
-                    minimum_characters=4,
-                )
-            ):
+            except RuntimeError as error:
+                last_error = str(error)
                 continue
-            scores_by_id[case_id] = {
-                "case_id": case_id,
-                "brief_id": next(
-                    str(case.get("brief_id") or "")
-                    for case in batch
-                    if str(case.get("case_id") or "") == case_id
-                ),
-                "faithfulness_score_1_to_5": faithfulness,
-                "usefulness_score_1_to_5": usefulness,
-                "faithfulness_concerns": str(
-                    raw_score.get("faithfulness_concerns")
-                ).strip(),
-                "usefulness_rationale": str(
-                    raw_score.get("usefulness_rationale")
-                ).strip(),
+            raw_scores = output.get("scores") if isinstance(output, dict) else None
+            if not isinstance(raw_scores, list):
+                last_error = "missing_scores"
+                continue
+            accepted_before = len(scores_by_id)
+            pending_ids = {
+                str(case.get("case_id") or "") for case in pending
             }
+            for raw_score in raw_scores:
+                if not isinstance(raw_score, dict):
+                    continue
+                case_id = str(raw_score.get("case_id") or "")
+                faithfulness = raw_score.get("faithfulness_score_1_to_5")
+                usefulness = raw_score.get("usefulness_score_1_to_5")
+                if (
+                    case_id not in pending_ids
+                    or case_id in scores_by_id
+                    or not isinstance(faithfulness, int)
+                    or isinstance(faithfulness, bool)
+                    or not 1 <= faithfulness <= 5
+                    or not isinstance(usefulness, int)
+                    or isinstance(usefulness, bool)
+                    or not 1 <= usefulness <= 5
+                    or not _substantive_text(
+                        raw_score.get("faithfulness_concerns"),
+                        minimum_characters=4,
+                    )
+                    or not _substantive_text(
+                        raw_score.get("usefulness_rationale"),
+                        minimum_characters=4,
+                    )
+                ):
+                    continue
+                scores_by_id[case_id] = {
+                    "case_id": case_id,
+                    "brief_id": str(batch_by_id[case_id].get("brief_id") or ""),
+                    "faithfulness_score_1_to_5": faithfulness,
+                    "usefulness_score_1_to_5": usefulness,
+                    "faithfulness_concerns": str(
+                        raw_score.get("faithfulness_concerns")
+                    ).strip(),
+                    "usefulness_rationale": str(
+                        raw_score.get("usefulness_rationale")
+                    ).strip(),
+                }
+            if len(scores_by_id) == accepted_before:
+                last_error = "missing_scores"
+        missing_ids = [
+            case_id for case_id in batch_by_id if case_id not in scores_by_id
+        ]
+        if missing_ids:
+            errors.append(
+                f"batch_{start // batch_size + 1}: {last_error}; "
+                f"missing_case_ids={','.join(missing_ids)}"
+            )
 
     scores = [scores_by_id[case_id] for case_id in expected_ids if case_id in scores_by_id]
     faithfulness_distribution = Counter(
@@ -255,6 +281,8 @@ def _run_advisory_judge(
         "generation_model": generation_model,
         "expected_case_count": len(expected_ids),
         "scored_case_count": len(scores),
+        "request_count": request_count,
+        "retry_count": retry_count,
         "faithfulness_score_distribution": dict(sorted(faithfulness_distribution.items())),
         "usefulness_score_distribution": dict(sorted(usefulness_distribution.items())),
         "faithfulness_median": median(
@@ -1532,7 +1560,7 @@ def _missing_evidence_structure_passes(brief: dict[str, Any]) -> bool:
         for value in brief.get("missing_evidence") or []
         if str(value).strip()
     ]
-    if not 1 <= len(rows) <= 2 or len(set(rows)) != len(rows):
+    if not 1 <= len(rows) <= 3 or len(set(rows)) != len(rows):
         return False
     generic = re.compile(
         r"^(?:more|additional|further)\s+(?:evidence|information|sources?)\s+"

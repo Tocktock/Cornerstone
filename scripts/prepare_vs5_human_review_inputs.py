@@ -18,6 +18,11 @@ from cornerstone_cli.vs5_corpus import (  # noqa: E402
     load_vs5_corpus,
     validate_vs5_corpus_freeze,
 )
+from cornerstone_cli.vs5_verification import (  # noqa: E402
+    _pipeline_sha256,
+    _runtime_state_binding,
+    _verification_contract_binding,
+)
 
 
 REPORT_PATH = ROOT / "reports/scenario/vs5-citation-grounded-brief-2026-07-12.json"
@@ -117,6 +122,38 @@ def _selected_records(
     review_case_ids: tuple[str, ...],
 ) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, dict[str, dict[str, Any]]]]:
     report = _load(REPORT_PATH)
+    model_stack = report.get("model_stack")
+    if not isinstance(model_stack, dict):
+        raise ValueError("The VS5 report has no model-stack binding.")
+    if model_stack.get("pipeline_sha256") != _pipeline_sha256(ROOT):
+        raise ValueError(
+            "The VS5 report is stale for the current generation pipeline; "
+            "run a fresh canonical Ollama verification before preparing human review."
+        )
+    if report.get("verification_contract_binding") != _verification_contract_binding(ROOT):
+        raise ValueError(
+            "The VS5 report is stale for the current verification contract; "
+            "run a fresh canonical Ollama verification before preparing human review."
+        )
+    if report.get("runtime_state_binding") != _runtime_state_binding(STATE_DIR):
+        raise ValueError(
+            "The VS5 runtime state no longer matches the canonical report; "
+            "run a fresh canonical Ollama verification before preparing human review."
+        )
+    automated_failures = [
+        str(row.get("id") or "")
+        for row in report.get("scenario_results", [])
+        if isinstance(row, dict)
+        and (
+            str(row.get("status") or "") == "FAIL"
+            or str(row.get("automated_status") or "") == "FAIL"
+        )
+    ]
+    if automated_failures:
+        raise ValueError(
+            "The VS5 report still has automated failures and is not ready for "
+            f"human review: {', '.join(automated_failures)}"
+        )
     report_corpus = report.get("corpus")
     if not isinstance(report_corpus, dict):
         raise ValueError("The VS5 report has no corpus binding.")
@@ -649,7 +686,10 @@ def main() -> int:
         if stale:
             print("STALE: " + ", ".join(str(path.relative_to(ROOT)) for path in stale))
             return 1
-        print("PASS: VS5 human-review inputs match the current report and runtime records.")
+        print(
+            "PASS: VS5 human-review inputs match the current pipeline, verification "
+            "contract, report, and runtime records."
+        )
         return 0
     for path, content in expected.items():
         path.write_text(content)
