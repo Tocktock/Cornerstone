@@ -1452,6 +1452,78 @@ def _select_evidence_chunks(
         if facet_coverage(best, terms) > selected_coverage:
             add(best)
 
+    # A high-scoring legal window can end in the middle of the exact clause
+    # that made it relevant (for example, ``terminate ... for any``). Prefer
+    # its overlapping continuation before generic relevance backfill so a
+    # material notice, cure, or transition condition is not cut off.
+    if allow_boundary_overlap_backfill:
+        if not selected:
+            add(ranked_chunks[0])
+        boundary_candidates: list[dict[str, Any]] = []
+        for existing in list(selected):
+            text = re.sub(r"\s+", " ", str(existing.get("text") or "")).strip()
+            if not (
+                re.search(
+                    r"\b(?:terminat\w*|non[- ]renew\w*|notice|cure|transition|option|"
+                    r"price|fee|must|shall)\b[^.!?;]{0,260}?"
+                    r"\b(?:a|an|and|any|at|before|by|for|from|if|including|of|on|"
+                    r"or|other|such|the|to|under|unless|upon|with|within)\s*$",
+                    text,
+                    flags=re.IGNORECASE,
+                )
+            ):
+                continue
+            span = existing.get("span") or {}
+            existing_end = int(span.get("char_end", 0))
+            continuations = [
+                chunk
+                for chunk in by_source.get(str(existing.get("artifact_id") or ""), [])
+                if str(chunk.get("evidence_chunk_id") or "") not in selected_ids
+                and int((chunk.get("span") or {}).get("char_start", existing_end))
+                < existing_end
+                < int((chunk.get("span") or {}).get("char_end", existing_end))
+                and 0
+                < existing_end
+                - int((chunk.get("span") or {}).get("char_start", existing_end))
+                <= EVIDENCE_CHUNK_OVERLAP_CHARS * 2
+            ]
+            if continuations:
+                boundary_candidates.append(
+                    max(
+                        continuations,
+                        key=lambda chunk: (
+                            int((chunk.get("span") or {}).get("char_end", 0)),
+                            float(chunk.get("score", 0)),
+                        ),
+                    )
+                )
+        for candidate in boundary_candidates:
+            if len(selected) >= limit:
+                source_counts = {
+                    artifact_id: sum(
+                        row.get("artifact_id") == artifact_id for row in selected
+                    )
+                    for artifact_id in by_source
+                }
+                replaceable = [
+                    row
+                    for row in selected
+                    if source_counts.get(str(row.get("artifact_id") or ""), 0)
+                    > max(1, per_source_target)
+                ]
+                if not replaceable:
+                    break
+                victim = min(
+                    replaceable,
+                    key=lambda row: (
+                        float(row.get("score", 0)),
+                        rank[str(row.get("evidence_chunk_id") or "")],
+                    ),
+                )
+                selected.remove(victim)
+                selected_ids.discard(str(victim.get("evidence_chunk_id") or ""))
+            add(candidate)
+
     for chunk in ranked_chunks:
         if len(selected) >= limit:
             break
@@ -1471,6 +1543,70 @@ def _select_evidence_chunks(
         if len(selected) >= limit:
             break
         add(chunk, enforce_source_cap=False)
+
+    # Some low-ranked but decision-bearing windows enter only during the final
+    # backfill above. Give those windows the same clause-completion treatment,
+    # replacing surplus source coverage rather than expanding the prompt.
+    if allow_boundary_overlap_backfill:
+        for existing in list(selected):
+            text = re.sub(r"\s+", " ", str(existing.get("text") or "")).strip()
+            if not re.search(
+                r"\b(?:terminat\w*|non[- ]renew\w*|notice|cure|transition|option|"
+                r"price|fee|must|shall)\b[^.!?;]{0,260}?"
+                r"\b(?:a|an|and|any|at|before|by|for|from|if|including|of|on|"
+                r"or|other|such|the|to|under|unless|upon|with|within)\s*$",
+                text,
+                flags=re.IGNORECASE,
+            ):
+                continue
+            existing_end = int((existing.get("span") or {}).get("char_end", 0))
+            continuations = [
+                chunk
+                for chunk in by_source.get(str(existing.get("artifact_id") or ""), [])
+                if str(chunk.get("evidence_chunk_id") or "") not in selected_ids
+                and int((chunk.get("span") or {}).get("char_start", existing_end))
+                < existing_end
+                < int((chunk.get("span") or {}).get("char_end", existing_end))
+                and 0
+                < existing_end
+                - int((chunk.get("span") or {}).get("char_start", existing_end))
+                <= EVIDENCE_CHUNK_OVERLAP_CHARS * 2
+            ]
+            if not continuations:
+                continue
+            continuation = max(
+                continuations,
+                key=lambda chunk: (
+                    int((chunk.get("span") or {}).get("char_end", 0)),
+                    float(chunk.get("score", 0)),
+                ),
+            )
+            if len(selected) >= limit:
+                source_counts = {
+                    artifact_id: sum(
+                        row.get("artifact_id") == artifact_id for row in selected
+                    )
+                    for artifact_id in by_source
+                }
+                replaceable = [
+                    row
+                    for row in selected
+                    if row is not existing
+                    and source_counts.get(str(row.get("artifact_id") or ""), 0)
+                    > per_source_target
+                ]
+                if not replaceable:
+                    continue
+                victim = min(
+                    replaceable,
+                    key=lambda row: (
+                        float(row.get("score", 0)),
+                        rank[str(row.get("evidence_chunk_id") or "")],
+                    ),
+                )
+                selected.remove(victim)
+                selected_ids.discard(str(victim.get("evidence_chunk_id") or ""))
+            add(continuation, enforce_source_cap=False)
 
     return sorted(
         selected,
@@ -5640,9 +5776,23 @@ def _chunk_has_different_named_agreement(
     text = _prompt_evidence_text(chunk)
     if any(re.search(rf"\b{re.escape(entity)}\b", text, re.I) for entity in question_entities):
         return False
-    return bool(
-        re.search(
-            r"\b[A-Z][A-Za-z0-9&.'-]{2,40}(?:\s+[A-Z][A-Za-z0-9&.'-]{2,40})?\s+"
+    generic_names = {
+        "development",
+        "license",
+        "manufacturing",
+        "master",
+        "product",
+        "service",
+        "services",
+        "supply",
+        "the",
+        "this",
+    }
+    return any(
+        any(token.casefold() not in generic_names for token in match.group("name").split())
+        for match in re.finditer(
+            r"\b(?P<name>[A-Z][A-Za-z0-9&.'-]{2,40}"
+            r"(?:\s+[A-Z][A-Za-z0-9&.'-]{2,40})?)\s+"
             r"(?:Master\s+Services?|Services?|Supply|Manufacturing|License|Development)?\s*Agreement\b",
             text,
         )
@@ -5796,7 +5946,7 @@ def _grounded_key_fact_fallback(
             )
             if conditional_exit:
                 add_host_projection(
-                    "Subject to applicable minimum-purchase and open-Schedule obligations, "
+                    "Subject to minimum purchases and provisions in open Schedules or their amendments, "
                     f"{convenience_termination.group('actor')} may terminate the Agreement "
                     "or any Schedule without cause on five days' written notice."
                 )
@@ -5814,6 +5964,147 @@ def _grounded_key_fact_fallback(
         ):
             add_host_projection(
                 "Terminating a Schedule does not terminate the Agreement unless the notice specifically says so."
+            )
+
+        bilateral_notice_exit = re.search(
+            r"\bEither\s+[Pp]arty\s+may\s+terminate\s+(?:this\s+)?Agreement\s+"
+            r"(?:at\s+any\s+time,?\s+)?(?:for\s+any\s+reason,?\s+)?"
+            r"(?:by\s+giving|upon)\s+(?:the\s+other\s+[Pp]arty\s+)?at\s+least\s+"
+            r"(?P<word>\w+)\s*\(\s*(?P<days>\d+)\s*\)\s+days?[’']?\s+"
+            r"prior\s+written\s+notice",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if bilateral_notice_exit is not None:
+            add_host_projection(
+                f"At least {bilateral_notice_exit.group('days')} days' prior written "
+                "notice lets either party terminate the Agreement for any reason."
+            )
+        option_notice_exit = re.search(
+            r"\bat\s+the\s+option\s+of\s+either\s+party\s+at\s+any\s+time\s+"
+            r"for\s+any\s+reason\b.{0,260}?\bnotice\s+to\s+be\s+given\s+at\s+"
+            r"least\s+(?P<word>\w+)\s*\(\s*(?P<days>\d+)\s*\)\s+days?\s+"
+            r"prior\s+to\s+the\s+specified\s+termination\s+date",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if option_notice_exit is not None:
+            add_host_projection(
+                "At the option of either party, the Agreement may be terminated at "
+                f"any time for any reason with at least {option_notice_exit.group('days')} "
+                "days' prior written notice."
+            )
+
+        transition_assistance = re.search(
+            r"\bcommencing\s+upon\s+any\s+notice\s+of\s+termination\b"
+            r".{0,320}?\bnon\s*[- ]\s*renewal\s+of\s+the\s+Agreement\s+or\s+applicable\s+"
+            r"Statement\s+of\s+Work\b.{0,520}?\bSupplier\s+shall\s+at\s+"
+            r"Company[’']s\s+request\b.{0,420}?\bfacilitate\s+Company[’']s\s+"
+            r"transition\b.{0,260}?\bprovide\s+reasonable\s+assistance\b",
+            prompt_text,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+        if transition_assistance is not None:
+            add_host_projection(
+                "Except for Company's material-breach termination notice, Supplier shall "
+                "at Company's request continue Services and provide reasonable transition "
+                "assistance upon termination or non-renewal notice."
+            )
+
+        economic_viability_exit = all(
+            re.search(pattern, prompt_text, flags=re.IGNORECASE)
+            for pattern in (
+                r"\btotal\s+net\s+profits\b.{0,120}?\bZTlido\b.{0,80}?\bSP-103\b"
+                r".{0,180}?\bequal\s+to\s+or\s+less\s+than\s+five\s+percent\b",
+                r"\bfour\s+(?:\(\s*4\s*\)\s+)?or\s+more\s+consecutive\s+quarters\b",
+                r"\bOishi\s+and\s+Itochu\s+have\s+the\s+right\s+to\s+terminate\b"
+                r".{0,160}?\bProduct\s+Development\s+Agreement\b.{0,80}?"
+                r"\bCommercial\s+Supply\s+Agreement\b",
+            )
+        )
+        if economic_viability_exit:
+            add_host_projection(
+                "Oishi and Itochu may terminate both agreements if ZTlido and SP-103 "
+                "net profits are equal to or less than five percent of net sales for "
+                "four or more consecutive quarters."
+            )
+
+        tulex_breach_exit = re.search(
+            r"\bTulex\s+has\s+the\s+right\s+to\s+terminate\s+the\s+Tulex\s+"
+            r"Master\s+Services\s+Agreement\b.{0,320}?\bmaterial\s+breach\s+of\s+"
+            r"the\s+agreement\s+or\s+a\s+statement\s+of\s+work\b.{0,180}?\bfail\s+"
+            r"to\s+cure\s+such\s+breach\s+within\s+(?P<days>\d+)\s+days\s+after\s+"
+            r"receipt\s+of\s+notice\b.{0,180}?\bother\s+time\s+period\s+expressly\s+"
+            r"stated\s+in\s+the\s+applicable\s+statement\s+of\s+work",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if tulex_breach_exit is not None:
+            add_host_projection(
+                "Tulex may terminate for an uncured material breach after "
+                f"{tulex_breach_exit.group('days')} days' notice, unless the SOW states another cure period."
+            )
+        tulex_customer_exit = re.search(
+            r"\bwe\s+may\s+terminate\s+the\s+agreement\s+or\s+any\s+statement\s+"
+            r"of\s+work\b.{0,160}?\bwithout\s+cause\s+upon\s+(?P<days>\d+)\s+"
+            r"days\s+prior\s+written\s+notice\s+to\s+Tulex\b.{0,180}?\bimmediately\s+"
+            r"upon\s+written\s+notice\s+in\s+the\s+event\s+Tulex\s+is\s+dissolved\s+"
+            r"or\s+undergoes\s+a\s+change\s+in\s+control",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if tulex_customer_exit is not None:
+            add_host_projection(
+                f"Scilex may terminate without cause on {tulex_customer_exit.group('days')} days' "
+                "notice or immediately after Tulex dissolution or change of control."
+            )
+
+        separate_fee_timing = re.search(
+            r"\b(?:(?P<invoiced>invoices\s+for\s+\[\*\*\]%\s+of\s+all\s+fees\s+"
+            r"upfront)|(?P<payable>all\s+fees\s+are\s+payable\s+\[\*\*\]%\s+upfront))\s+upon\s+"
+            r"initiation\b.{0,220}?\bremaining\s+\[\*\*\]%\s+(?:payable\s+)?upon\s+completion\b"
+            r".{0,260}?\ball\s+pass-through\s+costs\b.{0,180}?\bupon\s+order\s+"
+            r"placement\b.{0,220}?\bremaining\s+\[\*\*\]%\s+(?:to\s+be\s+invoiced|payable)\s+"
+            r"upon\s+Service\s+Provider[’']s\s+receipt",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if separate_fee_timing is not None:
+            fee_state = (
+                "are invoiced"
+                if separate_fee_timing.group("invoiced")
+                else "are payable"
+            )
+            add_host_projection(
+                f"Fees {fee_state} at activity initiation and completion; pass-through "
+                "costs at material order placement and receipt."
+            )
+
+        work_order_capacity = re.search(
+            r"\bCAPACITY\s+COMMITMENT\s+OF\s+(?P<scope>COVID-19\s+VACCINE\s+"
+            r"DRUG\s+SUBSTANCE\s+MANUFACTURING),\s+which\s+is\s+designated\s+"
+            r"Work\s+Order\s+#(?P<number>\d+)",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if work_order_capacity is not None:
+            add_host_projection(
+                f"Work Order #{work_order_capacity.group('number')} covers a capacity "
+                "commitment for COVID-19 vaccine drug-substance manufacturing."
+            )
+
+        additional_government_requirements = re.search(
+            r"\b(?P<actor>AstraZeneca)(?:[’']s|\s+further\s+understands\s+that\s+its)?\s+"
+            r"performance\s+(?:under|of\s+services\s+under)\s+"
+            r"this\s+Agreement\s+(?:may|will)\s+be\s+subject\s+to\s+certain\s+"
+            r"additional\s+government\s+requirements\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if additional_government_requirements is not None:
+            add_host_projection(
+                "Additional government requirements may apply to AstraZeneca's "
+                "performance under the Agreement."
             )
 
         annual_purchase_commitment = re.search(
@@ -6794,6 +7085,16 @@ def _complete_extracted_statement_surface(text: str) -> bool:
         return False
     if re.match(r"^\d+\s*[-–—]\s*\d+\s+(?:shall|must|may|will)\b", statement):
         return False
+    if re.match(
+        r"^\d+(?:\.\d+)*\s+(?:Effective\s+Date|Amendment\s+Effective\s+Date|"
+        r"Date|by\s+(?:its|their)|under\s+the|pursuant\s+to)\b",
+        statement,
+        flags=re.IGNORECASE,
+    ):
+        # OCR/page-boundary tails such as ``2 Effective Date by their
+        # respective duly authorized representatives`` contain verb-like words
+        # but no finite subject-predicate proposition.
+        return False
     if re.fullmatch(
         r"(?:Effect|Effects|Scope|Purpose|Background|Overview|Summary)\s+of\s+"
         r"[^.!?]{2,100}",
@@ -6897,6 +7198,156 @@ def _model_statement_source_semantics_supported(
         and not re.search(r"\bworldwide\b", combined, re.I)
     ):
         return False
+
+    # Lexical anchoring can accept a broad termination right after the model
+    # silently drops its operative notice/cure period or a nearby condition.
+    # Compare the statement with the most similar source clause that describes
+    # the same right. This remains deliberately narrow: it only applies to
+    # termination, cancellation, suspension, and non-renewal surfaces.
+    right_match = re.search(
+        r"\b(?:cancel|non[- ]renew|suspend|terminate|termination)\w*\b",
+        statement,
+        flags=re.IGNORECASE,
+    )
+    if right_match is not None:
+        statement_terms = _expanded_claim_support_terms(statement)
+        source_clauses = [
+            clause.strip()
+            for clause in re.split(r"(?<=[.!?])\s+|\n{2,}", combined)
+            if re.search(
+                r"\b(?:cancel|non[- ]renew|suspend|terminate|termination)\w*\b",
+                clause,
+                flags=re.IGNORECASE,
+            )
+        ]
+        ranked_clauses = sorted(
+            source_clauses,
+            key=lambda clause: -len(
+                statement_terms & _expanded_claim_support_terms(clause)
+            ),
+        )
+        if ranked_clauses:
+            source_clause = ranked_clauses[0]
+            shared_terms = statement_terms & _expanded_claim_support_terms(
+                source_clause
+            )
+            if len(shared_terms) >= 3:
+                material_kinds = {"currency", "duration", "percent"}
+                source_scalars = {
+                    scalar
+                    for scalar in _answer_scalar_values(source_clause)
+                    if scalar[0] in material_kinds
+                }
+                statement_scalars = {
+                    scalar
+                    for scalar in _answer_scalar_values(statement)
+                    if scalar[0] in material_kinds
+                }
+                if not source_scalars <= statement_scalars:
+                    return False
+
+                def operative_periods(value: str) -> set[tuple[str, str]]:
+                    periods: set[tuple[str, str]] = set()
+                    for period_match in re.finditer(
+                        rf"\b(?P<word>{_SCALAR_NUMBER}|[A-Za-z-]+(?=\s*\(\s*\d+\s*\)))"
+                        r"(?:\s*\(\s*(?P<number>\d+)\s*\))?\s*"
+                        r"(?P<unit>days?|weeks?|months?|years?)\b"
+                        r"(?P<context>.{0,80}\b(?:notice|cure|dismissed|termination|non[- ]renewal)\b)",
+                        value,
+                        flags=re.IGNORECASE,
+                    ):
+                        number = period_match.group("number") or period_match.group("word")
+                        number = _SCALAR_NUMBER_WORDS.get(
+                            number.casefold(), number.replace(",", "")
+                        )
+                        periods.add(
+                            (number, period_match.group("unit").casefold().rstrip("s"))
+                        )
+                    return periods
+
+                if not operative_periods(source_clause) <= operative_periods(statement):
+                    return False
+
+                source_start = combined.find(source_clause)
+                nearby_source = (
+                    combined[max(0, source_start - 500) : source_start + len(source_clause)]
+                    if source_start >= 0
+                    else source_clause
+                )
+                nearby_condition = re.search(
+                    r"\bsubject\s+to\b(?P<condition>.{1,500}?)"
+                    r"(?=\b[A-Z][A-Za-z0-9&.'-]{1,40}\s+may\s+terminate\b|$)",
+                    nearby_source,
+                    flags=re.IGNORECASE | re.DOTALL,
+                )
+                if nearby_condition is not None:
+                    condition_text = nearby_condition.group("condition")
+                    condition_terms = _expanded_claim_support_terms(condition_text) - {
+                        "agreement",
+                        "applicable",
+                        "condition",
+                        "continued",
+                        "party",
+                        "subject",
+                    }
+                    if (
+                        len(condition_terms) >= 2
+                        and len(condition_terms & statement_terms) < 2
+                    ):
+                        return False
+                    condition_facets = (
+                        (r"\bminimum[- ]purchases?\b", r"\bminimum[- ]purchases?\b"),
+                        (r"\bopen\s+Schedules?\b", r"\bopen[- ]Schedules?\b"),
+                        (r"\bamendment\s+thereto\b", r"\bamend\w*\b"),
+                    )
+                    source_facets = [
+                        statement_pattern
+                        for source_pattern, statement_pattern in condition_facets
+                        if re.search(source_pattern, condition_text, flags=re.IGNORECASE)
+                    ]
+                    if len(source_facets) >= 2 and any(
+                        re.search(pattern, statement, flags=re.IGNORECASE) is None
+                        for pattern in source_facets
+                    ):
+                        return False
+
+    if (
+        re.search(r"\bfees?\s+and\s+(?:pass[- ]through\s+)?costs?\b", statement, re.I)
+        and re.search(
+            r"\bfees?\b.{0,240}\b(?:initiation|commencement)\b.{0,180}\bcompletion\b",
+            combined,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+        and re.search(
+            r"\b(?:pass[- ]through\s+)?costs?\b.{0,240}\b(?:order|ordering)\b"
+            r".{0,180}\breceipt\b",
+            combined,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+        and not (
+            re.search(r"\b(?:order|ordering)\b", statement, re.I)
+            and re.search(r"\breceipt\b", statement, re.I)
+        )
+    ):
+        # Fees and pass-through costs can have different invoice triggers. A
+        # single joined schedule materially changes cash-flow timing.
+        return False
+
+    if re.search(r"\b(?:both\s+parties|by\s+both|both\b.{0,60}\band\b)\b", statement, re.I) and re.search(
+        r"\b(?:executed|signed)\b",
+        statement,
+        flags=re.IGNORECASE,
+    ):
+        statement_dates = {
+            value for kind, value in _answer_scalar_values(statement) if kind == "date"
+        }
+        source_dates = {
+            value for kind, value in _answer_scalar_values(combined) if kind == "date"
+        }
+        if statement_dates and len(source_dates) > 1 and not source_dates <= statement_dates:
+            # One effective date cannot be promoted into a shared execution
+            # date when the signature block records different party dates.
+            return False
 
     locator_matches = list(
         re.finditer(
@@ -7186,29 +7637,29 @@ def _select_grounded_bottom_line(
     def hold_pending_review(row: dict[str, Any]) -> dict[str, Any]:
         """Turn one cited basis into a concise, non-factual decision condition."""
 
-        action = _question_specific_next_step(
+        review_need = _question_specific_review_uncertainty(
             decision_question,
             evidence_text="\n".join(
                 _chunk_grounding_text(chunk) for chunk in chunk_by_ref.values()
             ),
         ).strip()
-        action_match = re.match(
-            r"^(?P<verb>Confirm|Verify|Review)\s+(?P<object>.+?)\s+before\s+deciding\.?$",
-            action,
+        current_need = re.match(
+            r"^Current\s+(?P<object>.+?)\s+require(?:s)?\s+human\s+confirmation\.?$",
+            review_need,
             flags=re.IGNORECASE,
         )
-        if action_match is None:
-            statement = f"{hold_prefix}: {action}".rstrip()
-        else:
-            noun = {
-                "confirm": "confirmation",
-                "verify": "verification",
-                "review": "review",
-            }[action_match.group("verb").casefold()]
+        if korean_output:
+            statement = "보류: 제공된 근거만으로는 결정을 확정할 수 없습니다."
+        elif current_need is not None:
             statement = (
-                f"{hold_prefix} pending {noun} of "
-                f"{action_match.group('object').rstrip('.')} ."
-            ).replace(" .", ".")
+                "Hold: supplied evidence does not establish current "
+                f"{current_need.group('object').rstrip('.')}."
+            )
+        else:
+            statement = (
+                "Hold: supplied evidence does not yet establish the decision; "
+                "review the cited basis and missing evidence."
+            )
         basis_statement = str(row.get("statement") or "").strip()
         combined_statement = f"{statement} Basis: {basis_statement}"
         if len(combined_statement) <= 240:
@@ -8396,6 +8847,14 @@ def _repair_grounded_recommendations(
             decision_question,
         )
     ]
+    portfolio_review_question = bool(
+        re.search(
+            r"\b(?:concentration|economics|global\s+development|"
+            r"development\s+plan|collaboration)\b",
+            decision_question,
+            flags=re.IGNORECASE,
+        )
+    )
 
     def grounded_proposal_from_basis(
         basis: dict[str, Any],
@@ -8448,6 +8907,29 @@ def _repair_grounded_recommendations(
                 "Verify the second source's readiness before deciding.",
             )
 
+    if portfolio_review_question:
+        # A specialized document-change validator may conservatively reject a
+        # conflict row even when an ordinary cited fact remains usable. Do not
+        # let that one row suppress a concrete portfolio-review action.
+        for basis in [
+            *_rank_decision_rows(conflict_rows),
+            *_rank_decision_rows(key_fact_rows),
+        ]:
+            if _decision_basis_usable(
+                str(basis.get("statement") or ""),
+                decision_question,
+            ) and grounded(basis):
+                return grounded_proposal_from_basis(
+                    basis,
+                    _question_specific_next_step(
+                        decision_question,
+                        evidence_text="\n".join(
+                            _chunk_grounding_text(chunk)
+                            for chunk in chunk_by_ref.values()
+                        ),
+                    ),
+                )
+
     for basis in bases:
         basis_statement = str(basis.get("statement") or "")
         question_bound_next_step = _question_specific_next_step(
@@ -8463,7 +8945,10 @@ def _repair_grounded_recommendations(
         if (
             specific_question_bound_step
             and grounded(basis)
-            and _decision_statement_relevant(basis_statement, decision_question)
+            and (
+                portfolio_review_question
+                or _decision_statement_relevant(basis_statement, decision_question)
+            )
         ):
             return grounded_proposal_from_basis(
                 basis,
@@ -12961,6 +13446,123 @@ def _grounded_decision_risk_rows(
     return result
 
 
+_AGREEMENT_CHAIN_DATE = (
+    rf"(?:{_SCALAR_MONTHS})\s+\d{{1,2}},\s*\d{{4}}"
+)
+
+
+def _agreement_chain_ambiguity(
+    source_records: list[dict[str, Any]],
+    decision_question: str,
+) -> dict[str, Any] | None:
+    """Detect multiple same-party master-agreement chains in one decision packet.
+
+    Different counterparties are already fenced during retrieval. The harder
+    failure is two instruments between substantially the same parties: isolated
+    clauses can each be accurate while their combination is decision-dangerous.
+    This guard uses full derived source text, not retrieval windows, and returns
+    an honest draft instruction instead of guessing which chain controls.
+    """
+
+    if not re.search(
+        r"\b(?:master\s+services?|services?\s+(?:agreement|arrangement|relationship)|"
+        r"amend(?:ed|ment|ments)?)\b",
+        decision_question,
+        flags=re.IGNORECASE,
+    ):
+        return None
+    question_entities = _question_named_entities(decision_question)
+    patterns = (
+        re.compile(
+            rf"\bmaster\s+services(?:\s+and\s+collaboration)?\s+agreement\b"
+            rf".{{0,220}}?\b(?:effective\s+as\s+of|effective\s+date\s+of|dated\s+as\s+of)\s+"
+            rf"(?P<date>{_AGREEMENT_CHAIN_DATE})",
+            flags=re.IGNORECASE | re.DOTALL,
+        ),
+        re.compile(
+            rf"\bentered\s+into\s+(?:a|the)\s+master\s+services\s+agreement\b"
+            rf".{{0,120}}?\b(?:effective\s+as\s+of|with\s+an?\s+effective\s+date\s+of|dated\s+as\s+of)\s+"
+            rf"(?P<date>{_AGREEMENT_CHAIN_DATE})",
+            flags=re.IGNORECASE | re.DOTALL,
+        ),
+    )
+    dates: dict[str, set[str]] = {}
+    for record in source_records:
+        text = str(record.get("text") or "")
+        if not text.strip():
+            continue
+        if question_entities and not any(
+            re.search(rf"\b{re.escape(entity)}\b", text, flags=re.IGNORECASE)
+            for entity in question_entities
+        ):
+            continue
+        source_ref = str(
+            ((record.get("source") or {}).get("ref") if isinstance(record.get("source"), dict) else "")
+            or record.get("artifact_ref")
+            or "unknown-source"
+        )
+        for pattern in patterns:
+            for match in pattern.finditer(text):
+                local_context = text[
+                    max(0, match.start() - 260) : min(len(text), match.end() + 260)
+                ]
+                if question_entities and not any(
+                    re.search(
+                        rf"\b{re.escape(entity)}\b",
+                        local_context,
+                        flags=re.IGNORECASE,
+                    )
+                    for entity in question_entities
+                ):
+                    # A mixed SEC filing can mention the question entity in
+                    # one exhibit and unrelated master agreements elsewhere.
+                    # Only a locally bound party mention can authorize the
+                    # agreement-chain safety guard.
+                    continue
+                prefix = text[max(0, match.start() - 100) : match.start()]
+                if re.search(
+                    r"\bAmendment(?:\s+No\.?\s*\d+)?\s+to\s+(?:the\s+)?$",
+                    prefix,
+                    flags=re.IGNORECASE,
+                ):
+                    # This is the amendment's own effective date, not a new
+                    # base Master Services Agreement chain.
+                    continue
+                date = re.sub(r"\s+", " ", match.group("date")).strip().title()
+                dates.setdefault(date, set()).add(source_ref)
+    if len(dates) < 2:
+        return None
+
+    ordered_dates = sorted(
+        dates,
+        key=lambda value: (
+            int(re.search(r"\b(\d{4})\b", value).group(1))
+            if re.search(r"\b(\d{4})\b", value)
+            else 0,
+            value,
+        ),
+    )
+    date_surface = " or ".join(ordered_dates[:2])
+    return {
+        "dates": ordered_dates,
+        "source_refs_by_date": {
+            date: sorted(dates[date]) for date in ordered_dates
+        },
+        "missing_evidence": (
+            "Which Master Services Agreement controls—the "
+            f"{date_surface} chain—is not established."
+        ),
+        "bottom_line": (
+            "Hold: identify the controlling Master Services Agreement before "
+            "combining amendment, term, or termination clauses."
+        ),
+        "recommended_next_step": (
+            "Match each amendment to its agreement effective date, then evaluate "
+            "only the controlling chain."
+        ),
+    }
+
+
 def _corpus_coverage_gaps(
     source_records: list[dict[str, Any]],
     decision_question: str,
@@ -14121,25 +14723,25 @@ def _question_specific_next_step(
         flags=re.IGNORECASE,
     ):
         return (
-            "Set service, renewal-cost, and replacement-readiness thresholds; "
-            "continue only if current performance clears them."
+            "Obtain the current SOW, latest SLA report, renewal pricing, and transition "
+            "plan; compare them with the cited contract terms."
         )
     if re.search(r"\bsecond[- ]source\b", question, flags=re.IGNORECASE):
         return "Verify comparability, validation, inspection status, and the second source's qualified capacity before deciding."
     if re.search(r"\bservice[- ]provider\s+dependency\b", question, flags=re.IGNORECASE):
         return (
-            "Set SLA, disengagement-cost, and transition-readiness thresholds; "
-            "continue only if current performance clears them."
+            "Obtain the latest SLA report, disengagement-cost estimate, and transition "
+            "plan; compare them with the cited exit terms."
         )
     if re.search(r"\bsupply\s+dependency\b", question, flags=re.IGNORECASE):
         if re.search(r"\bcontinuity\b", question, flags=re.IGNORECASE):
             return (
-                "Set demand, capacity, delivery, quality, and price thresholds; "
-                "continue only if verified supply performance clears them."
+                "Compare forecast demand with committed volume, then obtain current "
+                "capacity, delivery, quality, and pricing records."
             )
         return (
-            "Set capacity, quality, delivery, and price thresholds; continue only "
-            "if verified supply performance clears them."
+            "Obtain current capacity, quality, delivery, and pricing records; compare "
+            "them with the cited supply commitments."
         )
     if re.search(r"\bwork[- ]order\b", question, flags=re.IGNORECASE):
         return (
@@ -14149,7 +14751,10 @@ def _question_specific_next_step(
     if re.search(r"\blicense\b", question, flags=re.IGNORECASE):
         return "Map territory, licensed scope, termination triggers, and surviving rights before deciding."
     if re.search(r"\b(?:concentration|economics)\b", question, flags=re.IGNORECASE):
-        return "Quantify concentration economics and exit exposure, then compare current performance before deciding."
+        return (
+            "Calculate current concentration, termination fees, and transition charges "
+            "from active SOWs and invoices before deciding."
+        )
     if re.search(r"\bmanufactur\w*\b", question, flags=re.IGNORECASE):
         if re.search(
             r"\b(?:readiness|remediation|deviation|validation)\b",
@@ -14157,12 +14762,12 @@ def _question_specific_next_step(
             flags=re.IGNORECASE,
         ):
             return (
-                "Continue only after quality remediation, validation, regulatory "
-                "inspection, and usable capacity meet documented acceptance thresholds."
+                "Obtain remediation closure, validation results, inspection status, and "
+                "usable-capacity evidence before deciding."
             )
         return (
-            "Set capacity, quality, delivery, and price thresholds; continue only "
-            "after verified performance clears them."
+            "Obtain current capacity, quality, delivery, and pricing records; compare "
+            "them with the cited manufacturing obligations."
         )
     if re.search(
         r"\b(?:missing[- ]drive|unaccounted[- ]for\s+(?:server\s+)?drives?|"
@@ -14173,8 +14778,8 @@ def _question_specific_next_step(
         return "Obtain incident-remediation closure and quantify current service and transition exposure before deciding."
     if re.search(r"\boutsourc\w*\b", question, flags=re.IGNORECASE):
         return (
-            "Set SLA, incident, and transition-cost thresholds; continue only if "
-            "current performance and exit readiness clear them."
+            "Obtain the latest SLA and incident reports, calculate current exit cost, "
+            "and validate the transition plan."
         )
     if re.search(
         r"\b(?:global\s+development|development\s+plan|collaboration)\b",
@@ -14182,8 +14787,8 @@ def _question_specific_next_step(
         flags=re.IGNORECASE,
     ):
         return (
-            "Approve continuation only after the current plan, budget, cost "
-            "allocation, milestones, and opt-out exposure reconcile."
+            "Reconcile the current plan, approved budget, cost-allocation ledger, "
+            "milestone status, and opt-out terms before deciding."
         )
     if re.search(r"\balternate\s+supply\b", question, flags=re.IGNORECASE):
         return "Verify alternate-supply qualification and map the intellectual-property rights needed for transition before deciding."
@@ -14199,8 +14804,8 @@ def _question_specific_next_step(
         flags=re.IGNORECASE,
     ):
         return (
-            "Set service-level, price, and transition-cost thresholds; extend only "
-            "if current performance clears them and no replacement option is better."
+            "Obtain the latest service-level report, current price schedule, and "
+            "termination or transition-cost estimate before deciding."
         )
     if re.search(
         r"\b(?:amend(?:ed|ment)|renew(?:al)?|terminat(?:e|ion)|extend)\b",
@@ -14208,8 +14813,8 @@ def _question_specific_next_step(
         flags=re.IGNORECASE,
     ):
         return (
-            "Build a clause-change table for scope, service levels, price, term, and "
-            "notice; extend only after current performance clears agreed thresholds."
+            "Build a controlling-amendment table for scope, price, term, and notice; "
+            "attach current performance evidence before deciding."
         )
     return "Verify the cited decision basis against current operating evidence before deciding."
 
@@ -25323,6 +25928,19 @@ class LocalRuntimeStore:
             decision_question,
             limit=coverage_gap_limit,
         )
+        agreement_chain_ambiguity = _agreement_chain_ambiguity(
+            coverage_source_records,
+            decision_question,
+        )
+        if agreement_chain_ambiguity is not None:
+            corpus_coverage_gaps = list(
+                dict.fromkeys(
+                    [
+                        str(agreement_chain_ambiguity["missing_evidence"]),
+                        *corpus_coverage_gaps,
+                    ]
+                )
+            )[:coverage_gap_limit]
 
         model_error = None
         model_output: dict[str, Any] | None = None
@@ -25573,17 +26191,23 @@ class LocalRuntimeStore:
             explicit_document_conflict_rows = [
                 row
                 for row in explicit_document_change_rows
-                if row.get("projection_kind") == "original_agreement_date_conflict"
+                if row.get("projection_kind")
+                in {
+                    "definition_scope_narrowing",
+                    "original_agreement_date_conflict",
+                    "prior_amendment_cancellation",
+                }
             ]
             explicit_document_change_fact_rows = [
                 row
                 for row in explicit_document_change_rows
-                if row.get("projection_kind") != "original_agreement_date_conflict"
+                if row not in explicit_document_conflict_rows
             ]
             if explicit_document_change_rows:
-                # An amendment change is an observed fact, not automatically
-                # a conflict or risk. Date contradictions stay in the risk
-                # surface; supersessions and scope changes stay in key facts.
+                # Most amendment changes are neutral facts. A conflicting base
+                # date, cancellation of a prior amendment, or narrowing of the
+                # licensed scope materially changes what the owner can rely on,
+                # so those decision exposures belong in conflicts/risks.
                 conflict_citations = [
                     *explicit_document_conflict_rows,
                     *[
@@ -26058,6 +26682,34 @@ class LocalRuntimeStore:
                     recommended_next_step_rows,
                 )
             )
+            if agreement_chain_ambiguity is not None:
+                # Do not combine individually accurate clauses from distinct
+                # same-party instruments. This intentionally produces an
+                # ``ollama_draft`` until a human identifies the controlling
+                # agreement chain; no citation is attached to the proposal.
+                bottom_line_row = {
+                    "statement": str(agreement_chain_ambiguity["bottom_line"]),
+                    "citation_refs": [],
+                    "allowed_citation_refs": [],
+                }
+                key_point_citations = []
+                conflict_citations = []
+                final_missing_evidence = [
+                    str(agreement_chain_ambiguity["missing_evidence"])
+                ]
+                model_output["missing_evidence"] = final_missing_evidence
+                recommended_next_step_rows = [
+                    {
+                        "statement": str(
+                            agreement_chain_ambiguity["recommended_next_step"]
+                        ),
+                        "citation_refs": [],
+                        "allowed_citation_refs": [],
+                    }
+                ]
+                metadata["agreement_chain_ambiguity_guard"] = (
+                    agreement_chain_ambiguity
+                )
             final_echo_violations = _brief_output_echo_violations(
                 {
                     "title": model_output.get("title"),

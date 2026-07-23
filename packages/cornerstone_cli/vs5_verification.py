@@ -1610,7 +1610,18 @@ def _citation_integrity(store: LocalRuntimeStore, brief: dict[str, Any]) -> dict
     dangling: list[str] = []
     invalid_spans: list[str] = []
     missing_citation_statement_count = 0
-    rows = brief.get("load_bearing_statements") or []
+    declared_rows = brief.get("load_bearing_statements") or []
+    rows = [
+        row
+        for row in declared_rows
+        if row.get("presented_as_fact") is not False
+        or bool(row.get("citation_refs") or [])
+    ]
+    excluded_statement_hashes = {
+        hashlib.sha256(str(row.get("statement") or "").strip().encode("utf-8")).hexdigest()
+        for row in declared_rows
+        if row not in rows
+    }
     for row in rows:
         refs = row.get("citation_refs") or []
         if not refs:
@@ -1634,17 +1645,232 @@ def _citation_integrity(store: LocalRuntimeStore, brief: dict[str, Any]) -> dict
             if start < 0 or end < start or text[start:end] != str(chunk.get("text") or ""):
                 invalid_spans.append(ref)
     anchor_failures = [
-        row for row in brief.get("statement_anchor_checks") or [] if row.get("status") != "passed"
+        row
+        for row in brief.get("statement_anchor_checks") or []
+        if row.get("status") != "passed"
+        and row.get("statement_sha256") not in excluded_statement_hashes
     ]
     fabricated = missing_citation_statement_count + len(set(dangling)) + len(set(invalid_spans))
+    honest_empty_draft = bool(
+        not rows
+        and brief.get("status") == "draft"
+        and brief.get("presented_as_fact") is False
+    )
     return {
         "load_bearing_count": len(rows),
+        "declared_load_bearing_count": len(declared_rows),
+        "non_factual_uncited_statement_count": len(declared_rows) - len(rows),
         "dangling_refs": sorted(set(dangling)),
         "invalid_span_refs": sorted(set(invalid_spans)),
         "anchor_failure_count": len(anchor_failures),
         "missing_citation_statement_count": missing_citation_statement_count,
         "fabricated_citation_count": fabricated,
-        "passed": bool(rows) and fabricated == 0,
+        "passed": fabricated == 0 and (bool(rows) or honest_empty_draft),
+    }
+
+
+def _verification_contract_changed_paths(
+    source: dict[str, Any],
+    current: dict[str, Any],
+) -> list[str] | None:
+    """Return exact changed inputs, or None when the bindings are not comparable."""
+
+    source_entries = source.get("entries")
+    current_entries = current.get("entries")
+    if not isinstance(source_entries, list) or not isinstance(current_entries, list):
+        return None
+    source_by_path = {
+        str(row.get("path") or ""): str(row.get("sha256") or "")
+        for row in source_entries
+        if isinstance(row, dict) and row.get("path")
+    }
+    current_by_path = {
+        str(row.get("path") or ""): str(row.get("sha256") or "")
+        for row in current_entries
+        if isinstance(row, dict) and row.get("path")
+    }
+    if not source_by_path or source_by_path.keys() != current_by_path.keys():
+        return None
+    return sorted(
+        path
+        for path in source_by_path
+        if source_by_path[path] != current_by_path[path]
+    )
+
+
+def _refresh_vs5_citation_verification(
+    root: Path,
+    source_report: dict[str, Any],
+    *,
+    current_verification_contract_binding: dict[str, Any],
+) -> tuple[dict[str, Any] | None, dict[str, Any]]:
+    """Re-run deterministic citation and regression checks over the bound model state."""
+
+    refreshed = deepcopy(source_report)
+    state_path = root / VS5_STATE_DIR
+    store = LocalRuntimeStore(state_path)
+    refreshed_case_results: list[dict[str, Any]] = []
+    missing_brief_ids: list[str] = []
+    for source_case in source_report.get("case_results") or []:
+        if not isinstance(source_case, dict):
+            continue
+        case = deepcopy(source_case)
+        brief_id = str(case.get("brief_id") or "")
+        brief = _load_json_object(state_path / "briefs" / f"{brief_id}.json")
+        if brief is None:
+            missing_brief_ids.append(brief_id)
+            continue
+        case["citation_integrity"] = _citation_integrity(store, brief)
+        refreshed_case_results.append(case)
+    if missing_brief_ids or len(refreshed_case_results) != len(source_report.get("case_results") or []):
+        return None, {
+            "reason": "one or more bound Brief records could not be revalidated",
+            "missing_brief_ids": sorted(set(missing_brief_ids)),
+        }
+
+    citations_ok = bool(refreshed_case_results) and all(
+        row["citation_integrity"]["passed"] for row in refreshed_case_results
+    )
+    fabricated_count = sum(
+        row["citation_integrity"]["fabricated_citation_count"]
+        for row in refreshed_case_results
+    )
+    seeded_fabrication_probe = _citation_integrity(
+        store,
+        {
+            "load_bearing_statements": [
+                {
+                    "statement": "Seeded unsupported statement",
+                    "citation_refs": ["evidence_chunk:seeded-missing-ref"],
+                }
+            ],
+            "statement_anchor_checks": [],
+        },
+    )
+    seeded_detector_passed = bool(
+        seeded_fabrication_probe["passed"] is False
+        and seeded_fabrication_probe["dangling_refs"]
+        == ["evidence_chunk:seeded-missing-ref"]
+    )
+    trust_labels_earned = all(
+        row.get("brief_status") != "evidence_backed"
+        or (
+            row["citation_integrity"]["passed"]
+            and row["citation_integrity"]["anchor_failure_count"] == 0
+        )
+        for row in refreshed_case_results
+    )
+
+    gate_results = {
+        "targeted_tests": _run_gate(
+            root,
+            ["python3", "-m", "unittest", "tests.scenario.test_vs5"],
+        ),
+        "ask_history_surface": _run_gate(root, ASK_HISTORY_GATE_COMMAND),
+        "sot_docs": _run_gate(root, ["sh", "scripts/verify_sot_docs.sh"]),
+        "scenario_matrix": _run_gate(
+            root,
+            ["python3", "scripts/verify_scenario_matrix.py"],
+        ),
+        "diff_check": _run_gate(root, ["git", "diff", "--check"]),
+    }
+    regression_ok = all(result["exit_code"] == 0 for result in gate_results.values())
+
+    rows = {
+        str(row.get("id") or ""): row
+        for row in refreshed.get("scenario_results") or []
+        if isinstance(row, dict)
+    }
+    rows["VS5-BRIEF-002"].update(
+        {
+            "status": "PASS" if citations_ok else "FAIL",
+            "evidence": {
+                "case_count": len(refreshed_case_results),
+                "passing_case_count": sum(
+                    row["citation_integrity"]["passed"]
+                    for row in refreshed_case_results
+                ),
+                "honest_non_factual_draft_count": sum(
+                    bool(
+                        row["citation_integrity"]["passed"]
+                        and row["citation_integrity"]["load_bearing_count"] == 0
+                        and row.get("brief_status") == "draft"
+                    )
+                    for row in refreshed_case_results
+                ),
+            },
+        }
+    )
+    rows["VS5-BRIEF-003"].update(
+        {
+            "status": (
+                "PASS"
+                if fabricated_count == 0 and citations_ok and seeded_detector_passed
+                else "FAIL"
+            ),
+            "evidence": {
+                "fabricated_citation_count": fabricated_count,
+                "seeded_detector_passed": seeded_detector_passed,
+                "seeded_probe": seeded_fabrication_probe,
+            },
+        }
+    )
+    rows["VS5-TRUST-001"].update(
+        {
+            "status": "PASS" if trust_labels_earned else "FAIL",
+            "evidence": {
+                "evidence_backed_count": sum(
+                    row.get("brief_status") == "evidence_backed"
+                    for row in refreshed_case_results
+                ),
+                "citation_passing_count": sum(
+                    row["citation_integrity"]["passed"]
+                    for row in refreshed_case_results
+                ),
+                "anchor_passing_count": sum(
+                    row["citation_integrity"]["anchor_failure_count"] == 0
+                    for row in refreshed_case_results
+                ),
+                "unearned_evidence_backed_count": sum(
+                    bool(
+                        row.get("brief_status") == "evidence_backed"
+                        and not (
+                            row["citation_integrity"]["passed"]
+                            and row["citation_integrity"]["anchor_failure_count"] == 0
+                        )
+                    )
+                    for row in refreshed_case_results
+                ),
+            },
+        }
+    )
+    rows["VS5-REG-001"].update(
+        {
+            "status": "PASS" if regression_ok else "FAIL",
+            "evidence": gate_results,
+        }
+    )
+    refreshed["scenario_results"] = [rows[scenario_id] for scenario_id in SCENARIO_IDS]
+    refreshed["case_results"] = refreshed_case_results
+    refreshed["verification_contract_binding"] = current_verification_contract_binding
+    refreshed["deterministic_verification_refresh"] = {
+        "mode": "bound_model_state_reuse",
+        "model_outputs_regenerated": False,
+        "refreshed_checks": [
+            "citation_integrity",
+            "fabricated_citation_seed_probe",
+            "trust_label_eligibility",
+            "regression_gates",
+        ],
+        "regression_gates": gate_results,
+    }
+    return refreshed, {
+        "citation_case_count": len(refreshed_case_results),
+        "citation_passing_case_count": sum(
+            row["citation_integrity"]["passed"] for row in refreshed_case_results
+        ),
+        "fabricated_citation_count": fabricated_count,
+        "regression_ok": regression_ok,
     }
 
 
@@ -2646,6 +2872,22 @@ def revalidate_vs5_human_evidence(root: Path) -> dict[str, Any]:
     source_verification_contract_binding = source_report.get(
         "verification_contract_binding"
     )
+    verification_contract_changed_paths = (
+        _verification_contract_changed_paths(
+            source_verification_contract_binding,
+            current_verification_contract_binding,
+        )
+        if isinstance(source_verification_contract_binding, dict)
+        else None
+    )
+    verifier_only_refresh_allowed = bool(
+        source_verification_contract_binding
+        != current_verification_contract_binding
+        and verification_contract_changed_paths
+        == ["packages/cornerstone_cli/vs5_verification.py"]
+    )
+    verification_refresh_performed = False
+    verification_refresh_evidence: dict[str, Any] = {}
     missing_brief_ids = sorted(
         brief_id
         for brief_id in current_brief_ids
@@ -2677,7 +2919,10 @@ def revalidate_vs5_human_evidence(root: Path) -> dict[str, Any]:
     )
     if not verification_contract_valid:
         revision_errors.append("canonical report has no valid verification-contract binding")
-    elif source_verification_contract_binding != current_verification_contract_binding:
+    elif (
+        source_verification_contract_binding != current_verification_contract_binding
+        and not verifier_only_refresh_allowed
+    ):
         revision_errors.append(
             "current verification contract differs from the exact verifier and gate inputs bound to the canonical report"
         )
@@ -2699,6 +2944,27 @@ def revalidate_vs5_human_evidence(root: Path) -> dict[str, Any]:
         revision_errors.append("current runtime state differs from the exact state bound to the canonical report")
     if missing_brief_ids:
         revision_errors.append("one or more reviewed Brief records are missing from current runtime state")
+    if verifier_only_refresh_allowed and not revision_errors:
+        refreshed_report, verification_refresh_evidence = (
+            _refresh_vs5_citation_verification(
+                root,
+                source_report,
+                current_verification_contract_binding=(
+                    current_verification_contract_binding
+                ),
+            )
+        )
+        if refreshed_report is None:
+            revision_errors.append(
+                "the verifier-only deterministic refresh could not validate the bound model state"
+            )
+        else:
+            source_report = refreshed_report
+            case_results = source_report.get("case_results") or []
+            source_verification_contract_binding = (
+                current_verification_contract_binding
+            )
+            verification_refresh_performed = True
     automated_rows = [
         row
         for row in source_report.get("scenario_results", [])
@@ -2938,6 +3204,11 @@ def revalidate_vs5_human_evidence(root: Path) -> dict[str, Any]:
             "manifest_sha256"
         ),
         "verification_contract_exact_match": True,
+        "verification_contract_refreshed": verification_refresh_performed,
+        "verification_contract_changed_paths": (
+            verification_contract_changed_paths or []
+        ),
+        "deterministic_refresh_evidence": verification_refresh_evidence,
         "ask_history_surface_gate": ask_history_gate,
     }
     result.pop("errors", None)

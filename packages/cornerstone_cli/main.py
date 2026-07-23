@@ -20823,6 +20823,11 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
     if (
         args.reuse_vs5_current_run
         and report.get("status") == "failed"
+        and any(
+            isinstance(error, dict)
+            and error.get("code") == "CS_VS5_REUSABLE_RUN_STALE"
+            for error in report.get("errors") or []
+        )
         and output_arg
         and (root / output_arg).resolve()
         == (root / "reports/scenario/vs5-citation-grounded-brief-2026-07-12.json").resolve()

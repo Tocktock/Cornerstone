@@ -26,6 +26,7 @@ from cornerstone_cli.runtime import (
     _answer_relationship_supported,
     _answer_chunk_scalar_relevance_bonus,
     _answer_scalar_values,
+    _agreement_chain_ambiguity,
     _brief_output_echo_violations,
     _brief_needs_concise_repair,
     _brief_key_fact_target,
@@ -99,6 +100,7 @@ from cornerstone_cli.vs5_verification import (
     SCENARIO_IDS,
     VERIFICATION_CONTRACT_FILES,
     _answer_review_identity,
+    _citation_integrity,
     _run_advisory_judge,
     _contains_all_answer_terms,
     _missing_evidence_structure_passes,
@@ -113,6 +115,7 @@ from cornerstone_cli.vs5_verification import (
     _validate_external_sessions,
     _validate_faithfulness_review,
     _validate_usefulness_review,
+    _verification_contract_changed_paths,
     _vs4_h01_decision_authorizes_external,
     revalidate_vs5_human_evidence,
 )
@@ -128,6 +131,88 @@ SCOPE = {
 
 
 class Vs5DecisionBriefTest(unittest.TestCase):
+    def test_citation_integrity_accepts_only_an_honest_non_factual_empty_draft(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            store = LocalRuntimeStore(Path(temp_dir))
+            statement = "Hold until the controlling agreement is identified."
+            honest_draft = {
+                "status": "draft",
+                "presented_as_fact": False,
+                "load_bearing_statements": [
+                    {
+                        "statement": statement,
+                        "presented_as_fact": False,
+                        "citation_refs": [],
+                    }
+                ],
+                "statement_anchor_checks": [
+                    {
+                        "statement_sha256": hashlib.sha256(
+                            statement.encode("utf-8")
+                        ).hexdigest(),
+                        "status": "failed",
+                    }
+                ],
+            }
+            integrity = _citation_integrity(store, honest_draft)
+            self.assertTrue(integrity["passed"])
+            self.assertEqual(integrity["load_bearing_count"], 0)
+            self.assertEqual(integrity["declared_load_bearing_count"], 1)
+            self.assertEqual(integrity["non_factual_uncited_statement_count"], 1)
+            self.assertEqual(integrity["fabricated_citation_count"], 0)
+            self.assertEqual(integrity["anchor_failure_count"], 0)
+
+            factual_draft = {
+                **honest_draft,
+                "load_bearing_statements": [
+                    {
+                        "statement": statement,
+                        "presented_as_fact": True,
+                        "citation_refs": [],
+                    }
+                ],
+            }
+            factual_integrity = _citation_integrity(store, factual_draft)
+            self.assertFalse(factual_integrity["passed"])
+            self.assertEqual(
+                factual_integrity["missing_citation_statement_count"], 1
+            )
+
+            unlabeled_empty = _citation_integrity(
+                store,
+                {
+                    "status": "evidence_backed",
+                    "presented_as_fact": True,
+                    "load_bearing_statements": [],
+                    "statement_anchor_checks": [],
+                },
+            )
+            self.assertFalse(unlabeled_empty["passed"])
+
+    def test_verification_contract_refresh_is_comparable_only_by_exact_paths(self) -> None:
+        source = {
+            "entries": [
+                {"path": "packages/cornerstone_cli/vs5_verification.py", "sha256": "old"},
+                {"path": "fixtures/vs5/eval/performance_budget.json", "sha256": "same"},
+            ]
+        }
+        current = {
+            "entries": [
+                {"path": "packages/cornerstone_cli/vs5_verification.py", "sha256": "new"},
+                {"path": "fixtures/vs5/eval/performance_budget.json", "sha256": "same"},
+            ]
+        }
+        self.assertEqual(
+            _verification_contract_changed_paths(source, current),
+            ["packages/cornerstone_cli/vs5_verification.py"],
+        )
+        self.assertIsNone(
+            _verification_contract_changed_paths(
+                source,
+                {"entries": current["entries"][:-1]},
+            )
+        )
+
     def test_advisory_judge_records_full_distribution_without_pass_authority(self) -> None:
         cases = [
             {"case_id": f"case-{index}", "brief_id": f"brief-{index}"}
@@ -2491,6 +2576,48 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             ["heading-before-value", "value-after-boundary"],
         )
 
+    def test_brief_backfill_prioritizes_a_dangling_decision_clause_continuation(self) -> None:
+        ranked = [
+            {
+                "artifact_id": "agreement",
+                "evidence_chunk_id": "termination-start",
+                "score": 10.0,
+                "span": {"char_start": 0, "char_end": 1200},
+                "text": (
+                    "The prior breach clause ends here; notwithstanding any other "
+                    "provision, at the option of either party at any time for any"
+                ),
+            },
+            {
+                "artifact_id": "other",
+                "evidence_chunk_id": "generic-amendment",
+                "score": 9.0,
+                "span": {"char_start": 0, "char_end": 1200},
+                "text": "The amendment otherwise remains in effect.",
+            },
+            {
+                "artifact_id": "agreement",
+                "evidence_chunk_id": "termination-finish",
+                "score": 1.0,
+                "span": {"char_start": 1040, "char_end": 2240},
+                "text": (
+                    "terminate the Agreement at any time for any reason with at least "
+                    "90 days' prior written notice."
+                ),
+            },
+        ]
+
+        selected = _select_evidence_chunks(
+            ranked,
+            limit=2,
+            allow_boundary_overlap_backfill=True,
+        )
+
+        self.assertEqual(
+            [row["evidence_chunk_id"] for row in selected],
+            ["termination-start", "termination-finish"],
+        )
+
     def test_scalar_relevance_bonus_reserves_split_and_duration_rows(self) -> None:
         self.assertEqual(
             _answer_chunk_scalar_relevance_bonus(
@@ -3755,8 +3882,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         )
         self.assertEqual(
             brief["bottom_line"],
-            "Hold: Map territory, licensed scope, termination triggers, and surviving "
-            "rights before deciding. "
+            "Hold: supplied evidence does not establish current territory, scope, and "
+            "termination rights. "
             "Basis: Bristol-Myers: Amendment No. 1 deletes ITI's Qualified Study "
             "prerequisite before third-party licensing.",
         )
@@ -4137,9 +4264,9 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertIn("manufacturing readiness", uncertainty.lower())
         self.assertIn("remediation", uncertainty.lower())
         self.assertNotIn("evidence for this decision", uncertainty.lower())
-        self.assertIn("quality remediation", next_step.lower())
-        self.assertIn("regulatory inspection", next_step.lower())
-        self.assertIn("acceptance thresholds", next_step.lower())
+        self.assertIn("remediation closure", next_step.lower())
+        self.assertIn("inspection status", next_step.lower())
+        self.assertIn("usable-capacity evidence", next_step.lower())
 
         contract_next_step = _question_specific_next_step(
             "Should the owner extend the agreement given its minimum-purchase "
@@ -4154,8 +4281,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         service_next_step = _question_specific_next_step(
             "Should the owner extend the NTT services relationship?"
         )
-        self.assertIn("thresholds", service_next_step.lower())
-        self.assertIn("extend only if", service_next_step.lower())
+        self.assertIn("service-level report", service_next_step.lower())
+        self.assertIn("price schedule", service_next_step.lower())
 
     def test_question_specific_review_need_names_decision_critical_dimensions(self) -> None:
         cases = [
@@ -7377,8 +7504,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertTrue(changed)
         self.assertEqual(
             repaired[0]["statement"],
-            "Continue only after quality remediation, validation, regulatory "
-            "inspection, and usable capacity meet documented acceptance thresholds.",
+            "Obtain remediation closure, validation results, inspection status, and "
+            "usable-capacity evidence before deciding.",
         )
         self.assertNotIn(basis["statement"], repaired[0]["statement"])
         self.assertEqual(repaired[0]["proposal_basis_statement"], basis["statement"])
@@ -7408,6 +7535,93 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             "rights before deciding.",
         )
         self.assertNotIn(amendment_basis["statement"], repaired[0]["statement"])
+
+    def test_portfolio_review_recommendations_request_concrete_records(self) -> None:
+        cases = [
+            (
+                "evidence_chunk:jpm-exit",
+                (
+                    "A regulator may object to the services, and Supplier has at "
+                    "least 10 days to cure the objection."
+                ),
+                (
+                    "Should the owner continue the JPMorgan agreement chain while "
+                    "managing concentration and undisclosed-economics risk?"
+                ),
+                (
+                    "Calculate current concentration, termination fees, and transition "
+                    "charges from active SOWs and invoices before deciding."
+                ),
+            ),
+            (
+                "evidence_chunk:iteos-scope",
+                (
+                    "Amendment No. 1 excludes products containing a non-Licensed "
+                    "Antibody from the Licensed Product definition."
+                ),
+                (
+                    "Should iTeos continue its share of the GSK global development "
+                    "plan under the amended collaboration?"
+                ),
+                (
+                    "Reconcile the current plan, approved budget, cost-allocation "
+                    "ledger, milestone status, and opt-out terms before deciding."
+                ),
+            ),
+        ]
+
+        for ref, source, question, expected in cases:
+            basis = {
+                "statement": source,
+                "citation_refs": [ref],
+                "allowed_citation_refs": [ref],
+            }
+            repaired, changed = _repair_grounded_recommendations(
+                [],
+                [basis],
+                [],
+                {ref: {"text": source}},
+                decision_question=question,
+            )
+            self.assertTrue(changed)
+            self.assertEqual(repaired[0]["statement"], expected)
+            self.assertEqual(repaired[0]["proposal_basis_statement"], source)
+
+        invalid_change = {
+            "statement": (
+                "Amendment No. 1 excludes products containing a non-Licensed "
+                "Antibody from the Licensed Product definition."
+            ),
+            "citation_refs": ["evidence_chunk:iteos-scope"],
+            "allowed_citation_refs": ["evidence_chunk:iteos-scope"],
+            "validation_mode": "explicit_document_change_projection",
+            "projection_kind": "definition_scope_narrowing",
+        }
+        allocation = {
+            "statement": "GSK bears 60% and ITEOS bears 40% of Development Costs.",
+            "citation_refs": ["evidence_chunk:iteos-costs"],
+            "allowed_citation_refs": ["evidence_chunk:iteos-costs"],
+        }
+        repaired, changed = _repair_grounded_recommendations(
+            [],
+            [invalid_change],
+            [allocation],
+            {
+                "evidence_chunk:iteos-scope": {"text": invalid_change["statement"]},
+                "evidence_chunk:iteos-costs": {"text": allocation["statement"]},
+            },
+            decision_question=(
+                "Should iTeos continue its share of the GSK global development "
+                "plan under the amended collaboration?"
+            ),
+        )
+        self.assertTrue(changed)
+        self.assertEqual(
+            repaired[0]["statement"],
+            "Reconcile the current plan, approved budget, cost-allocation ledger, "
+            "milestone status, and opt-out terms before deciding.",
+        )
+        self.assertEqual(repaired[0]["proposal_basis_statement"], allocation["statement"])
 
     def test_decision_repairs_skip_legal_headings_and_drafting_furniture(self) -> None:
         heading_ref = "evidence_chunk:heading"
@@ -9375,6 +9589,140 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             ],
         )
 
+    def test_grounded_key_fact_fallback_preserves_material_exit_and_payment_terms(self) -> None:
+        chunks = [
+            {
+                "artifact_id": "cigna-services",
+                "evidence_chunk_id": "cigna-exit",
+                "text": (
+                    "Notwithstanding any other provision in this Agreement, at the "
+                    "option of either party at any time for any reason, on the date "
+                    "specified in a written notice to the other of its intention to "
+                    "terminate this Agreement, said notice to be given at least ninety "
+                    "(90) days prior to the specified termination date."
+                ),
+                "safety": {},
+            },
+            {
+                "artifact_id": "oishi-filing",
+                "evidence_chunk_id": "oishi-exit",
+                "text": (
+                    "The Developers have the right to terminate both agreements if "
+                    "Scilex's total net profits for ZTlido and SP-103 are equal to or "
+                    "less than five percent of net sales of ZTlido and SP-103 for a "
+                    "period of four or more consecutive quarters. Accordingly, Oishi "
+                    "and Itochu have the right to terminate the Product Development "
+                    "Agreement and Commercial Supply Agreement."
+                ),
+                "safety": {},
+            },
+            {
+                "artifact_id": "tulex-filing",
+                "evidence_chunk_id": "tulex-exit",
+                "text": (
+                    "Tulex has the right to terminate the Tulex Master Services "
+                    "Agreement if we are in material breach of the agreement or a "
+                    "statement of work and fail to cure such breach within 15 days "
+                    "after receipt of notice of such breach (or such other time period "
+                    "expressly stated in the applicable statement of work). In "
+                    "addition, we may terminate the agreement or any statement of work "
+                    "without cause upon 30 days prior written notice to Tulex or "
+                    "immediately upon written notice in the event Tulex is dissolved "
+                    "or undergoes a change in control."
+                ),
+                "safety": {},
+            },
+            {
+                "artifact_id": "az-product-schedule",
+                "evidence_chunk_id": "az-payment",
+                "text": (
+                    "Total [**] [**] $174,306,844. AstraZeneca shall pay Service "
+                    "Provider all fees and costs set forth in this Product Schedule. "
+                    "Service Provider will issue invoices for [**]% of all fees upfront "
+                    "upon initiation of the specified activity or task, with the "
+                    "remaining [**]% upon completion of the applicable activity or "
+                    "task; and invoices for [**]% of all pass-through costs upon order "
+                    "placement for the materials, with the remaining [**]% to be "
+                    "invoiced upon Service Provider's receipt of the materials."
+                ),
+                "safety": {},
+            },
+        ]
+
+        cases = [
+            (
+                chunks[:1],
+                "Should the owner continue the Cigna services arrangement under its termination terms?",
+                {
+                    "At the option of either party, the Agreement may be terminated at "
+                    "any time for any reason with at least 90 days' prior written notice"
+                },
+            ),
+            (
+                chunks[1:2],
+                "Should the owner renew the Oishi and Itochu development relationship?",
+                {
+                    "Oishi and Itochu may terminate both agreements if ZTlido and SP-103 "
+                    "net profits are equal to or less than five percent of net sales for "
+                    "four or more consecutive quarters"
+                },
+            ),
+            (
+                chunks[2:3],
+                "Should the owner continue the Tulex manufacturing relationship?",
+                {
+                    "Tulex may terminate for an uncured material breach after 15 days' "
+                    "notice, unless the SOW states another cure period",
+                    "Scilex may terminate without cause on 30 days' notice or immediately "
+                    "after Tulex dissolution or change of control",
+                },
+            ),
+            (
+                chunks[3:],
+                "Should the owner continue AstraZeneca manufacturing given payment exposure?",
+                {
+                    "Fees are invoiced at activity initiation and completion; pass-through "
+                    "costs at material order placement and receipt",
+                },
+            ),
+        ]
+        for case_chunks, question, expected in cases:
+            rows = _grounded_key_fact_fallback(
+                case_chunks,
+                limit=4,
+                decision_question=question,
+            )
+            statements = {row["statement"] for row in rows}
+            self.assertTrue(expected <= statements, (expected, statements))
+
+        transition_source = {
+            "artifact_id": "evernorth-msa",
+            "evidence_chunk_id": "evernorth-transition",
+            "text": (
+                "Commencing upon any notice of termination (except for notice of "
+                "Company's material breach for purposes of termination) or of non- "
+                "renewal of the Agreement or applicable Statement of Work, Supplier "
+                "shall at Company's request continue to provide the Services to "
+                "facilitate Company's transition and provide reasonable assistance."
+                " This Agreement remains in full force during transition assistance."
+            ),
+            "safety": {},
+        }
+        transition_rows = _grounded_key_fact_fallback(
+            [transition_source],
+            limit=2,
+            decision_question=(
+                "Should the owner continue the Evernorth relationship or prepare a "
+                "replacement channel plan?"
+            ),
+        )
+        self.assertIn(
+            "Except for Company's material-breach termination notice, Supplier shall "
+            "at Company's request continue Services and provide reasonable transition "
+            "assistance upon termination or non-renewal notice",
+            {row["statement"] for row in transition_rows},
+        )
+
     def test_grounded_key_fact_fallback_prefers_question_relevance_and_projects_allocations(self) -> None:
         incident_chunks = [
             {
@@ -10295,6 +10643,7 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             "9-16 shall survive the termination or expiration of this Agreement",
             "Effect of Amendment on other Documents",
             "Amendment 6 is effective October 17, 2018 between CoreLogic",
+            "2 Effective Date by their respective duly authorized representatives",
         ):
             with self.subTest(statement=statement):
                 self.assertFalse(_complete_extracted_statement_surface(statement))
@@ -10333,6 +10682,195 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 ],
             )
         )
+
+    def test_model_statement_semantics_preserves_operating_qualifiers_and_bindings(self) -> None:
+        self.assertFalse(
+            _model_statement_source_semantics_supported(
+                "Either party may terminate the agreement at any time for any reason with written notice.",
+                [
+                    "Either party may terminate this Agreement at any time, for any reason, "
+                    "by giving the other party at least ninety (90) days prior written notice."
+                ],
+            )
+        )
+        self.assertTrue(
+            _model_statement_source_semantics_supported(
+                "At least 90 days' prior written notice lets either party terminate the Agreement for any reason.",
+                [
+                    "Either party may terminate this Agreement at any time, for any reason, "
+                    "by giving the other party at least ninety (90) days prior written notice."
+                ],
+            )
+        )
+        amex_source = (
+            "Subject to continued compliance with applicable required minimum purchase "
+            "obligations, if any, and other provisions set forth in any open Schedule or "
+            "amendment thereto, AXP may terminate this Agreement and/or any Schedule without "
+            "cause upon five (5) days' written notice."
+        )
+        self.assertFalse(
+            _model_statement_source_semantics_supported(
+                "AXP may terminate on five days' notice, subject to minimum purchase obligations.",
+                [amex_source],
+            )
+        )
+        self.assertTrue(
+            _model_statement_source_semantics_supported(
+                "Subject to minimum purchases and provisions in open Schedules or their "
+                "amendments, AXP may terminate on five days' written notice.",
+                [amex_source],
+            )
+        )
+        self.assertFalse(
+            _model_statement_source_semantics_supported(
+                "Fees and costs use initiation and completion invoicing.",
+                [
+                    "Fees are invoiced upon activity initiation and completion. Pass-through "
+                    "costs are invoiced upon material order placement and receipt."
+                ],
+            )
+        )
+        self.assertFalse(
+            _model_statement_source_semantics_supported(
+                "The amendment was executed on December 19, 2022 by both Lonza and ITI.",
+                [
+                    "The parties executed this Amendment as of the dates below. Lonza Date: "
+                    "December 20, 2022. ITI Date: December 19, 2022."
+                ],
+            )
+        )
+
+    def test_same_party_master_agreement_chains_require_control_confirmation(self) -> None:
+        ambiguity = _agreement_chain_ambiguity(
+            [
+                {
+                    "text": (
+                        "This master services and collaboration agreement, effective as of "
+                        "April 2, 2018, is between Sema4 and Mount Sinai."
+                    ),
+                    "source": {"ref": "clinical-msa.txt"},
+                },
+                {
+                    "text": (
+                        "Mount Sinai and Sema4 entered into a Master Services Agreement with "
+                        "an effective date of May 10, 2018."
+                    ),
+                    "source": {"ref": "research-msa.txt"},
+                },
+            ],
+            "Should the owner continue the Mount Sinai services agreement after amendments?",
+        )
+
+        self.assertIsNotNone(ambiguity)
+        assert ambiguity is not None
+        self.assertEqual(ambiguity["dates"], ["April 2, 2018", "May 10, 2018"])
+        self.assertIn("controls", ambiguity["missing_evidence"])
+        self.assertIsNone(
+            _agreement_chain_ambiguity(
+                [
+                    {
+                        "text": (
+                            "This Master Services Agreement is effective as of April 2, 2018. "
+                            "The amendment confirms the Master Services Agreement effective "
+                            "as of April 2, 2018."
+                        ),
+                        "source": {"ref": "one-chain.txt"},
+                    }
+                ],
+                "Should the owner continue the Mount Sinai services agreement?",
+            )
+        )
+        self.assertIsNone(
+            _agreement_chain_ambiguity(
+                [
+                    {
+                        "text": (
+                            "Illumina is the disclosed supply counterparty. "
+                            "The exhibit index separately lists a Master Services Agreement, "
+                            "dated as of April 2, 2018, between Sema4 and Mount Sinai, and "
+                            "another Master Services Agreement, dated as of May 10, 2018, "
+                            "between Sema4 and Mount Sinai."
+                        ),
+                        "source": {"ref": "mixed-super-8k.txt"},
+                    }
+                ],
+                "Should the owner continue the Illumina supply dependency?",
+            )
+        )
+        self.assertIsNone(
+            _agreement_chain_ambiguity(
+                [
+                    {
+                        "text": (
+                            "AMENDMENT NO. 4 TO THE MASTER SERVICES AGREEMENT between "
+                            "CoreLogic and NTT DATA. Amendment 4 Effective Date October 1, 2017."
+                        ),
+                        "source": {"ref": "ntt-amendment-4.txt"},
+                    },
+                    {
+                        "text": (
+                            "AMENDMENT NO. 5 TO THE MASTER SERVICES AGREEMENT between "
+                            "CoreLogic and NTT DATA. Amendment 5 Effective Date May 15, 2018."
+                        ),
+                        "source": {"ref": "ntt-amendment-5.txt"},
+                    },
+                ],
+                "Should the owner extend the NTT DATA services relationship based on Amendments 4 and 5?",
+            )
+        )
+
+    def test_work_order_fallback_keeps_echo_safe_decision_facts(self) -> None:
+        chunks = [
+            {
+                "artifact_id": "az-work-order",
+                "evidence_chunk_id": "az-capacity",
+                "text": (
+                    "CAPACITY COMMITMENT OF COVID-19 VACCINE DRUG SUBSTANCE MANUFACTURING, "
+                    "which is designated Work Order #01 (this Work Order). AstraZeneca "
+                    "further understands that its performance under this Agreement may be "
+                    "subject to certain additional government requirements."
+                ),
+                "source": {"ref": "az-work-order.txt"},
+                "safety": {},
+            },
+            {
+                "artifact_id": "az-work-order",
+                "evidence_chunk_id": "az-fees",
+                "text": (
+                    "All fees are payable [**]% upfront upon initiation of the specified "
+                    "activity or task, with the remaining [**]% payable upon completion of "
+                    "the applicable activity or task; and all pass-through costs are payable "
+                    "[**]% upon order placement, with the remaining [**]% payable upon "
+                    "Service Provider's receipt of the materials or services."
+                ),
+                "source": {"ref": "az-work-order.txt"},
+                "safety": {},
+            },
+        ]
+        question = (
+            "Should the contract owner authorize continued AstraZeneca work-order "
+            "performance as aligned with the governing master agreement?"
+        )
+        rows = _grounded_key_fact_fallback(
+            chunks,
+            limit=3,
+            decision_question=question,
+        )
+        statements = [row["statement"] for row in rows]
+        self.assertTrue(any("Work Order #01" in value for value in statements), statements)
+        self.assertTrue(any("pass-through" in value for value in statements), statements)
+        self.assertTrue(
+            any("government requirements" in value for value in statements),
+            statements,
+        )
+        for row in rows:
+            self.assertEqual(
+                _brief_output_echo_violations(
+                    {"title": "", "bottom_line": None, "key_facts": [row]},
+                    [chunk["text"] for chunk in chunks],
+                ),
+                [],
+            )
 
     def test_named_agreement_exposure_does_not_cross_counterparties(self) -> None:
         chunks = [
@@ -10403,7 +10941,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         )
 
         self.assertTrue(rows)
-        self.assertIn("Subject to applicable minimum-purchase", rows[0]["statement"])
+        self.assertIn("Subject to minimum purchases", rows[0]["statement"])
+        self.assertIn("open Schedules or their amendments", rows[0]["statement"])
         self.assertIn("five days' written notice", rows[0]["statement"])
 
     def test_gema_readiness_gaps_are_specific_and_echo_safe(self) -> None:

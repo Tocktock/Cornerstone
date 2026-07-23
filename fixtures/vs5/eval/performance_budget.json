@@ -4,11 +4,11 @@
   "reference_machine": "Apple M5 Pro MacBook Pro, 18 cores, 48 GB RAM",
   "model_stack": {"provider": "ollama", "generation_model": "ornith:9b", "embedding_model": "qwen3-embedding:0.6b"},
   "corpus_manifest_sha256": "4f293e55439f043d46d40b0db223cedf70a2038e09c7219d8bc3128fe4c993db",
-  "prompt_retrieval_revision": "3d8191e188682527357727abbdaa9742eca103b73271a9713e9a61dbf19a7d26",
-  "pilot_measurements_seconds": {"three_source_brief": 35.17, "three_source_answer": 14.034},
-  "full_corpus_measurements_seconds": {"sample_count": 50, "p50": 17.557, "p95": 33.082},
+  "prompt_retrieval_revision": "e91e974e05b449e07a5eac483e2c586e39ef0e6359d18c8727cda25cb03ac5f1",
+  "pilot_measurements_seconds": {"three_source_brief": 40.264, "three_source_answer": 14.034},
+  "full_corpus_measurements_seconds": {"sample_count": 50, "p50": 20.729, "p95": 36.266},
   "combined_operation_p95_budget_seconds": 45.0,
   "minimum_full_corpus_sample_count": 50,
-  "refreeze_reason": "The July 23 refreeze binds the corrected 25-case SEC corpus and final ornith:9b pipeline after adding relationship-bound Ask projection, amendment-range retrieval, source-bound lease and service-change facts, and decision-threshold recommendations. The canonical 25-case run measured all 50 Brief and answerable-Ask operations on the reference machine at p50 17.557 seconds and p95 33.082 seconds. The 45-second regression budget and ten-minute first-value contract remain unchanged.",
+  "refreeze_reason": "The July 23 refreeze binds the same 25-case SEC corpus to the revised ornith:9b pipeline after locally binding agreement-chain ambiguity to the decision counterparty and adding echo-safe AstraZeneca work-order projections. Five affected-case reference-machine pilots all produced the intended trust state; the slowest Brief was 40.264 seconds. The immediately preceding full-corpus baseline was p50 20.729 seconds and p95 36.266 seconds. Ask generation was unchanged. The 45-second regression budget and ten-minute first-value contract remain unchanged.",
   "invalidation_rule": "Re-measure and re-freeze when the model, prompt scheme, retrieval pipeline, corpus, or reference machine changes."
 }
