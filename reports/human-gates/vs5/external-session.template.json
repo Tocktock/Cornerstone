@@ -29,10 +29,10 @@
       "packages/cornerstone_cli/briefing.py",
       "packages/cornerstone_cli/product_access.py"
     ],
-    "pipeline_sha256": "e91e974e05b449e07a5eac483e2c586e39ef0e6359d18c8727cda25cb03ac5f1",
+    "pipeline_sha256": "34dd2d969a49dda60810c21c119a4b9c537d7d452c3114eaf0a1b80464d3eded",
     "provider": "ollama"
   },
-  "prompt_retrieval_revision": "e91e974e05b449e07a5eac483e2c586e39ef0e6359d18c8727cda25cb03ac5f1",
+  "prompt_retrieval_revision": "34dd2d969a49dda60810c21c119a4b9c537d7d452c3114eaf0a1b80464d3eded",
   "decision_case": {
     "source_count": null,
     "source_language": "en",

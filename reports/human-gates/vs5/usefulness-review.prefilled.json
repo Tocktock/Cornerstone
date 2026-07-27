@@ -12,10 +12,10 @@
       "packages/cornerstone_cli/briefing.py",
       "packages/cornerstone_cli/product_access.py"
     ],
-    "pipeline_sha256": "e91e974e05b449e07a5eac483e2c586e39ef0e6359d18c8727cda25cb03ac5f1",
+    "pipeline_sha256": "34dd2d969a49dda60810c21c119a4b9c537d7d452c3114eaf0a1b80464d3eded",
     "provider": "ollama"
   },
-  "prompt_retrieval_revision": "e91e974e05b449e07a5eac483e2c586e39ef0e6359d18c8727cda25cb03ac5f1",
+  "prompt_retrieval_revision": "34dd2d969a49dda60810c21c119a4b9c537d7d452c3114eaf0a1b80464d3eded",
   "source_report": "reports/scenario/vs5-citation-grounded-brief-2026-07-12.json",
   "minimum_reviewer_count": 2,
   "non_owner_reviewer_required": true,
@@ -23,49 +23,66 @@
     {
       "case_id": "edgar-omada-evernorth-msa",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_25248865a6e578c0",
+      "brief_id": "brief_067493659a22d51a",
       "brief_status": "evidence_backed",
       "title": "Should CornerStone continue with Evernorth or build a replacement channel plan?",
       "decision_question": "Should the contract owner continue the Evernorth relationship under the surviving statement-of-work terms or prepare a replacement channel plan?",
-      "bottom_line": "Hold: supplied evidence does not establish current pricing, renewal terms, service performance, and replacement readiness.",
+      "bottom_line": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below.",
       "key_facts": [
         "Section 1.6's replacement says service levels and performance guarantees, if any, apply to named services and to other statements of work only when they make Exhibit A applicable.",
-        "Except for Company's material-breach termination notice, Supplier shall at Company's request continue Services and provide reasonable transition assistance upon termination or non-renewal notice"
+        "Other provisions survive agreement expiration or termination"
       ],
-      "conflicts_risks": [],
+      "conflicts_risks": [
+        "Except for Company's material-breach notice, at Company's request Supplier continues Services and provides reasonable transition assistance for a redacted or longer SOW period; Company pays Supplier"
+      ],
       "missing_evidence": [
         "Current pricing, renewal terms, service performance, and replacement readiness require human confirmation."
       ],
       "recommended_next_steps": [
-        "Obtain the current SOW, latest SLA report, renewal pricing, and transition plan; compare them with the cited contract terms."
+        "Obtain the current SOW, latest SLA report, renewal pricing, and transition plan; compare them with the cited contract terms.",
+        "Continue only if current service performance, pricing, and transition exposure support retention; otherwise use the replacement plan."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: supplied evidence does not establish current pricing, renewal terms, service performance, and replacement readiness.",
+          "statement": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below.",
           "citation_refs": [
-            "evidence_chunk:chunk_ae68aabe9c11cada9b1bf033f9bb29425dbd225d06ed62cb1cf3f55571e8dc8a"
+            "evidence_chunk:chunk_2ed56a9a41f57f6e8e039942e14a90d0f4bd01f0455508f8326211c4e7e55b13"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Section 1.6's replacement says service levels and performance guarantees, if any, apply to named services and to other statements of work only when they make Exhibit A applicable.",
           "citation_refs": [
-            "evidence_chunk:chunk_ae68aabe9c11cada9b1bf033f9bb29425dbd225d06ed62cb1cf3f55571e8dc8a"
+            "evidence_chunk:chunk_2ed56a9a41f57f6e8e039942e14a90d0f4bd01f0455508f8326211c4e7e55b13"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Except for Company's material-breach termination notice, Supplier shall at Company's request continue Services and provide reasonable transition assistance upon termination or non-renewal notice",
+          "statement": "Other provisions survive agreement expiration or termination",
           "citation_refs": [
-            "evidence_chunk:chunk_686c430719a9785ec6afc253605dcfb6b39345cc2aaf71f6586dc060930f7828"
+            "evidence_chunk:chunk_d630a4169dc046cbb45394780f4998c9f122dc46eff0d2f6f9ff1dd02880f0af"
+          ]
+        },
+        {
+          "section": "conflicts_risks",
+          "statement": "Except for Company's material-breach notice, at Company's request Supplier continues Services and provides reasonable transition assistance for a redacted or longer SOW period; Company pays Supplier",
+          "citation_refs": [
+            "evidence_chunk:chunk_b658f702cddef38c8b5d7057f55c53cbcd8f951d2910bc4102f9c460834333a1"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Obtain the current SOW, latest SLA report, renewal pricing, and transition plan; compare them with the cited contract terms.",
           "citation_refs": [
-            "evidence_chunk:chunk_ae68aabe9c11cada9b1bf033f9bb29425dbd225d06ed62cb1cf3f55571e8dc8a"
+            "evidence_chunk:chunk_b658f702cddef38c8b5d7057f55c53cbcd8f951d2910bc4102f9c460834333a1"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only if current service performance, pricing, and transition exposure support retention; otherwise use the replacement plan.",
+          "citation_refs": [
+            "evidence_chunk:chunk_b658f702cddef38c8b5d7057f55c53cbcd8f951d2910bc4102f9c460834333a1"
           ]
         }
       ],
@@ -167,7 +184,7 @@
     {
       "case_id": "edgar-composecure-amex-msa",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_c71bf388a29d426c",
+      "brief_id": "brief_f4aa7a46293ddd4b",
       "brief_status": "evidence_backed",
       "title": "Should CornerStone extend the American Express agreement?",
       "decision_question": "Should the contract owner extend the American Express agreement given its termination, minimum-purchase, and exclusivity provisions?",
@@ -185,42 +202,50 @@
         "Current volume, pricing, and exclusivity thresholds require human confirmation."
       ],
       "recommended_next_steps": [
-        "Calculate minimum-purchase and exclusivity exposure against forecast volume and pricing before deciding."
+        "Calculate minimum-purchase and exclusivity exposure against forecast volume and pricing before deciding.",
+        "Continue only if forecast demand covers the minimum purchase and the resulting exclusivity and pricing exposure is acceptable; otherwise renegotiate or exit."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
           "statement": "Hold: Subject to minimum purchases and provisions in open Schedules or their amendments, AXP may terminate the Agreement or any Schedule without cause on five days' written notice",
           "citation_refs": [
-            "evidence_chunk:chunk_9dc24ca8948fa71ebe850b69bffe31be3045a7c1eac44624ebdc82eda0a8c162"
+            "evidence_chunk:chunk_03b6097a8d48ee5b4669345587c8b5b713537fef998b83d8a3f235ae50f5c315"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Terminating a Schedule does not terminate the Agreement unless the notice specifically says so",
           "citation_refs": [
-            "evidence_chunk:chunk_9dc24ca8948fa71ebe850b69bffe31be3045a7c1eac44624ebdc82eda0a8c162"
+            "evidence_chunk:chunk_03b6097a8d48ee5b4669345587c8b5b713537fef998b83d8a3f235ae50f5c315"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Subject to minimum purchases and provisions in open Schedules or their amendments, AXP may terminate the Agreement or any Schedule without cause on five days' written notice",
           "citation_refs": [
-            "evidence_chunk:chunk_9dc24ca8948fa71ebe850b69bffe31be3045a7c1eac44624ebdc82eda0a8c162"
+            "evidence_chunk:chunk_03b6097a8d48ee5b4669345587c8b5b713537fef998b83d8a3f235ae50f5c315"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "AXP agrees to comply with required minimum-purchase obligations",
           "citation_refs": [
-            "evidence_chunk:chunk_9dc24ca8948fa71ebe850b69bffe31be3045a7c1eac44624ebdc82eda0a8c162"
+            "evidence_chunk:chunk_03b6097a8d48ee5b4669345587c8b5b713537fef998b83d8a3f235ae50f5c315"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Calculate minimum-purchase and exclusivity exposure against forecast volume and pricing before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_9dc24ca8948fa71ebe850b69bffe31be3045a7c1eac44624ebdc82eda0a8c162"
+            "evidence_chunk:chunk_03b6097a8d48ee5b4669345587c8b5b713537fef998b83d8a3f235ae50f5c315"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only if forecast demand covers the minimum purchase and the resulting exclusivity and pricing exposure is acceptable; otherwise renegotiate or exit.",
+          "citation_refs": [
+            "evidence_chunk:chunk_03b6097a8d48ee5b4669345587c8b5b713537fef998b83d8a3f235ae50f5c315"
           ]
         }
       ],
@@ -299,14 +324,13 @@
     {
       "case_id": "edgar-corelogic-ntt-msa",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_1fbe7068306a9e08",
+      "brief_id": "brief_87ca53be343f4f7c",
       "brief_status": "evidence_backed",
       "title": "Should CoreLogic extend the NTT DATA services relationship based on Amendments 4–6?",
       "decision_question": "Should the contract owner extend the NTT DATA services relationship based on Amendments 4 through 6?",
-      "bottom_line": "Hold: supplied evidence does not establish current service levels, pricing, renewal terms, and performance. Basis: Amendment No. 6 is effective October 17, 2018 between CoreLogic and NTT DATA Services, LLC.",
+      "bottom_line": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: Amendment 6 is effective October 17, 2018 between CoreLogic and NTT DATA Services.",
       "key_facts": [
-        "Amendment No. 6 is effective October 17, 2018 between CoreLogic and NTT DATA Services, LLC.",
-        "Schedule A-3.2 adds detailed measurement methodology for Critical Service Levels in the amended contract documents.",
+        "Amendment 6 is effective October 17, 2018 between CoreLogic and NTT DATA Services.",
         "Schedule A-3.2 provides detailed definitions and measurement methodology for the service levels and key measurements in Schedule A-3.1"
       ],
       "conflicts_risks": [],
@@ -314,46 +338,47 @@
         "Current service levels, pricing, renewal terms, and performance require human confirmation."
       ],
       "recommended_next_steps": [
-        "Obtain the latest service-level report, current price schedule, and termination or transition-cost estimate before deciding."
+        "Obtain the latest service-level report, current price schedule, and termination or transition-cost estimate before deciding.",
+        "Continue only if current service performance, pricing, and transition exposure support retention; otherwise use the replacement plan."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: supplied evidence does not establish current service levels, pricing, renewal terms, and performance. Basis: Amendment No. 6 is effective October 17, 2018 between CoreLogic and NTT DATA Services, LLC.",
+          "statement": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: Amendment 6 is effective October 17, 2018 between CoreLogic and NTT DATA Services.",
           "citation_refs": [
-            "evidence_chunk:chunk_60d58b622f7ab58b899f00d19a147c52ac1b18fd7fe2aa700505dcfb648d9cd2",
-            "evidence_chunk:chunk_a1f476fbd1f4b2f4a6b6a738d35ee56db8315ed4dc2865edd96885c25e9eb017"
+            "evidence_chunk:chunk_183b4d5739b61190c093d6868d432d03babfdbb8c81e0274b7401e1df2433c1b",
+            "evidence_chunk:chunk_8e1ebe7b60bcf8a0cb9029cdef480d22825babc1465324a2176438fe7ff6e58b"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Amendment No. 6 is effective October 17, 2018 between CoreLogic and NTT DATA Services, LLC.",
+          "statement": "Amendment 6 is effective October 17, 2018 between CoreLogic and NTT DATA Services.",
           "citation_refs": [
-            "evidence_chunk:chunk_60d58b622f7ab58b899f00d19a147c52ac1b18fd7fe2aa700505dcfb648d9cd2",
-            "evidence_chunk:chunk_a1f476fbd1f4b2f4a6b6a738d35ee56db8315ed4dc2865edd96885c25e9eb017"
-          ]
-        },
-        {
-          "section": "key_facts",
-          "statement": "Schedule A-3.2 adds detailed measurement methodology for Critical Service Levels in the amended contract documents.",
-          "citation_refs": [
-            "evidence_chunk:chunk_5380891e2fcf715d7dab48e1db87e0715ac6ae8287ca7a90a234730e708da67f",
-            "evidence_chunk:chunk_f3241d7fc995b1c3e966316c9b44a80371c05393e1f353962912557c33ae5064"
+            "evidence_chunk:chunk_183b4d5739b61190c093d6868d432d03babfdbb8c81e0274b7401e1df2433c1b",
+            "evidence_chunk:chunk_8e1ebe7b60bcf8a0cb9029cdef480d22825babc1465324a2176438fe7ff6e58b"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Schedule A-3.2 provides detailed definitions and measurement methodology for the service levels and key measurements in Schedule A-3.1",
           "citation_refs": [
-            "evidence_chunk:chunk_5380891e2fcf715d7dab48e1db87e0715ac6ae8287ca7a90a234730e708da67f"
+            "evidence_chunk:chunk_4b949ad177704d6f1cce9598547385263c42d23644b09c9088d727f8e8b1c604"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Obtain the latest service-level report, current price schedule, and termination or transition-cost estimate before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_60d58b622f7ab58b899f00d19a147c52ac1b18fd7fe2aa700505dcfb648d9cd2",
-            "evidence_chunk:chunk_a1f476fbd1f4b2f4a6b6a738d35ee56db8315ed4dc2865edd96885c25e9eb017"
+            "evidence_chunk:chunk_183b4d5739b61190c093d6868d432d03babfdbb8c81e0274b7401e1df2433c1b",
+            "evidence_chunk:chunk_8e1ebe7b60bcf8a0cb9029cdef480d22825babc1465324a2176438fe7ff6e58b"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only if current service performance, pricing, and transition exposure support retention; otherwise use the replacement plan.",
+          "citation_refs": [
+            "evidence_chunk:chunk_183b4d5739b61190c093d6868d432d03babfdbb8c81e0274b7401e1df2433c1b",
+            "evidence_chunk:chunk_8e1ebe7b60bcf8a0cb9029cdef480d22825babc1465324a2176438fe7ff6e58b"
           ]
         }
       ],
@@ -432,59 +457,67 @@
     {
       "case_id": "edgar-gogo-airspan-dependency",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_cec059cb18df7154",
+      "brief_id": "brief_32e85dcf982cc032",
       "brief_status": "evidence_backed",
-      "title": "Should Gogo continue the Airspan dependency after Chapter 11 and the June 2024 amendment?",
+      "title": "Should the contract owner continue the Airspan dependency after Chapter 11 and June 2024 amendment?",
       "decision_question": "Should the contract owner continue the Airspan dependency after the Chapter 11 event and June 2024 amendment?",
-      "bottom_line": "Hold: Gogo's conditional waiver of any purported default under the Airspan/Gogo Agreements is limited to the Waiver Termination Date if any.",
+      "bottom_line": "Hold: The new revolving facility remains subject to closing conditions and execution of definitive documents",
       "key_facts": [
         "Airspan: until the Waiver Termination Date, the limited waiver covers defaults that occurred or were purported as of the amendment date, whether known or unknown, contingent or matured.",
-        "On June 27, 2024 Gogo and Airspan amended the Master Service Agreement dated November 25, 2019 to resolve disputes under the Airspan/Gogo Agreements."
+        "The June 27, 2024 Master Service Agreement amendment was executed alongside the Chapter 11 plan supplement.",
+        "Airspan and Fortress Credit Corp. agreed in principle to a new $20M first lien revolving facility on June 28, 2024."
       ],
       "conflicts_risks": [
-        "Gogo's conditional waiver of any purported default under the Airspan/Gogo Agreements is limited to the Waiver Termination Date, if any."
+        "The new revolving facility remains subject to closing conditions and execution of definitive documents"
       ],
       "missing_evidence": [
         "Whether the Waiver Termination Date occurred, and whether the facility closing conditions, definitive documents, and related contingency are complete, require human confirmation."
       ],
       "recommended_next_steps": [
-        "Confirm whether the Waiver Termination Date occurred and whether facility closing conditions and definitive documents are complete before deciding."
+        "Confirm with Airspan whether the new revolving facility's closing conditions are met and whether the amendment is fully effective."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: Gogo's conditional waiver of any purported default under the Airspan/Gogo Agreements is limited to the Waiver Termination Date if any.",
+          "statement": "Hold: The new revolving facility remains subject to closing conditions and execution of definitive documents",
           "citation_refs": [
-            "evidence_chunk:chunk_f1a828b53817c833afb35549b1788886dd088fbc6a74900d7eb6dee0c2cb9de9"
+            "evidence_chunk:chunk_7a1b9a7f361cc8200d7cfa963d67bee0d63c1808007e344939fa61d339db9a71"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Airspan: until the Waiver Termination Date, the limited waiver covers defaults that occurred or were purported as of the amendment date, whether known or unknown, contingent or matured.",
           "citation_refs": [
-            "evidence_chunk:chunk_f1a828b53817c833afb35549b1788886dd088fbc6a74900d7eb6dee0c2cb9de9"
+            "evidence_chunk:chunk_0759e3ac7243ad975a778c102c94488c5a52ccb47e8f3ff2afb8ff69f35b437e"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "On June 27, 2024 Gogo and Airspan amended the Master Service Agreement dated November 25, 2019 to resolve disputes under the Airspan/Gogo Agreements.",
+          "statement": "The June 27, 2024 Master Service Agreement amendment was executed alongside the Chapter 11 plan supplement.",
           "citation_refs": [
-            "evidence_chunk:chunk_026df219677f9836e1095f1b36842678825590eeec3ef70dec719cd74969c9cc",
-            "evidence_chunk:chunk_b6405b1577ec422f0e503ca451c4fa1a9580f914e975e620156a368929036549"
+            "evidence_chunk:chunk_7a1b9a7f361cc8200d7cfa963d67bee0d63c1808007e344939fa61d339db9a71"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "Airspan and Fortress Credit Corp. agreed in principle to a new $20M first lien revolving facility on June 28, 2024.",
+          "citation_refs": [
+            "evidence_chunk:chunk_7a1b9a7f361cc8200d7cfa963d67bee0d63c1808007e344939fa61d339db9a71",
+            "evidence_chunk:chunk_df2aeaf297900898e670b438118975e53dfffac7f5ea013aaac8ddf833d8c798"
           ]
         },
         {
           "section": "conflicts_risks",
-          "statement": "Gogo's conditional waiver of any purported default under the Airspan/Gogo Agreements is limited to the Waiver Termination Date, if any.",
+          "statement": "The new revolving facility remains subject to closing conditions and execution of definitive documents",
           "citation_refs": [
-            "evidence_chunk:chunk_f1a828b53817c833afb35549b1788886dd088fbc6a74900d7eb6dee0c2cb9de9"
+            "evidence_chunk:chunk_7a1b9a7f361cc8200d7cfa963d67bee0d63c1808007e344939fa61d339db9a71"
           ]
         },
         {
           "section": "recommended_next_steps",
-          "statement": "Confirm whether the Waiver Termination Date occurred and whether facility closing conditions and definitive documents are complete before deciding.",
+          "statement": "Confirm with Airspan whether the new revolving facility's closing conditions are met and whether the amendment is fully effective.",
           "citation_refs": [
-            "evidence_chunk:chunk_f1a828b53817c833afb35549b1788886dd088fbc6a74900d7eb6dee0c2cb9de9"
+            "evidence_chunk:chunk_7a1b9a7f361cc8200d7cfa963d67bee0d63c1808007e344939fa61d339db9a71"
           ]
         }
       ],
@@ -586,57 +619,58 @@
     {
       "case_id": "edgar-emergent-astrazeneca-manufacturing",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_be2c8178730684ae",
+      "brief_id": "brief_3348f46728a749b8",
       "brief_status": "evidence_backed",
-      "title": "Should AstraZeneca continue manufacturing under incomplete readiness and remediation evidence?",
+      "title": "Should AstraZeneca continue manufacturing under the current contract?",
       "decision_question": "Should the contract owner continue AstraZeneca manufacturing while readiness and remediation evidence remains incomplete?",
-      "bottom_line": "Hold: supplied evidence does not establish current manufacturing readiness, remediation status, regulatory evidence, and pricing.",
+      "bottom_line": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: Fees are invoiced at activity initiation and completion; pass-through costs at material order placement and receipt",
       "key_facts": [
-        "The Master Services Agreement between AstraZeneca and Emergent Manufacturing Operations Baltimore, LLC was finalized on July 24, 2020.",
-        "Fees are invoiced at activity initiation and completion; pass-through costs at material order placement and receipt",
         "Production shall use a cGMP-validated manufacturing process"
       ],
-      "conflicts_risks": [],
+      "conflicts_risks": [
+        "Fees are invoiced at activity initiation and completion; pass-through costs at material order placement and receipt"
+      ],
       "missing_evidence": [
         "Current manufacturing readiness, remediation status, regulatory evidence, and pricing require human confirmation."
       ],
       "recommended_next_steps": [
-        "Obtain remediation closure, validation results, inspection status, and usable-capacity evidence before deciding."
+        "Obtain remediation closure, validation results, inspection status, and usable-capacity evidence before deciding.",
+        "Continue only after remediation, validation, inspection, capacity, quality, delivery, and pricing evidence supports readiness."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: supplied evidence does not establish current manufacturing readiness, remediation status, regulatory evidence, and pricing.",
+          "statement": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: Fees are invoiced at activity initiation and completion; pass-through costs at material order placement and receipt",
           "citation_refs": [
-            "evidence_chunk:chunk_5f35b7c48e71c3dcc387e224e3b27bf029b5db0352e4b364c75777045830549f"
-          ]
-        },
-        {
-          "section": "key_facts",
-          "statement": "The Master Services Agreement between AstraZeneca and Emergent Manufacturing Operations Baltimore, LLC was finalized on July 24, 2020.",
-          "citation_refs": [
-            "evidence_chunk:chunk_5f35b7c48e71c3dcc387e224e3b27bf029b5db0352e4b364c75777045830549f"
-          ]
-        },
-        {
-          "section": "key_facts",
-          "statement": "Fees are invoiced at activity initiation and completion; pass-through costs at material order placement and receipt",
-          "citation_refs": [
-            "evidence_chunk:chunk_8d5a040f7fb7dee30bbe1647a1df10201aac449b6d1ae61dfa7ce8bb58199f5e"
+            "evidence_chunk:chunk_1503d8d28b74ad6063e5542ad234a737e627218ac4442239b1da3b4c91c3edf5"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Production shall use a cGMP-validated manufacturing process",
           "citation_refs": [
-            "evidence_chunk:chunk_7fae7e870f5a66eb415be0acd19c7155a7b717a98b8506d574d24753a27f1f09"
+            "evidence_chunk:chunk_66c7e3f592dbc1edc58faeeebb4f0fd0a14e0d3f14c211ba74f3a57621a8039a"
+          ]
+        },
+        {
+          "section": "conflicts_risks",
+          "statement": "Fees are invoiced at activity initiation and completion; pass-through costs at material order placement and receipt",
+          "citation_refs": [
+            "evidence_chunk:chunk_1503d8d28b74ad6063e5542ad234a737e627218ac4442239b1da3b4c91c3edf5"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Obtain remediation closure, validation results, inspection status, and usable-capacity evidence before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_5f35b7c48e71c3dcc387e224e3b27bf029b5db0352e4b364c75777045830549f"
+            "evidence_chunk:chunk_1503d8d28b74ad6063e5542ad234a737e627218ac4442239b1da3b4c91c3edf5"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only after remediation, validation, inspection, capacity, quality, delivery, and pricing evidence supports readiness.",
+          "citation_refs": [
+            "evidence_chunk:chunk_1503d8d28b74ad6063e5542ad234a737e627218ac4442239b1da3b4c91c3edf5"
           ]
         }
       ],
@@ -738,14 +772,13 @@
     {
       "case_id": "edgar-itci-lonza-manufacturing",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_40fcf32e885c135e",
+      "brief_id": "brief_4a11bd3a4ca4f8db",
       "brief_status": "evidence_backed",
-      "title": "Should Lonza manufacturing services be continued under Amendment No. 1?",
+      "title": "Should ITI continue Lonza manufacturing under the amended agreement?",
       "decision_question": "Should the contract owner continue or extend Lonza manufacturing services under the amended agreement?",
       "bottom_line": "Hold: The Lonza Agreement provides minimum annual purchase commitments for 2025 through 2028 and delivery in 2026 through 2029",
       "key_facts": [
         "Lonza: Amendment No. 1 sets the agreement end date at December 31, 2028, subject to earlier termination or extension by mutual written consent.",
-        "Amendment No. 1 was executed on December 19, 2022 by Lonza and ITI Limited.",
         "Lonza agreed to manufacture and supply the API for lumateperone"
       ],
       "conflicts_risks": [
@@ -755,51 +788,51 @@
         "Current manufacturing capacity, audit and quality status, remediation, performance, and pricing require human confirmation."
       ],
       "recommended_next_steps": [
-        "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited manufacturing obligations."
+        "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited manufacturing obligations.",
+        "Continue only after remediation, validation, inspection, capacity, quality, delivery, and pricing evidence supports readiness."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
           "statement": "Hold: The Lonza Agreement provides minimum annual purchase commitments for 2025 through 2028 and delivery in 2026 through 2029",
           "citation_refs": [
-            "evidence_chunk:chunk_0896e79cd43a9f139fbc2bc6e1167fbe3fba088d78b2ce52d0235da4a5f8da82"
+            "evidence_chunk:chunk_cac7b5a5cd6d838beab304095dd3a44d7370d8774a7bc838e4dff805aa66b61f"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Lonza: Amendment No. 1 sets the agreement end date at December 31, 2028, subject to earlier termination or extension by mutual written consent.",
           "citation_refs": [
-            "evidence_chunk:chunk_6e03c1b43ffb02838249a23c36379a50511e73cc4095976ebd6536a0f8c716b6",
-            "evidence_chunk:chunk_0d42b992433f7f9eeacc527a4d34145fc9e167cc4367a5546325fb392286b7f6"
-          ]
-        },
-        {
-          "section": "key_facts",
-          "statement": "Amendment No. 1 was executed on December 19, 2022 by Lonza and ITI Limited.",
-          "citation_refs": [
-            "evidence_chunk:chunk_6e03c1b43ffb02838249a23c36379a50511e73cc4095976ebd6536a0f8c716b6",
-            "evidence_chunk:chunk_a205af5921854704e9cd5d8a336c2b07b5b2df3ee5a6f4c908cfdf688a023354"
+            "evidence_chunk:chunk_accc2958504ffe6ef3e910f22dc8ac33fd3181aded8f43582e7f4427bba4cedc",
+            "evidence_chunk:chunk_213f64c9ffaa021e56e01dc2bddbf694911f0bd14ded82811d873219f73a4260"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Lonza agreed to manufacture and supply the API for lumateperone",
           "citation_refs": [
-            "evidence_chunk:chunk_0896e79cd43a9f139fbc2bc6e1167fbe3fba088d78b2ce52d0235da4a5f8da82"
+            "evidence_chunk:chunk_cac7b5a5cd6d838beab304095dd3a44d7370d8774a7bc838e4dff805aa66b61f"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "The Lonza Agreement provides minimum annual purchase commitments for 2025 through 2028 and delivery in 2026 through 2029",
           "citation_refs": [
-            "evidence_chunk:chunk_0896e79cd43a9f139fbc2bc6e1167fbe3fba088d78b2ce52d0235da4a5f8da82"
+            "evidence_chunk:chunk_cac7b5a5cd6d838beab304095dd3a44d7370d8774a7bc838e4dff805aa66b61f"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited manufacturing obligations.",
           "citation_refs": [
-            "evidence_chunk:chunk_0896e79cd43a9f139fbc2bc6e1167fbe3fba088d78b2ce52d0235da4a5f8da82"
+            "evidence_chunk:chunk_cac7b5a5cd6d838beab304095dd3a44d7370d8774a7bc838e4dff805aa66b61f"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only after remediation, validation, inspection, capacity, quality, delivery, and pricing evidence supports readiness.",
+          "citation_refs": [
+            "evidence_chunk:chunk_cac7b5a5cd6d838beab304095dd3a44d7370d8774a7bc838e4dff805aa66b61f"
           ]
         }
       ],
@@ -878,14 +911,13 @@
     {
       "case_id": "edgar-scilex-oishi-itochu-development",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_e814798f1e9a1456",
+      "brief_id": "brief_3e031972e369f89e",
       "brief_status": "evidence_backed",
-      "title": "Should Scilex renegotiate or replace its Oishi/Itochu development relationship before renewal?",
+      "title": "Oishi/Itochu Product Development Agreement Renewal Decision",
       "decision_question": "Should the contract owner renegotiate the Oishi and Itochu development relationship or establish alternate supply and intellectual-property arrangements before renewal?",
       "bottom_line": "Hold: Oishi and Itochu may terminate both agreements if ZTlido and SP-103 net profits are equal to or less than five percent of net sales for four or more consecutive quarters.",
       "key_facts": [
-        "Oishi and Itochu collectively hold the right to terminate both agreements if Scilex's net profits for ZTlido and SP-103 do not exceed five percent of net sales for four or more consecutive quarters.",
-        "As of the proxy statement date, neither Oishi nor Itochu has exercised its termination right."
+        "Itochu have the right to terminate the Product Development Agreement"
       ],
       "conflicts_risks": [
         "Oishi: Fifth Amendment cancels the Fourth Amendment's effect on the Development Agreement.",
@@ -895,50 +927,43 @@
         "Alternate supply readiness and the related intellectual-property terms require human confirmation."
       ],
       "recommended_next_steps": [
-        "Verify alternate-supply qualification and map the intellectual-property rights needed for transition before deciding."
+        "Obtain a confirmed update on Scilex's profit metrics for ZTlido and SP-103 to assess whether the termination condition has been triggered."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
           "statement": "Hold: Oishi and Itochu may terminate both agreements if ZTlido and SP-103 net profits are equal to or less than five percent of net sales for four or more consecutive quarters.",
           "citation_refs": [
-            "evidence_chunk:chunk_c903b58f942e6912b5ef64551708a9912409a70e5697ca95fb9568381372cb7b"
+            "evidence_chunk:chunk_84680c47cf0cae0259bf315b71a50a5b6dc916a1ac6164b67f00cc1b07c242fb"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Oishi and Itochu collectively hold the right to terminate both agreements if Scilex's net profits for ZTlido and SP-103 do not exceed five percent of net sales for four or more consecutive quarters.",
+          "statement": "Itochu have the right to terminate the Product Development Agreement",
           "citation_refs": [
-            "evidence_chunk:chunk_c903b58f942e6912b5ef64551708a9912409a70e5697ca95fb9568381372cb7b"
-          ]
-        },
-        {
-          "section": "key_facts",
-          "statement": "As of the proxy statement date, neither Oishi nor Itochu has exercised its termination right.",
-          "citation_refs": [
-            "evidence_chunk:chunk_5fae57fee70a8343038d7b2800af0cbe0355854b470a812a8e905b7bf624b6d0"
+            "evidence_chunk:chunk_84680c47cf0cae0259bf315b71a50a5b6dc916a1ac6164b67f00cc1b07c242fb"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Oishi: Fifth Amendment cancels the Fourth Amendment's effect on the Development Agreement.",
           "citation_refs": [
-            "evidence_chunk:chunk_02e57044432549f806fe7b53301b2c6fe3fd9b94b5139d85e0d7fe940f5cd014",
-            "evidence_chunk:chunk_94eae9385559dccc35bde49adedbc0130baf279c38a768e4fd96b001e391a18e"
+            "evidence_chunk:chunk_5040685539b1c1514f47f81641eb115278ab205cf4fac42916997dccea4b8217",
+            "evidence_chunk:chunk_0e5e55df61bb75deb2f4a7efc5dbe4760c02e51253d8567d67365eb044018755"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Oishi and Itochu may terminate both agreements if ZTlido and SP-103 net profits are equal to or less than five percent of net sales for four or more consecutive quarters",
           "citation_refs": [
-            "evidence_chunk:chunk_c903b58f942e6912b5ef64551708a9912409a70e5697ca95fb9568381372cb7b"
+            "evidence_chunk:chunk_84680c47cf0cae0259bf315b71a50a5b6dc916a1ac6164b67f00cc1b07c242fb"
           ]
         },
         {
           "section": "recommended_next_steps",
-          "statement": "Verify alternate-supply qualification and map the intellectual-property rights needed for transition before deciding.",
+          "statement": "Obtain a confirmed update on Scilex's profit metrics for ZTlido and SP-103 to assess whether the termination condition has been triggered.",
           "citation_refs": [
-            "evidence_chunk:chunk_c903b58f942e6912b5ef64551708a9912409a70e5697ca95fb9568381372cb7b"
+            "evidence_chunk:chunk_84680c47cf0cae0259bf315b71a50a5b6dc916a1ac6164b67f00cc1b07c242fb"
           ]
         }
       ],
@@ -1040,13 +1065,12 @@
     {
       "case_id": "edgar-savara-gema-supply",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_875c2368b6411f1d",
+      "brief_id": "brief_f904b1a4bbe8f8e4",
       "brief_status": "evidence_backed",
-      "title": "Should SAVARA accelerate a qualified second source for molgramostim manufacturing?",
+      "title": "Should Savara accelerate a qualified second source for molgramostim manufacturing?",
       "decision_question": "Should the contract owner remain dependent on GEMA manufacturing or accelerate a qualified second source?",
-      "bottom_line": "Hold: supplied evidence does not establish current second-source validation, inspection status, and readiness. Basis: Through the filing date, all clinical and nonclinical trials used material sourced from GEMA",
+      "bottom_line": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: A third party was engaged as a second source for molgramostim manufacturing.",
       "key_facts": [
-        "Through the filing date, all clinical and nonclinical trials used material sourced from GEMA",
         "A third party was engaged as a second source for molgramostim manufacturing."
       ],
       "conflicts_risks": [],
@@ -1055,35 +1079,36 @@
         "Current second-source validation, inspection status, and readiness require human confirmation."
       ],
       "recommended_next_steps": [
-        "Verify the second source's readiness before deciding."
+        "Verify the second source's readiness before deciding.",
+        "Transition only after qualification, validation, capacity, and required rights are confirmed; until then preserve the current continuity plan."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: supplied evidence does not establish current second-source validation, inspection status, and readiness. Basis: Through the filing date, all clinical and nonclinical trials used material sourced from GEMA",
+          "statement": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: A third party was engaged as a second source for molgramostim manufacturing.",
           "citation_refs": [
-            "evidence_chunk:chunk_f94d18943e5b38358e42a2fc2c5a12439f536bfa5411f32b3a4f4558cbfdcb01"
-          ]
-        },
-        {
-          "section": "key_facts",
-          "statement": "Through the filing date, all clinical and nonclinical trials used material sourced from GEMA",
-          "citation_refs": [
-            "evidence_chunk:chunk_f94d18943e5b38358e42a2fc2c5a12439f536bfa5411f32b3a4f4558cbfdcb01"
+            "evidence_chunk:chunk_78345b5753ccb1957fcb6774aa5273e8097eb36982d74f5678abc23789b4b1ce"
           ]
         },
         {
           "section": "key_facts",
           "statement": "A third party was engaged as a second source for molgramostim manufacturing.",
           "citation_refs": [
-            "evidence_chunk:chunk_f94d18943e5b38358e42a2fc2c5a12439f536bfa5411f32b3a4f4558cbfdcb01"
+            "evidence_chunk:chunk_78345b5753ccb1957fcb6774aa5273e8097eb36982d74f5678abc23789b4b1ce"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Verify the second source's readiness before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_f94d18943e5b38358e42a2fc2c5a12439f536bfa5411f32b3a4f4558cbfdcb01"
+            "evidence_chunk:chunk_78345b5753ccb1957fcb6774aa5273e8097eb36982d74f5678abc23789b4b1ce"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Transition only after qualification, validation, capacity, and required rights are confirmed; until then preserve the current continuity plan.",
+          "citation_refs": [
+            "evidence_chunk:chunk_78345b5753ccb1957fcb6774aa5273e8097eb36982d74f5678abc23789b4b1ce"
           ]
         }
       ],
@@ -1162,13 +1187,14 @@
     {
       "case_id": "edgar-healthnet-ibm-outsourcing",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_70f2778f835f9f4c",
+      "brief_id": "brief_a8a097b74bc67440",
       "brief_status": "evidence_backed",
-      "title": "Should Health Net continue IBM outsourcing or prepare a transition after the missing-drive incident?",
+      "title": "Should Health Net continue with IBM outsourcing after the missing-drive incident?",
       "decision_question": "As of the latest packet filing, should the contract owner continue IBM outsourcing or prepare a transition after the missing-drive incident?",
       "bottom_line": "Hold: The missing drives held personal information for approximately two million Health Net members, employees, and providers",
       "key_facts": [
-        "IBM notified Health Net on January 21, 2011 that it could not locate several hard disk drives used in its Rancho Cordova data center."
+        "Health Net determined approximately two million members' personal information was stored on the unaccounted-for drives and began notifying individuals starting March 14, 2011.",
+        "IBM could not locate several hard disk drives used in the data center"
       ],
       "conflicts_risks": [
         "The missing drives held personal information for approximately two million Health Net members, employees, and providers"
@@ -1177,35 +1203,50 @@
         "The incident root cause, completed remediation, exit cost, and current service performance require human confirmation."
       ],
       "recommended_next_steps": [
-        "Obtain incident-remediation closure and quantify current service and transition exposure before deciding."
+        "Obtain incident-remediation closure and quantify current service and transition exposure before deciding.",
+        "Continue only if current service performance, pricing, and transition exposure support retention; otherwise use the replacement plan."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
           "statement": "Hold: The missing drives held personal information for approximately two million Health Net members, employees, and providers",
           "citation_refs": [
-            "evidence_chunk:chunk_674c52c0322f254c18106ba2e9bf040c9684ca8abbef03682480c6d567fc5e1f"
+            "evidence_chunk:chunk_074d4ddb3aa3ebf4e5236db3972743bcba0e68fedb2053cb53301b3cefd143eb"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "IBM notified Health Net on January 21, 2011 that it could not locate several hard disk drives used in its Rancho Cordova data center.",
+          "statement": "Health Net determined approximately two million members' personal information was stored on the unaccounted-for drives and began notifying individuals starting March 14, 2011.",
           "citation_refs": [
-            "evidence_chunk:chunk_674c52c0322f254c18106ba2e9bf040c9684ca8abbef03682480c6d567fc5e1f"
+            "evidence_chunk:chunk_074d4ddb3aa3ebf4e5236db3972743bcba0e68fedb2053cb53301b3cefd143eb"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "IBM could not locate several hard disk drives used in the data center",
+          "citation_refs": [
+            "evidence_chunk:chunk_074d4ddb3aa3ebf4e5236db3972743bcba0e68fedb2053cb53301b3cefd143eb"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "The missing drives held personal information for approximately two million Health Net members, employees, and providers",
           "citation_refs": [
-            "evidence_chunk:chunk_674c52c0322f254c18106ba2e9bf040c9684ca8abbef03682480c6d567fc5e1f"
+            "evidence_chunk:chunk_074d4ddb3aa3ebf4e5236db3972743bcba0e68fedb2053cb53301b3cefd143eb"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Obtain incident-remediation closure and quantify current service and transition exposure before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_674c52c0322f254c18106ba2e9bf040c9684ca8abbef03682480c6d567fc5e1f"
+            "evidence_chunk:chunk_074d4ddb3aa3ebf4e5236db3972743bcba0e68fedb2053cb53301b3cefd143eb"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only if current service performance, pricing, and transition exposure support retention; otherwise use the replacement plan.",
+          "citation_refs": [
+            "evidence_chunk:chunk_074d4ddb3aa3ebf4e5236db3972743bcba0e68fedb2053cb53301b3cefd143eb"
           ]
         }
       ],
@@ -1284,13 +1325,12 @@
     {
       "case_id": "edgar-iteos-gsk-collaboration",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_6381360441cae511",
+      "brief_id": "brief_70890dc390c766fe",
       "brief_status": "evidence_backed",
-      "title": "Should iTeos continue its share of the GSK global development plan under the amended collaboration?",
+      "title": "Should iTeos continue its share under the amended GSK collaboration?",
       "decision_question": "Should the contract owner continue iTeos's share of the GSK global development plan under the amended collaboration?",
-      "bottom_line": "Hold: supplied evidence does not establish current trial outcomes, milestones, development budget, and opt-out terms. Basis: Development costs: GSK bears 60%; ITEOS 40%, except §3.4 and subject to §6.7",
+      "bottom_line": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: Development costs: GSK bears 60%; ITEOS 40%, except §3.4 and subject to §6.7",
       "key_facts": [
-        "Amendments replace Table 12.6 with new development deadlines but redact the milestone rows.",
         "Development costs: GSK bears 60%; ITEOS 40%, except §3.4 and subject to §6.7"
       ],
       "conflicts_risks": [
@@ -1300,44 +1340,44 @@
         "Current trial outcomes, milestones, development budget, and opt-out terms require human confirmation."
       ],
       "recommended_next_steps": [
-        "Reconcile the current plan, approved budget, cost-allocation ledger, milestone status, and opt-out terms before deciding."
+        "Reconcile the current plan, approved budget, cost-allocation ledger, milestone status, and opt-out terms before deciding.",
+        "Continue only if the current plan, approved budget, cost allocation, milestones, and opt-out exposure fit approved resource limits."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: supplied evidence does not establish current trial outcomes, milestones, development budget, and opt-out terms. Basis: Development costs: GSK bears 60%; ITEOS 40%, except §3.4 and subject to §6.7",
+          "statement": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: Development costs: GSK bears 60%; ITEOS 40%, except §3.4 and subject to §6.7",
           "citation_refs": [
-            "evidence_chunk:chunk_2480a7defbd263208232bbfb7b12f52e140e30f150bd9f9c7a7bdc5442cb8c0b"
-          ]
-        },
-        {
-          "section": "key_facts",
-          "statement": "Amendments replace Table 12.6 with new development deadlines but redact the milestone rows.",
-          "citation_refs": [
-            "evidence_chunk:chunk_dbe8d349f1d4639cebfdfd715a58a37b27929ed011d4e10f28b939885b84df59",
-            "evidence_chunk:chunk_e8c88aff04f1cd858cee144b9d5202030e3c4c8b0ca612c163dc2fdd45d81e80"
+            "evidence_chunk:chunk_f8569fa474c48f21d702261a82f4637299398be3385f728b38aacfdd032ab56d"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Development costs: GSK bears 60%; ITEOS 40%, except §3.4 and subject to §6.7",
           "citation_refs": [
-            "evidence_chunk:chunk_2480a7defbd263208232bbfb7b12f52e140e30f150bd9f9c7a7bdc5442cb8c0b"
+            "evidence_chunk:chunk_f8569fa474c48f21d702261a82f4637299398be3385f728b38aacfdd032ab56d"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "iTeos: Amendment No. 1 excludes products containing non-Licensed-Antibody ITEOS/Affiliate-owned or controlled ingredients from GSK's Licensed Product scope.",
           "citation_refs": [
-            "evidence_chunk:chunk_e8c88aff04f1cd858cee144b9d5202030e3c4c8b0ca612c163dc2fdd45d81e80",
-            "evidence_chunk:chunk_61625a05535627dab39465769fe148e71bbcf18b3a535960679a732202364cbc"
+            "evidence_chunk:chunk_3278f91e5fe5964febd56901f61dafd17488ff1d58bfa219a4efe4f58740a73e",
+            "evidence_chunk:chunk_6d156ed4526879f30e5164b382a552b3965a401e291ee67f873d2fac4a812b1b"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Reconcile the current plan, approved budget, cost-allocation ledger, milestone status, and opt-out terms before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_2480a7defbd263208232bbfb7b12f52e140e30f150bd9f9c7a7bdc5442cb8c0b"
+            "evidence_chunk:chunk_f8569fa474c48f21d702261a82f4637299398be3385f728b38aacfdd032ab56d"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only if the current plan, approved budget, cost allocation, milestones, and opt-out exposure fit approved resource limits.",
+          "citation_refs": [
+            "evidence_chunk:chunk_f8569fa474c48f21d702261a82f4637299398be3385f728b38aacfdd032ab56d"
           ]
         }
       ],
@@ -1439,58 +1479,59 @@
     {
       "case_id": "edgar-omada-cigna-services",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_e31f0da8936862ca",
+      "brief_id": "brief_b7942a5716362f7b",
       "brief_status": "evidence_backed",
       "title": "Should Omada continue or renew the Cigna services arrangement?",
       "decision_question": "Should the contract owner continue or renew the Cigna services arrangement under the controlling agreement and amendment?",
-      "bottom_line": "Hold: supplied evidence does not establish current service levels, pricing, renewal terms, and performance. Basis: The 2018 Services Agreement between Omada and CHLIC began on February 1, 2018 and continues until terminated per Section 4.",
+      "bottom_line": "Hold: At the option of either party, the Agreement may be terminated at any time for any reason with at least 90 days' prior written notice",
       "key_facts": [
-        "Cigna: Amendment No. 1 replaces the Enrolled Participants definition.",
-        "The 2018 Services Agreement between Omada and CHLIC began on February 1, 2018 and continues until terminated per Section 4.",
+        "Cigna: Amendment No. 1 replaces the Enrolled Participants definition."
+      ],
+      "conflicts_risks": [
         "At the option of either party, the Agreement may be terminated at any time for any reason with at least 90 days' prior written notice"
       ],
-      "conflicts_risks": [],
       "missing_evidence": [
         "Current service levels, pricing, renewal terms, and performance require human confirmation."
       ],
       "recommended_next_steps": [
-        "Obtain the latest service-level report, current price schedule, and termination or transition-cost estimate before deciding."
+        "Obtain the latest service-level report, current price schedule, and termination or transition-cost estimate before deciding.",
+        "Continue only if current service performance, pricing, and transition exposure support retention; otherwise use the replacement plan."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: supplied evidence does not establish current service levels, pricing, renewal terms, and performance. Basis: The 2018 Services Agreement between Omada and CHLIC began on February 1, 2018 and continues until terminated per Section 4.",
+          "statement": "Hold: At the option of either party, the Agreement may be terminated at any time for any reason with at least 90 days' prior written notice",
           "citation_refs": [
-            "evidence_chunk:chunk_9773b51001bb9735c5c78d2cc0470c523398526a16c25aa364b2c2617e9d7872"
+            "evidence_chunk:chunk_59b22a2652e1c75305cfae47dd1a7bbe87d92048ac58045a44863be3c8a2a26d"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Cigna: Amendment No. 1 replaces the Enrolled Participants definition.",
           "citation_refs": [
-            "evidence_chunk:chunk_ceb52667a9971f87fbd154ae09c260f3c86450a25e9f1fc839afc7f1e9ca21f6",
-            "evidence_chunk:chunk_1a8b65d87feb17f2920b1dba8114ba027660143c0f1eae326ad18eddfe5d50ee"
+            "evidence_chunk:chunk_9761706ff60fae59944a91aa52c480e0964eeb2ac050843ccdadddeee5087b36",
+            "evidence_chunk:chunk_39e31a75cb31ed1ce95b77e317e178f148a451b2f79cf991bb4356c22667da51"
           ]
         },
         {
-          "section": "key_facts",
-          "statement": "The 2018 Services Agreement between Omada and CHLIC began on February 1, 2018 and continues until terminated per Section 4.",
-          "citation_refs": [
-            "evidence_chunk:chunk_9773b51001bb9735c5c78d2cc0470c523398526a16c25aa364b2c2617e9d7872"
-          ]
-        },
-        {
-          "section": "key_facts",
+          "section": "conflicts_risks",
           "statement": "At the option of either party, the Agreement may be terminated at any time for any reason with at least 90 days' prior written notice",
           "citation_refs": [
-            "evidence_chunk:chunk_836156c6885abdb0fcf06fd010cf58a184d459c01adc5bc7c3b5b6f87b377071"
+            "evidence_chunk:chunk_59b22a2652e1c75305cfae47dd1a7bbe87d92048ac58045a44863be3c8a2a26d"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Obtain the latest service-level report, current price schedule, and termination or transition-cost estimate before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_9773b51001bb9735c5c78d2cc0470c523398526a16c25aa364b2c2617e9d7872"
+            "evidence_chunk:chunk_59b22a2652e1c75305cfae47dd1a7bbe87d92048ac58045a44863be3c8a2a26d"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only if current service performance, pricing, and transition exposure support retention; otherwise use the replacement plan.",
+          "citation_refs": [
+            "evidence_chunk:chunk_59b22a2652e1c75305cfae47dd1a7bbe87d92048ac58045a44863be3c8a2a26d"
           ]
         }
       ],
@@ -1569,44 +1610,58 @@
     {
       "case_id": "edgar-omada-cigna-admin",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_d3c2de38509e7ba2",
+      "brief_id": "brief_cc38ecd455f79b27",
       "brief_status": "evidence_backed",
-      "title": "Should the Cigna admin-services contract be continued or renewed under Amendment No. 2?",
+      "title": "Should the Cigna admin-services contract continue under Amendment No. 2?",
       "decision_question": "Should the contract owner continue or renew the Cigna administrative-services arrangement under the latest controlling amendment?",
-      "bottom_line": "Hold: supplied evidence does not establish current service levels, pricing, renewal terms, and performance. Basis: Section 5.01 compensation language for Hypertension and Diabetes Programs is restated but fee amounts are redacted.",
+      "bottom_line": "Hold: Either party may terminate for any reason on redacted prior notice, together with termination of SOW No. 1",
       "key_facts": [
-        "Section 5.01 compensation language for Hypertension and Diabetes Programs is restated but fee amounts are redacted."
+        "Amendment No. 1 CHLIC Compensation is not effective for the redacted client accounts"
       ],
-      "conflicts_risks": [],
+      "conflicts_risks": [
+        "Either party may terminate for any reason on redacted prior notice, together with termination of SOW No. 1"
+      ],
       "missing_evidence": [
         "Current service levels, pricing, renewal terms, and performance require human confirmation."
       ],
       "recommended_next_steps": [
-        "Obtain the latest service-level report, current price schedule, and termination or transition-cost estimate before deciding."
+        "Obtain the latest service-level report, current price schedule, and termination or transition-cost estimate before deciding.",
+        "Continue only if current service performance, pricing, and transition exposure support retention; otherwise use the replacement plan."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: supplied evidence does not establish current service levels, pricing, renewal terms, and performance. Basis: Section 5.01 compensation language for Hypertension and Diabetes Programs is restated but fee amounts are redacted.",
+          "statement": "Hold: Either party may terminate for any reason on redacted prior notice, together with termination of SOW No. 1",
           "citation_refs": [
-            "evidence_chunk:chunk_816b50e5d2024f58aa2b472a7e91e243e42eb5b58cae6c5efbdf23b050280160",
-            "evidence_chunk:chunk_f376109c92b656ff8b51caf5436d591a70b02263b9b73f197461cf1b1c7e3c02"
+            "evidence_chunk:chunk_3362fd3ec26f01296f11394b6ead96e647c074f131790ed3fe4b7cdfd6067b5f"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Section 5.01 compensation language for Hypertension and Diabetes Programs is restated but fee amounts are redacted.",
+          "statement": "Amendment No. 1 CHLIC Compensation is not effective for the redacted client accounts",
           "citation_refs": [
-            "evidence_chunk:chunk_816b50e5d2024f58aa2b472a7e91e243e42eb5b58cae6c5efbdf23b050280160",
-            "evidence_chunk:chunk_f376109c92b656ff8b51caf5436d591a70b02263b9b73f197461cf1b1c7e3c02"
+            "evidence_chunk:chunk_72bb5a163726b44ec369cb9a2a5b64f423a009dd088f9940e14fdc3142ba994e"
+          ]
+        },
+        {
+          "section": "conflicts_risks",
+          "statement": "Either party may terminate for any reason on redacted prior notice, together with termination of SOW No. 1",
+          "citation_refs": [
+            "evidence_chunk:chunk_3362fd3ec26f01296f11394b6ead96e647c074f131790ed3fe4b7cdfd6067b5f"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Obtain the latest service-level report, current price schedule, and termination or transition-cost estimate before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_816b50e5d2024f58aa2b472a7e91e243e42eb5b58cae6c5efbdf23b050280160",
-            "evidence_chunk:chunk_f376109c92b656ff8b51caf5436d591a70b02263b9b73f197461cf1b1c7e3c02"
+            "evidence_chunk:chunk_3362fd3ec26f01296f11394b6ead96e647c074f131790ed3fe4b7cdfd6067b5f"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only if current service performance, pricing, and transition exposure support retention; otherwise use the replacement plan.",
+          "citation_refs": [
+            "evidence_chunk:chunk_3362fd3ec26f01296f11394b6ead96e647c074f131790ed3fe4b7cdfd6067b5f"
           ]
         }
       ],
@@ -1708,9 +1763,9 @@
     {
       "case_id": "edgar-sema4-mount-sinai-services",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_6f4d3c594206932d",
+      "brief_id": "brief_237514b99d1d3d21",
       "brief_status": "draft",
-      "title": "Should CornerStone continue Mount Sinai services after amendment?",
+      "title": "Should Mount Sinai continue services under Sema4 after amendment?",
       "decision_question": "Should the contract owner continue the Mount Sinai services arrangement after applying the amendment effects?",
       "bottom_line": "Hold: identify the controlling Master Services Agreement before combining amendment, term, or termination clauses.",
       "key_facts": [],
@@ -1808,50 +1863,75 @@
     {
       "case_id": "edgar-sema4-mount-sinai-data-rights",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_5cf7e611813863c3",
+      "brief_id": "brief_6c4b7347f14ac80d",
       "brief_status": "evidence_backed",
       "title": "Should Mount Sinai continue the data-rights arrangement with Sema4?",
       "decision_question": "Should the contract owner continue the Mount Sinai data-rights arrangement given the operative intellectual-property, license, and post-termination constraints?",
-      "bottom_line": "Hold: supplied evidence does not yet establish the decision; review the cited basis and missing evidence. Basis: Sequence Data ownership: Sema4 owns Sequence Data subject to Section 10.4(d)",
+      "bottom_line": "Hold: Sema4 must maintain insurance naming Mount Sinai as additional insured during term and 3 years after a Fundamental Post-Termination Breach.",
       "key_facts": [
-        "ISMMS owns Biospecimens and Clinical Data at all times; Sema4 holds a perpetual nonexclusive license to Clinical Data.",
+        "Deliverables contain no Background or Third Party IP without Mount Sinai's prior written consent.",
+        "ISMMS owns Biospecimens and Clinical Data; Sema4 owns Sequence Data at all times.",
         "Sequence Data ownership: Sema4 owns Sequence Data subject to Section 10.4(d)"
       ],
-      "conflicts_risks": [],
+      "conflicts_risks": [
+        "Sema4 must maintain insurance naming Mount Sinai as additional insured during term and 3 years after a Fundamental Post-Termination Breach."
+      ],
       "missing_evidence": [
+        "The specific valuation precepts, royalty rates, minimum payments, and termination conditions referenced in Section 2.1 are redacted and not established.",
         "Post-termination obligations, data rights, and pricing exposure require human confirmation."
       ],
       "recommended_next_steps": [
-        "Map ownership, permitted use, return or destruction duties, and surviving licenses before deciding."
+        "Map ownership, permitted use, return or destruction duties, and surviving licenses before deciding.",
+        "Continue only if ownership, permitted use, return or destruction duties, and surviving licenses support the intended operating model."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: supplied evidence does not yet establish the decision; review the cited basis and missing evidence. Basis: Sequence Data ownership: Sema4 owns Sequence Data subject to Section 10.4(d)",
+          "statement": "Hold: Sema4 must maintain insurance naming Mount Sinai as additional insured during term and 3 years after a Fundamental Post-Termination Breach.",
           "citation_refs": [
-            "evidence_chunk:chunk_cb24539d54024a60e82aa2726cd2f8c14090f952db15f7f58e013b9e0ab30ab6"
+            "evidence_chunk:chunk_694e5f56693bfe6a6a82bb5a9651239c86119669ed9d96aa61dae5c6539bbfe2"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "ISMMS owns Biospecimens and Clinical Data at all times; Sema4 holds a perpetual nonexclusive license to Clinical Data.",
+          "statement": "Deliverables contain no Background or Third Party IP without Mount Sinai's prior written consent.",
           "citation_refs": [
-            "evidence_chunk:chunk_1b53bdbfe7a1352ff328884259a39086b9eeefa5efcd90d934a1db73f70546bb",
-            "evidence_chunk:chunk_cb24539d54024a60e82aa2726cd2f8c14090f952db15f7f58e013b9e0ab30ab6"
+            "evidence_chunk:chunk_d10073d06ee99fbccfec62daa635828aca8894fa35c6a32bfed5a2c273cb8742"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "ISMMS owns Biospecimens and Clinical Data; Sema4 owns Sequence Data at all times.",
+          "citation_refs": [
+            "evidence_chunk:chunk_ec1c7b5f2ca487abfff3fd67bd89871a6c89d8b40ba6271310b696e494d3a121"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Sequence Data ownership: Sema4 owns Sequence Data subject to Section 10.4(d)",
           "citation_refs": [
-            "evidence_chunk:chunk_cb24539d54024a60e82aa2726cd2f8c14090f952db15f7f58e013b9e0ab30ab6"
+            "evidence_chunk:chunk_ec1c7b5f2ca487abfff3fd67bd89871a6c89d8b40ba6271310b696e494d3a121"
+          ]
+        },
+        {
+          "section": "conflicts_risks",
+          "statement": "Sema4 must maintain insurance naming Mount Sinai as additional insured during term and 3 years after a Fundamental Post-Termination Breach.",
+          "citation_refs": [
+            "evidence_chunk:chunk_694e5f56693bfe6a6a82bb5a9651239c86119669ed9d96aa61dae5c6539bbfe2"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Map ownership, permitted use, return or destruction duties, and surviving licenses before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_cb24539d54024a60e82aa2726cd2f8c14090f952db15f7f58e013b9e0ab30ab6"
+            "evidence_chunk:chunk_694e5f56693bfe6a6a82bb5a9651239c86119669ed9d96aa61dae5c6539bbfe2"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only if ownership, permitted use, return or destruction duties, and surviving licenses support the intended operating model.",
+          "citation_refs": [
+            "evidence_chunk:chunk_694e5f56693bfe6a6a82bb5a9651239c86119669ed9d96aa61dae5c6539bbfe2"
           ]
         }
       ],
@@ -1953,14 +2033,15 @@
     {
       "case_id": "edgar-sema4-illumina-supply",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_3a0c5a924f216e6f",
+      "brief_id": "brief_d3df02ec36a1fb71",
       "brief_status": "evidence_backed",
-      "title": "Should Illumina supply dependency continue under the disclosed agreement?",
+      "title": "Should CornerStone continue its Illumina supply dependency?",
       "decision_question": "Should the contract owner continue the Illumina supply dependency given the disclosed agreement and remaining continuity gaps?",
       "bottom_line": "Hold: Customer must purchase and take delivery of a redacted minimum during each calendar quarter of the Term",
       "key_facts": [
-        "The original agreement allowed Illumina to delegate or subcontract its obligations to affiliates, and invoices from affiliates are treated as coming directly from Illumina.",
-        "The First Amendment revives the expired Agreement and extends its term"
+        "The original Supply Agreement between Original Customer and Illumina was dated August 20, 2014 and let expire without extension.",
+        "Illumina may delegate or subcontract its rights and obligations to one or more Affiliates under the Agreement.",
+        "Customer must maintain a minimum service contract on each covered hardware throughout the Term; the minimum is redacted"
       ],
       "conflicts_risks": [
         "Customer must purchase and take delivery of a redacted minimum during each calendar quarter of the Term"
@@ -1969,43 +2050,57 @@
         "Current pricing, committed volume, and continuity protections require human confirmation."
       ],
       "recommended_next_steps": [
-        "Compare forecast demand with committed volume, then obtain current capacity, delivery, quality, and pricing records."
+        "Compare forecast demand with committed volume, then obtain current capacity, delivery, quality, and pricing records.",
+        "Continue only if documented capacity, quality, delivery, volume, and pricing meet approved requirements; otherwise qualify an alternate source."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
           "statement": "Hold: Customer must purchase and take delivery of a redacted minimum during each calendar quarter of the Term",
           "citation_refs": [
-            "evidence_chunk:chunk_64860913da48e8be1aba5f03f3b9c56bdbe8bed7fd2a57c2eebbe5e2a843214c"
+            "evidence_chunk:chunk_a8ce31afd6e70be891c9d2970db09de0548c99c88eda30a5b805af5f2ceb7544"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "The original agreement allowed Illumina to delegate or subcontract its obligations to affiliates, and invoices from affiliates are treated as coming directly from Illumina.",
+          "statement": "The original Supply Agreement between Original Customer and Illumina was dated August 20, 2014 and let expire without extension.",
           "citation_refs": [
-            "evidence_chunk:chunk_b7cb1969f3cc3bc337701a50a2827c4565318c464f07b91e3d2882744d739e45",
-            "evidence_chunk:chunk_bc7187e5dd8efa88ec68525efed8f35d25a0b3e4b1cfdfcc693a3f5ec04c9084"
+            "evidence_chunk:chunk_0899121cc7f9ba88a5fcc6d252517558b13064a5d0ba3703b83de168391b985c"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "The First Amendment revives the expired Agreement and extends its term",
+          "statement": "Illumina may delegate or subcontract its rights and obligations to one or more Affiliates under the Agreement.",
           "citation_refs": [
-            "evidence_chunk:chunk_c6694ca1c55371e1001cc069dca30553210493c6a9380cb601b4601a4166f423"
+            "evidence_chunk:chunk_b282126b9ef4ddce73bde68bb77bbdf34e7c6d9a1994bbafcda885ab463aca49"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "Customer must maintain a minimum service contract on each covered hardware throughout the Term; the minimum is redacted",
+          "citation_refs": [
+            "evidence_chunk:chunk_3f6043134d11ca458a03ef71e444b7a056c36dd842ba8e8ad4f6884d8fac02ef"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Customer must purchase and take delivery of a redacted minimum during each calendar quarter of the Term",
           "citation_refs": [
-            "evidence_chunk:chunk_64860913da48e8be1aba5f03f3b9c56bdbe8bed7fd2a57c2eebbe5e2a843214c"
+            "evidence_chunk:chunk_a8ce31afd6e70be891c9d2970db09de0548c99c88eda30a5b805af5f2ceb7544"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Compare forecast demand with committed volume, then obtain current capacity, delivery, quality, and pricing records.",
           "citation_refs": [
-            "evidence_chunk:chunk_64860913da48e8be1aba5f03f3b9c56bdbe8bed7fd2a57c2eebbe5e2a843214c"
+            "evidence_chunk:chunk_a8ce31afd6e70be891c9d2970db09de0548c99c88eda30a5b805af5f2ceb7544"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only if documented capacity, quality, delivery, volume, and pricing meet approved requirements; otherwise qualify an alternate source.",
+          "citation_refs": [
+            "evidence_chunk:chunk_a8ce31afd6e70be891c9d2970db09de0548c99c88eda30a5b805af5f2ceb7544"
           ]
         }
       ],
@@ -2084,52 +2179,67 @@
     {
       "case_id": "edgar-composecure-jpm-msa",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_a83dc923eea434a0",
+      "brief_id": "brief_ed1626b7ec8d0483",
       "brief_status": "evidence_backed",
       "title": "Should JPMC continue the CompoSecure agreement chain given concentration and undisclosed-economics risk?",
       "decision_question": "Should the contract owner continue the JPMorgan agreement chain while managing concentration and undisclosed-economics risk?",
-      "bottom_line": "Hold: supplied evidence does not establish current economics, concentration exposure, and performance. Basis: The agreement is non-exclusive; JPMC may use other suppliers for similar goods and services.",
+      "bottom_line": "Hold: JPMC may terminate if a regulator objects, after giving Supplier at least ten days to cure.",
       "key_facts": [
         "The agreement is non-exclusive; JPMC may use other suppliers for similar goods and services.",
         "Subcontracts for JPMC Data must permit security audits"
       ],
-      "conflicts_risks": [],
+      "conflicts_risks": [
+        "JPMC may terminate if a regulator objects, after giving Supplier at least ten days to cure."
+      ],
       "missing_evidence": [
         "Current economics, concentration exposure, and performance require human confirmation."
       ],
       "recommended_next_steps": [
-        "Calculate current concentration, termination fees, and transition charges from active SOWs and invoices before deciding."
+        "Calculate current concentration, termination fees, and transition charges from active SOWs and invoices before deciding.",
+        "Continue only if quantified concentration, termination fees, and transition charges remain within approved limits."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: supplied evidence does not establish current economics, concentration exposure, and performance. Basis: The agreement is non-exclusive; JPMC may use other suppliers for similar goods and services.",
+          "statement": "Hold: JPMC may terminate if a regulator objects, after giving Supplier at least ten days to cure.",
           "citation_refs": [
-            "evidence_chunk:chunk_52c4ed3a25880402e4416f9e57a26c413da343e7ea963f892db1c67d58190b59",
-            "evidence_chunk:chunk_83d1f23e72404bf5d7ea7ebfe0530c68fba2d91d6d35b0db6943218eb7bca613"
+            "evidence_chunk:chunk_daac7b76623253a978e00394d026a1d1a177210f78c6efb5d132141de9e12dbe"
           ]
         },
         {
           "section": "key_facts",
           "statement": "The agreement is non-exclusive; JPMC may use other suppliers for similar goods and services.",
           "citation_refs": [
-            "evidence_chunk:chunk_52c4ed3a25880402e4416f9e57a26c413da343e7ea963f892db1c67d58190b59",
-            "evidence_chunk:chunk_83d1f23e72404bf5d7ea7ebfe0530c68fba2d91d6d35b0db6943218eb7bca613"
+            "evidence_chunk:chunk_0ad722d0f75708740b12fcee8227aa6cf8f1fa0f859eef71baada2cb5f6c0c74",
+            "evidence_chunk:chunk_bcfa0a0addaaf5d140197fd8eda644caaf3debd8ea4a88e0e4a8d6f34ae17e85"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Subcontracts for JPMC Data must permit security audits",
           "citation_refs": [
-            "evidence_chunk:chunk_1d92ad1893c810fa7951f6899a80e49a495ae3e28645f17d633aeeae5233c077"
+            "evidence_chunk:chunk_c284b77cd58eb48269276c4daa834400b68568b5df1886ee70c24d385fdfeca8"
+          ]
+        },
+        {
+          "section": "conflicts_risks",
+          "statement": "JPMC may terminate if a regulator objects, after giving Supplier at least ten days to cure.",
+          "citation_refs": [
+            "evidence_chunk:chunk_daac7b76623253a978e00394d026a1d1a177210f78c6efb5d132141de9e12dbe"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Calculate current concentration, termination fees, and transition charges from active SOWs and invoices before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_52c4ed3a25880402e4416f9e57a26c413da343e7ea963f892db1c67d58190b59",
-            "evidence_chunk:chunk_83d1f23e72404bf5d7ea7ebfe0530c68fba2d91d6d35b0db6943218eb7bca613"
+            "evidence_chunk:chunk_daac7b76623253a978e00394d026a1d1a177210f78c6efb5d132141de9e12dbe"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only if quantified concentration, termination fees, and transition charges remain within approved limits.",
+          "citation_refs": [
+            "evidence_chunk:chunk_daac7b76623253a978e00394d026a1d1a177210f78c6efb5d132141de9e12dbe"
           ]
         }
       ],
@@ -2231,49 +2341,58 @@
     {
       "case_id": "edgar-composecure-facility-lease",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_ff70c9b0c7a1e93f",
+      "brief_id": "brief_356bdae8cd725046",
       "brief_status": "evidence_backed",
-      "title": "Facilities owner renewal decision under amended lease term",
+      "title": "Should facilities owner renew or exit the leased site under the amendment-controlled term and occupancy exposure?",
       "decision_question": "Should the facilities owner renew or exit the leased site under the amendment-controlled term and occupancy exposure?",
-      "bottom_line": "Hold: supplied evidence does not establish current occupancy needs, exit costs, and renewal terms. Basis: Landlord has no obligation to complete work for the Term extension",
+      "bottom_line": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: Landlord has no obligation to complete work for the Term extension",
       "key_facts": [
-        "Lease renewal amendment extends the term to March 31, 2027.",
+        "Lease renewal amendment extends the term to March 31, 2027."
+      ],
+      "conflicts_risks": [
         "Tenant accepts the premises \"AS IS\"; Landlord has no obligation to complete work for the Term extension"
       ],
-      "conflicts_risks": [],
       "missing_evidence": [
         "Current occupancy needs, exit costs, and renewal terms require human confirmation."
       ],
       "recommended_next_steps": [
-        "Quantify required space, total renewal cost, and exit cost; renew only if the occupied-site option beats relocation on cost and timing."
+        "Quantify required space, total renewal cost, and exit cost; renew only if the occupied-site option beats relocation on cost and timing.",
+        "Renew only if the occupied-site option beats relocation on total cost, timing, and required space."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: supplied evidence does not establish current occupancy needs, exit costs, and renewal terms. Basis: Landlord has no obligation to complete work for the Term extension",
+          "statement": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: Landlord has no obligation to complete work for the Term extension",
           "citation_refs": [
-            "evidence_chunk:chunk_da75f9dc2c65e11f228d9e89ce9cc224289c620557582f2b2652191249449816"
+            "evidence_chunk:chunk_6019c65812c7db5ea937f27616a72c2b93acb0165b605e16629679dc8384122a"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Lease renewal amendment extends the term to March 31, 2027.",
           "citation_refs": [
-            "evidence_chunk:chunk_b24b0c93a3c4adeb97743428b12e66563407bf553064dc42649ae4dcb578d5cd"
+            "evidence_chunk:chunk_9982211be10759e784ddd887451b82186a959d751b19aa137c0ce84bb6aeed07"
           ]
         },
         {
-          "section": "key_facts",
+          "section": "conflicts_risks",
           "statement": "Tenant accepts the premises \"AS IS\"; Landlord has no obligation to complete work for the Term extension",
           "citation_refs": [
-            "evidence_chunk:chunk_da75f9dc2c65e11f228d9e89ce9cc224289c620557582f2b2652191249449816"
+            "evidence_chunk:chunk_6019c65812c7db5ea937f27616a72c2b93acb0165b605e16629679dc8384122a"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Quantify required space, total renewal cost, and exit cost; renew only if the occupied-site option beats relocation on cost and timing.",
           "citation_refs": [
-            "evidence_chunk:chunk_da75f9dc2c65e11f228d9e89ce9cc224289c620557582f2b2652191249449816"
+            "evidence_chunk:chunk_6019c65812c7db5ea937f27616a72c2b93acb0165b605e16629679dc8384122a"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Renew only if the occupied-site option beats relocation on total cost, timing, and required space.",
+          "citation_refs": [
+            "evidence_chunk:chunk_6019c65812c7db5ea937f27616a72c2b93acb0165b605e16629679dc8384122a"
           ]
         }
       ],
@@ -2352,57 +2471,65 @@
     {
       "case_id": "edgar-itci-bms-license",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_9930c34d91bc603d",
+      "brief_id": "brief_18723dd330d51ce4",
       "brief_status": "evidence_backed",
       "title": "Should ITI continue the BMS license under Amendment No. 1?",
       "decision_question": "Should the contract owner continue the Bristol-Myers Squibb license under the amended scope and termination terms?",
-      "bottom_line": "Hold: supplied evidence does not establish current territory, scope, and termination rights. Basis: The license amendment deletes ITI's Qualified Study requirement",
+      "bottom_line": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: BMS retains rights in obesity, diabetes, metabolic syndrome",
       "key_facts": [
-        "The amendment deletes the Qualified Study requirement before any third-party license.",
-        "BMS retains rights in obesity, diabetes, metabolic syndrome and cardiovascular disease fields only.",
-        "The license amendment deletes ITI's Qualified Study requirement and BMS's Article 3 negotiation right"
+        "BMS retains rights in obesity, diabetes, metabolic syndrome and cardiovascular disease fields but has no right to use or commercialize ITI-007.",
+        "The license amendment deletes ITI's Qualified Study requirement and BMS's Article 3 negotiation right",
+        "The agreement was amended on November 3, 2010"
       ],
       "conflicts_risks": [],
       "missing_evidence": [
         "Current territory, scope, and termination rights require human confirmation."
       ],
       "recommended_next_steps": [
-        "Map territory, licensed scope, termination triggers, and surviving rights before deciding."
+        "Map territory, licensed scope, termination triggers, and surviving rights before deciding.",
+        "Continue only if the current territory, licensed scope, termination triggers, and surviving rights support the intended use."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: supplied evidence does not establish current territory, scope, and termination rights. Basis: The license amendment deletes ITI's Qualified Study requirement",
+          "statement": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: BMS retains rights in obesity, diabetes, metabolic syndrome",
           "citation_refs": [
-            "evidence_chunk:chunk_f7b528e030f7b6c2d8f347ede18bb1fdba8ab2be5935172fdfef6c148475fe3e"
+            "evidence_chunk:chunk_7443640aa8fa0ebb9b335f522bf344f5df1311d128ef8213c63f0a1190e5056d"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "The amendment deletes the Qualified Study requirement before any third-party license.",
+          "statement": "BMS retains rights in obesity, diabetes, metabolic syndrome and cardiovascular disease fields but has no right to use or commercialize ITI-007.",
           "citation_refs": [
-            "evidence_chunk:chunk_f7b528e030f7b6c2d8f347ede18bb1fdba8ab2be5935172fdfef6c148475fe3e"
-          ]
-        },
-        {
-          "section": "key_facts",
-          "statement": "BMS retains rights in obesity, diabetes, metabolic syndrome and cardiovascular disease fields only.",
-          "citation_refs": [
-            "evidence_chunk:chunk_7105b10bdca0f1a88b057ffd5446b7e4059a25c382d88fee8469415b4d2b84a4"
+            "evidence_chunk:chunk_7443640aa8fa0ebb9b335f522bf344f5df1311d128ef8213c63f0a1190e5056d"
           ]
         },
         {
           "section": "key_facts",
           "statement": "The license amendment deletes ITI's Qualified Study requirement and BMS's Article 3 negotiation right",
           "citation_refs": [
-            "evidence_chunk:chunk_f7b528e030f7b6c2d8f347ede18bb1fdba8ab2be5935172fdfef6c148475fe3e"
+            "evidence_chunk:chunk_c630addce093a2e2732d182fe7c9d70f2fd4fd6f9bf06b76d4c925fd48c5c99b"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "The agreement was amended on November 3, 2010",
+          "citation_refs": [
+            "evidence_chunk:chunk_7443640aa8fa0ebb9b335f522bf344f5df1311d128ef8213c63f0a1190e5056d"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Map territory, licensed scope, termination triggers, and surviving rights before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_f7b528e030f7b6c2d8f347ede18bb1fdba8ab2be5935172fdfef6c148475fe3e"
+            "evidence_chunk:chunk_7443640aa8fa0ebb9b335f522bf344f5df1311d128ef8213c63f0a1190e5056d"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only if the current territory, licensed scope, termination triggers, and surviving rights support the intended use.",
+          "citation_refs": [
+            "evidence_chunk:chunk_7443640aa8fa0ebb9b335f522bf344f5df1311d128ef8213c63f0a1190e5056d"
           ]
         }
       ],
@@ -2481,50 +2608,72 @@
     {
       "case_id": "edgar-itci-siegfried-supply",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_06c9b6379f232343",
+      "brief_id": "brief_4446d7b5e80248ad",
       "brief_status": "evidence_backed",
-      "title": "Should ITI continue relying on Siegfried for lumateperone API manufacturing?",
+      "title": "Should ITI continue relying on Siegfried for API manufacturing?",
       "decision_question": "Should the contract owner continue the Siegfried manufacturing and supply dependency?",
-      "bottom_line": "Hold: supplied evidence does not establish current price, capacity, and quality performance. Basis: The Siegfried Agreement renews for consecutive one-year periods unless a party gives at least 12 months' notice",
+      "bottom_line": "Hold: Either party can terminate immediately upon uncured material breach, insolvency, liquidation, dissolution, bankruptcy, receiver appointment, or cessation of substantially all operations.",
       "key_facts": [
-        "Under the Siegfried Agreement, ITI may purchase API from other suppliers but there is no assurance that alternative manufacturers will supply on acceptable terms or timeframe.",
+        "Under the Siegfried Agreement ITI may purchase API from other suppliers but there is no assurance that alternative sources will be available on acceptable terms or timeframe.",
         "The Siegfried Agreement renews for consecutive one-year periods unless a party gives at least 12 months' notice"
       ],
-      "conflicts_risks": [],
+      "conflicts_risks": [
+        "Either party can terminate immediately upon uncured material breach, insolvency, liquidation, dissolution, bankruptcy, receiver appointment, or cessation of substantially all operations."
+      ],
       "missing_evidence": [
         "Current price, capacity, and quality performance require human confirmation."
       ],
       "recommended_next_steps": [
-        "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited supply commitments."
+        "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited supply commitments.",
+        "Continue only if documented capacity, quality, delivery, volume, and pricing meet approved requirements; otherwise qualify an alternate source."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: supplied evidence does not establish current price, capacity, and quality performance. Basis: The Siegfried Agreement renews for consecutive one-year periods unless a party gives at least 12 months' notice",
+          "statement": "Hold: Either party can terminate immediately upon uncured material breach, insolvency, liquidation, dissolution, bankruptcy, receiver appointment, or cessation of substantially all operations.",
           "citation_refs": [
-            "evidence_chunk:chunk_13f27d798791ecf80b654bd74d9454519d769ce8f7fc1cf8775d86c8ec9d6ac6"
+            "evidence_chunk:chunk_2d20da05f60f6a210b3b9a64da114090ce72a923dfcca9497c602fa67dcc0c5d",
+            "evidence_chunk:chunk_d50c0a41475ff3d7f02fa0f92ef2b358f10c5abf199a2e53ce430f29263503dd"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Under the Siegfried Agreement, ITI may purchase API from other suppliers but there is no assurance that alternative manufacturers will supply on acceptable terms or timeframe.",
+          "statement": "Under the Siegfried Agreement ITI may purchase API from other suppliers but there is no assurance that alternative sources will be available on acceptable terms or timeframe.",
           "citation_refs": [
-            "evidence_chunk:chunk_13f27d798791ecf80b654bd74d9454519d769ce8f7fc1cf8775d86c8ec9d6ac6",
-            "evidence_chunk:chunk_c4dae1952af6acdef87aab4b68130588c78e0a4a129b7524cfd8681c9269f78a"
+            "evidence_chunk:chunk_2d20da05f60f6a210b3b9a64da114090ce72a923dfcca9497c602fa67dcc0c5d",
+            "evidence_chunk:chunk_34279a4cb75bf8b6a895f17f6d17abeecb85dd610921cccdc677dc9355a47f9c",
+            "evidence_chunk:chunk_f9b42c59deb940ca5f3b8cc4ff157d2c08a2d97a48a2c814271a8e269ebeee4b"
           ]
         },
         {
           "section": "key_facts",
           "statement": "The Siegfried Agreement renews for consecutive one-year periods unless a party gives at least 12 months' notice",
           "citation_refs": [
-            "evidence_chunk:chunk_13f27d798791ecf80b654bd74d9454519d769ce8f7fc1cf8775d86c8ec9d6ac6"
+            "evidence_chunk:chunk_2d20da05f60f6a210b3b9a64da114090ce72a923dfcca9497c602fa67dcc0c5d"
+          ]
+        },
+        {
+          "section": "conflicts_risks",
+          "statement": "Either party can terminate immediately upon uncured material breach, insolvency, liquidation, dissolution, bankruptcy, receiver appointment, or cessation of substantially all operations.",
+          "citation_refs": [
+            "evidence_chunk:chunk_2d20da05f60f6a210b3b9a64da114090ce72a923dfcca9497c602fa67dcc0c5d",
+            "evidence_chunk:chunk_d50c0a41475ff3d7f02fa0f92ef2b358f10c5abf199a2e53ce430f29263503dd"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited supply commitments.",
           "citation_refs": [
-            "evidence_chunk:chunk_13f27d798791ecf80b654bd74d9454519d769ce8f7fc1cf8775d86c8ec9d6ac6"
+            "evidence_chunk:chunk_2d20da05f60f6a210b3b9a64da114090ce72a923dfcca9497c602fa67dcc0c5d",
+            "evidence_chunk:chunk_d50c0a41475ff3d7f02fa0f92ef2b358f10c5abf199a2e53ce430f29263503dd"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only if documented capacity, quality, delivery, volume, and pricing meet approved requirements; otherwise qualify an alternate source.",
+          "citation_refs": [
+            "evidence_chunk:chunk_2d20da05f60f6a210b3b9a64da114090ce72a923dfcca9497c602fa67dcc0c5d",
+            "evidence_chunk:chunk_d50c0a41475ff3d7f02fa0f92ef2b358f10c5abf199a2e53ce430f29263503dd"
           ]
         }
       ],
@@ -2580,57 +2729,66 @@
     {
       "case_id": "edgar-emergent-az-workorder",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_d06b3d1420989971",
+      "brief_id": "brief_cfed0c8acb1ef3c8",
       "brief_status": "evidence_backed",
-      "title": "AstraZeneca Work-Order Performance Alignment with Master Agreement",
+      "title": "Should the contract owner authorize continued AstraZeneca work-order performance under the governing master?",
       "decision_question": "Should the contract owner authorize continued AstraZeneca work-order performance as aligned with the governing master agreement?",
-      "bottom_line": "Hold: supplied evidence does not establish current acceptance criteria, performance evidence, and pricing. Basis: Work Order #01 covers a capacity commitment for COVID-19 vaccine drug-substance manufacturing",
+      "bottom_line": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: Work Order #01 covers a capacity commitment for COVID-19 vaccine drug-substance manufacturing",
       "key_facts": [
         "Work Order #01 covers a capacity commitment for COVID-19 vaccine drug-substance manufacturing",
-        "Additional government requirements may apply to AstraZeneca's performance under the Agreement",
-        "Fees are payable at activity initiation and completion; pass-through costs at material order placement and receipt"
+        "Additional government requirements may apply to AstraZeneca's performance under the Agreement"
       ],
-      "conflicts_risks": [],
+      "conflicts_risks": [
+        "The agreement allows AstraZeneca to terminate for convenience with 30 days notice or upon material breach."
+      ],
       "missing_evidence": [
         "Current acceptance criteria, performance evidence, and pricing require human confirmation."
       ],
       "recommended_next_steps": [
-        "Authorize continuation only after acceptance evidence and work-order pricing match the master agreement."
+        "Authorize continuation only after acceptance evidence and work-order pricing match the master agreement.",
+        "If acceptance evidence or pricing does not align, revise the work order or defer authorization."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: supplied evidence does not establish current acceptance criteria, performance evidence, and pricing. Basis: Work Order #01 covers a capacity commitment for COVID-19 vaccine drug-substance manufacturing",
+          "statement": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: Work Order #01 covers a capacity commitment for COVID-19 vaccine drug-substance manufacturing",
           "citation_refs": [
-            "evidence_chunk:chunk_387b875cc624c5ea2b81025d670a62bf736ce3a24f7d0acf91997fb805245d47"
+            "evidence_chunk:chunk_0d672883dad43c426ff727b43a7404aea1d76c5387a994fc9235fb9677c740fa"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Work Order #01 covers a capacity commitment for COVID-19 vaccine drug-substance manufacturing",
           "citation_refs": [
-            "evidence_chunk:chunk_387b875cc624c5ea2b81025d670a62bf736ce3a24f7d0acf91997fb805245d47"
+            "evidence_chunk:chunk_0d672883dad43c426ff727b43a7404aea1d76c5387a994fc9235fb9677c740fa"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Additional government requirements may apply to AstraZeneca's performance under the Agreement",
           "citation_refs": [
-            "evidence_chunk:chunk_7782e39e3c2569e62257fcf9352ede7543cb3fdbed16ba43f81a043ad3a47159"
+            "evidence_chunk:chunk_f0be7c6b619e3f56b97b7ed468eec571d24149f923c50eb9ca2881a53326aee0"
           ]
         },
         {
-          "section": "key_facts",
-          "statement": "Fees are payable at activity initiation and completion; pass-through costs at material order placement and receipt",
+          "section": "conflicts_risks",
+          "statement": "The agreement allows AstraZeneca to terminate for convenience with 30 days notice or upon material breach.",
           "citation_refs": [
-            "evidence_chunk:chunk_c0e2c1a8354c15a3eee79076c24a525cdfde9e0bd52bb50ad012aab2016318dc"
+            "evidence_chunk:chunk_d8938d335e2e407f3ab72c82fd9894e902c2cc3868459a073d8a37c8591b7dd3"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Authorize continuation only after acceptance evidence and work-order pricing match the master agreement.",
           "citation_refs": [
-            "evidence_chunk:chunk_387b875cc624c5ea2b81025d670a62bf736ce3a24f7d0acf91997fb805245d47"
+            "evidence_chunk:chunk_d8938d335e2e407f3ab72c82fd9894e902c2cc3868459a073d8a37c8591b7dd3"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "If acceptance evidence or pricing does not align, revise the work order or defer authorization.",
+          "citation_refs": [
+            "evidence_chunk:chunk_d8938d335e2e407f3ab72c82fd9894e902c2cc3868459a073d8a37c8591b7dd3"
           ]
         }
       ],
@@ -2709,13 +2867,13 @@
     {
       "case_id": "edgar-emergent-janssen-manufacturing",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_63bc044d81f9592a",
+      "brief_id": "brief_4a8fe8f52ea60f4e",
       "brief_status": "evidence_backed",
-      "title": "Should Janssen continue manufacturing under the amended contract?",
+      "title": "Should Emergent continue Janssen manufacturing under the amended agreement?",
       "decision_question": "Should the contract owner continue Janssen manufacturing under the obligations as changed by the later amendment?",
-      "bottom_line": "Hold: supplied evidence does not establish current manufacturing capacity, audit and quality status, remediation, performance, and pricing.",
+      "bottom_line": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: Amendment dated March 2, 2021 replaces Appendices 1, 2, and 6 of the Janssen Manufacturing Services Agreement.",
       "key_facts": [
-        "Amendment No.1 to the Janssen Manufacturing Services Agreement was executed by Emergent and Janssen on February 25, 2021.",
+        "Amendment dated March 2, 2021 replaces Appendices 1, 2, and 6 of the Janssen Manufacturing Services Agreement.",
         "The later amendment replaces Appendix 1 (Safety Stock) and Appendix 2 (Price)"
       ],
       "conflicts_risks": [],
@@ -2723,38 +2881,43 @@
         "Current manufacturing capacity, audit and quality status, remediation, performance, and pricing require human confirmation."
       ],
       "recommended_next_steps": [
-        "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited manufacturing obligations."
+        "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited manufacturing obligations.",
+        "Continue only after remediation, validation, inspection, capacity, quality, delivery, and pricing evidence supports readiness."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: supplied evidence does not establish current manufacturing capacity, audit and quality status, remediation, performance, and pricing.",
+          "statement": "Hold: do not commit yet. Complete the evidence checks and apply the decision rule below. Basis: Amendment dated March 2, 2021 replaces Appendices 1, 2, and 6 of the Janssen Manufacturing Services Agreement.",
           "citation_refs": [
-            "evidence_chunk:chunk_baff031f08590823cef7bd123037feb5b6f3d28e74b8b2d64faed77860df36b3",
-            "evidence_chunk:chunk_ea59b55830e4d4a926fc3bb7ac0c4f00c533d63695c1eabae0af8cb8e90eaf95"
+            "evidence_chunk:chunk_a27a75b12a2ca42d70d15e92381de16c89c65ee6b42353f0a49e2fe0709643f6"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Amendment No.1 to the Janssen Manufacturing Services Agreement was executed by Emergent and Janssen on February 25, 2021.",
+          "statement": "Amendment dated March 2, 2021 replaces Appendices 1, 2, and 6 of the Janssen Manufacturing Services Agreement.",
           "citation_refs": [
-            "evidence_chunk:chunk_baff031f08590823cef7bd123037feb5b6f3d28e74b8b2d64faed77860df36b3",
-            "evidence_chunk:chunk_ea59b55830e4d4a926fc3bb7ac0c4f00c533d63695c1eabae0af8cb8e90eaf95"
+            "evidence_chunk:chunk_a27a75b12a2ca42d70d15e92381de16c89c65ee6b42353f0a49e2fe0709643f6"
           ]
         },
         {
           "section": "key_facts",
           "statement": "The later amendment replaces Appendix 1 (Safety Stock) and Appendix 2 (Price)",
           "citation_refs": [
-            "evidence_chunk:chunk_69409e8494ff04926f5711e35ed82299d505f366031056847c896d43f0e039bd"
+            "evidence_chunk:chunk_a27a75b12a2ca42d70d15e92381de16c89c65ee6b42353f0a49e2fe0709643f6"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited manufacturing obligations.",
           "citation_refs": [
-            "evidence_chunk:chunk_baff031f08590823cef7bd123037feb5b6f3d28e74b8b2d64faed77860df36b3",
-            "evidence_chunk:chunk_ea59b55830e4d4a926fc3bb7ac0c4f00c533d63695c1eabae0af8cb8e90eaf95"
+            "evidence_chunk:chunk_a27a75b12a2ca42d70d15e92381de16c89c65ee6b42353f0a49e2fe0709643f6"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only after remediation, validation, inspection, capacity, quality, delivery, and pricing evidence supports readiness.",
+          "citation_refs": [
+            "evidence_chunk:chunk_a27a75b12a2ca42d70d15e92381de16c89c65ee6b42353f0a49e2fe0709643f6"
           ]
         }
       ],
@@ -2833,14 +2996,15 @@
     {
       "case_id": "edgar-gogo-hughes-msa",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_21ccf75c423a5165",
+      "brief_id": "brief_75347548ab28a70c",
       "brief_status": "evidence_backed",
       "title": "Should Gogo continue relying on Hughes under the MSA?",
       "decision_question": "Should the contract owner continue the Hughes service-provider dependency under the disclosed agreement and later relationship status?",
       "bottom_line": "Hold: Either party may terminate a SOW on thirty days' notice unless that SOW says otherwise",
       "key_facts": [
-        "Gogo BA and Hughes executed a Master Services Agreement on May 21, 2022 for airborne equipment design, development, testing and production readiness.",
-        "The MSA may be terminated by either party with thirty days' written notice if no statements of work are active under it."
+        "Gogo BA and Hughes executed an MSA on May 21, 2022 for airborne equipment design, development, testing and production readiness.",
+        "The MSA may be terminated by either party with thirty days' written notice if no SOWs exist under it.",
+        "Service fees and specific services are governed by one or more Statements of Work issued under the MSA."
       ],
       "conflicts_risks": [
         "Either party may terminate a SOW on thirty days' notice unless that SOW says otherwise"
@@ -2849,42 +3013,58 @@
         "Current service levels, transition readiness, and performance require human confirmation."
       ],
       "recommended_next_steps": [
-        "Obtain the latest SLA report, disengagement-cost estimate, and transition plan; compare them with the cited exit terms."
+        "Obtain the latest SLA report, disengagement-cost estimate, and transition plan; compare them with the cited exit terms.",
+        "Continue only if current service performance, pricing, and transition exposure support retention; otherwise use the replacement plan."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
           "statement": "Hold: Either party may terminate a SOW on thirty days' notice unless that SOW says otherwise",
           "citation_refs": [
-            "evidence_chunk:chunk_f1d93c60e9c46ed0648d022906271ca6fd2857b19f4a98c55bd49caacd91bb3c"
+            "evidence_chunk:chunk_79aeff5980c43c40dacfc6000687522b3268e0ca2557e7c4ad1590ffcbafaaaf"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Gogo BA and Hughes executed a Master Services Agreement on May 21, 2022 for airborne equipment design, development, testing and production readiness.",
+          "statement": "Gogo BA and Hughes executed an MSA on May 21, 2022 for airborne equipment design, development, testing and production readiness.",
           "citation_refs": [
-            "evidence_chunk:chunk_4e8bc9dad86f30b5d9a79208bb1cc69c7e0ada06249db49c3d5e551f41ac7180"
+            "evidence_chunk:chunk_535fe326c4b469197c834d91f17d536ef3e5b0255c47c0a8a4d48d6a5f900104"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "The MSA may be terminated by either party with thirty days' written notice if no statements of work are active under it.",
+          "statement": "The MSA may be terminated by either party with thirty days' written notice if no SOWs exist under it.",
           "citation_refs": [
-            "evidence_chunk:chunk_f1d93c60e9c46ed0648d022906271ca6fd2857b19f4a98c55bd49caacd91bb3c"
+            "evidence_chunk:chunk_79aeff5980c43c40dacfc6000687522b3268e0ca2557e7c4ad1590ffcbafaaaf"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "Service fees and specific services are governed by one or more Statements of Work issued under the MSA.",
+          "citation_refs": [
+            "evidence_chunk:chunk_2a4f1205c6a9b44205e75455117a57242a11668a3196c1b28e28b8c73d695e6a",
+            "evidence_chunk:chunk_535fe326c4b469197c834d91f17d536ef3e5b0255c47c0a8a4d48d6a5f900104"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Either party may terminate a SOW on thirty days' notice unless that SOW says otherwise",
           "citation_refs": [
-            "evidence_chunk:chunk_f1d93c60e9c46ed0648d022906271ca6fd2857b19f4a98c55bd49caacd91bb3c"
+            "evidence_chunk:chunk_79aeff5980c43c40dacfc6000687522b3268e0ca2557e7c4ad1590ffcbafaaaf"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Obtain the latest SLA report, disengagement-cost estimate, and transition plan; compare them with the cited exit terms.",
           "citation_refs": [
-            "evidence_chunk:chunk_f1d93c60e9c46ed0648d022906271ca6fd2857b19f4a98c55bd49caacd91bb3c"
+            "evidence_chunk:chunk_79aeff5980c43c40dacfc6000687522b3268e0ca2557e7c4ad1590ffcbafaaaf"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only if current service performance, pricing, and transition exposure support retention; otherwise use the replacement plan.",
+          "citation_refs": [
+            "evidence_chunk:chunk_79aeff5980c43c40dacfc6000687522b3268e0ca2557e7c4ad1590ffcbafaaaf"
           ]
         }
       ],
@@ -2963,13 +3143,14 @@
     {
       "case_id": "edgar-scilex-lifecore-msa",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_f22f5b35a5416019",
+      "brief_id": "brief_8e449370ae828a6e",
       "brief_status": "evidence_backed",
       "title": "Should Semnur continue Lifecore manufacturing under the Amendment?",
       "decision_question": "Should the contract owner continue Lifecore manufacturing and supply under the amendment-controlled obligations?",
       "bottom_line": "Hold: Either party may terminate for a material breach not cured within 30 days after written notice, subject to the agreement's extended-cure condition",
       "key_facts": [
-        "Lifecore: Amendment No. 1 replaces the earlier-of services-completion/December 31, 2020 endpoint with December 31, 2022."
+        "Lifecore: Amendment No. 1 replaces the earlier-of services-completion/December 31, 2020 endpoint with December 31, 2022.",
+        "The original Agreement granted Lifecore a nonexclusive, worldwide, royalty-free license to manufacture the Product for Semnur during the Term."
       ],
       "conflicts_risks": [
         "Either party may terminate for a material breach not cured within 30 days after written notice, subject to the agreement's extended-cure condition"
@@ -2978,36 +3159,51 @@
         "Current manufacturing capacity, audit and quality status, remediation, performance, and pricing require human confirmation."
       ],
       "recommended_next_steps": [
-        "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited manufacturing obligations."
+        "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited manufacturing obligations.",
+        "Continue only after remediation, validation, inspection, capacity, quality, delivery, and pricing evidence supports readiness."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
           "statement": "Hold: Either party may terminate for a material breach not cured within 30 days after written notice, subject to the agreement's extended-cure condition",
           "citation_refs": [
-            "evidence_chunk:chunk_6ab2392f9eeb3ffd0ea04c5ada1b487f7e30ff8d9f371492f5c532a45999231c"
+            "evidence_chunk:chunk_b47a6576fd25a84b2f58693085c5204a2c9d55ed1507317345e0451732229b52"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Lifecore: Amendment No. 1 replaces the earlier-of services-completion/December 31, 2020 endpoint with December 31, 2022.",
           "citation_refs": [
-            "evidence_chunk:chunk_718d46911d88b7cec0f7958c977b6207286d2dd52e1177f7f868c7842637a359",
-            "evidence_chunk:chunk_a7702b5be99355b969b24a36b66e6688bce49374f64153a536e05fbe93a29adb"
+            "evidence_chunk:chunk_cd514fa98d776be4c587e05fd364770a87784a0ccc4d5808a8ca33e29b00b04a",
+            "evidence_chunk:chunk_2a1b371591682043d054b0218f880e6fd31c1ae0a3c2079677fcde2baf7ad296"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "The original Agreement granted Lifecore a nonexclusive, worldwide, royalty-free license to manufacture the Product for Semnur during the Term.",
+          "citation_refs": [
+            "evidence_chunk:chunk_c1d63cef335ac143489dfe0f2826ab3ad6fd71889eff2f8fb77475680f9a45ae"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Either party may terminate for a material breach not cured within 30 days after written notice, subject to the agreement's extended-cure condition",
           "citation_refs": [
-            "evidence_chunk:chunk_6ab2392f9eeb3ffd0ea04c5ada1b487f7e30ff8d9f371492f5c532a45999231c"
+            "evidence_chunk:chunk_b47a6576fd25a84b2f58693085c5204a2c9d55ed1507317345e0451732229b52"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited manufacturing obligations.",
           "citation_refs": [
-            "evidence_chunk:chunk_6ab2392f9eeb3ffd0ea04c5ada1b487f7e30ff8d9f371492f5c532a45999231c"
+            "evidence_chunk:chunk_b47a6576fd25a84b2f58693085c5204a2c9d55ed1507317345e0451732229b52"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only after remediation, validation, inspection, capacity, quality, delivery, and pricing evidence supports readiness.",
+          "citation_refs": [
+            "evidence_chunk:chunk_b47a6576fd25a84b2f58693085c5204a2c9d55ed1507317345e0451732229b52"
           ]
         }
       ],
@@ -3086,14 +3282,15 @@
     {
       "case_id": "edgar-scilex-tulex-msa",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_1969da370f925df2",
+      "brief_id": "brief_74ac578b7a8f0b15",
       "brief_status": "evidence_backed",
       "title": "Should Aardvark continue the Tulex services and manufacturing relationship under the amended responsibilities?",
       "decision_question": "Should the contract owner continue the Tulex services and manufacturing relationship under the amended responsibilities?",
       "bottom_line": "Hold: Scilex may terminate without cause on 30 days' notice or immediately after Tulex dissolution or change of control",
       "key_facts": [
         "A Novation Agreement dated June 15, 2022 was executed by Tulex, Aardvark, and Scilex to restructure the Master Services Agreement.",
-        "Tulex is responsible for developing, testing, and manufacturing SP-104 clinical supplies"
+        "Tulex is responsible for developing, testing, and manufacturing SP-104 clinical supplies",
+        "Aardvark will pay Service Provider fees, pass-through costs"
       ],
       "conflicts_risks": [
         "Scilex may terminate without cause on 30 days' notice or immediately after Tulex dissolution or change of control"
@@ -3102,42 +3299,57 @@
         "Current manufacturing capacity, audit and quality status, remediation, performance, and pricing require human confirmation."
       ],
       "recommended_next_steps": [
-        "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited manufacturing obligations."
+        "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited manufacturing obligations.",
+        "Continue only after remediation, validation, inspection, capacity, quality, delivery, and pricing evidence supports readiness."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
           "statement": "Hold: Scilex may terminate without cause on 30 days' notice or immediately after Tulex dissolution or change of control",
           "citation_refs": [
-            "evidence_chunk:chunk_88c21627c52cd2bc5561f8de0be0e08c858205772c6487bf7f004ee23a77e9d3"
+            "evidence_chunk:chunk_e6f4edcf2a2abf03da80560ff65b5073e714bce0224076da10c1eddeedbf595e"
           ]
         },
         {
           "section": "key_facts",
           "statement": "A Novation Agreement dated June 15, 2022 was executed by Tulex, Aardvark, and Scilex to restructure the Master Services Agreement.",
           "citation_refs": [
-            "evidence_chunk:chunk_4633a04e395899fbc44843d7c47d41c0ea44692bd6f65d6ad80dba84bc5e783a"
+            "evidence_chunk:chunk_627f042028f90e4bad89eda10e7c5fe02b3c2a25babe32c2ed8b82f905d725c7"
           ]
         },
         {
           "section": "key_facts",
           "statement": "Tulex is responsible for developing, testing, and manufacturing SP-104 clinical supplies",
           "citation_refs": [
-            "evidence_chunk:chunk_88c21627c52cd2bc5561f8de0be0e08c858205772c6487bf7f004ee23a77e9d3"
+            "evidence_chunk:chunk_e6f4edcf2a2abf03da80560ff65b5073e714bce0224076da10c1eddeedbf595e"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "Aardvark will pay Service Provider fees, pass-through costs",
+          "citation_refs": [
+            "evidence_chunk:chunk_250f89207b233ba8ad45e6f677bfaac5eb9ab480f8b1bbad91ea5f8cf8d32035"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Scilex may terminate without cause on 30 days' notice or immediately after Tulex dissolution or change of control",
           "citation_refs": [
-            "evidence_chunk:chunk_88c21627c52cd2bc5561f8de0be0e08c858205772c6487bf7f004ee23a77e9d3"
+            "evidence_chunk:chunk_e6f4edcf2a2abf03da80560ff65b5073e714bce0224076da10c1eddeedbf595e"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Obtain current capacity, quality, delivery, and pricing records; compare them with the cited manufacturing obligations.",
           "citation_refs": [
-            "evidence_chunk:chunk_88c21627c52cd2bc5561f8de0be0e08c858205772c6487bf7f004ee23a77e9d3"
+            "evidence_chunk:chunk_e6f4edcf2a2abf03da80560ff65b5073e714bce0224076da10c1eddeedbf595e"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only after remediation, validation, inspection, capacity, quality, delivery, and pricing evidence supports readiness.",
+          "citation_refs": [
+            "evidence_chunk:chunk_e6f4edcf2a2abf03da80560ff65b5073e714bce0224076da10c1eddeedbf595e"
           ]
         }
       ],
@@ -3216,13 +3428,14 @@
     {
       "case_id": "edgar-healthnet-cognizant-expansion",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_fbf13a44168e0444",
+      "brief_id": "brief_49b92cdadb54d69b",
       "brief_status": "evidence_backed",
-      "title": "Should Health Net continue the expanded Cognizant outsourcing scope under the amendment?",
+      "title": "Should Health Net continue the expanded Cognizant outsourcing scope under the amended arrangement?",
       "decision_question": "Should the contract owner continue the expanded Cognizant outsourcing scope and dependency under the amended arrangement?",
       "bottom_line": "Hold: Convenience termination in the first year can trigger a maximum $300 million fee",
       "key_facts": [
-        "An amendment effective as of the Amendment Effective Date was signed by David Brown (VP, Strategic Sourcing) for Health Net and Robert Bushey (Senior Director, Procurement) for Cognizant."
+        "The Amendment is signed by David Brown (VP Strategic Sourcing) for Health Net and Robert Bushey (Senior Director Procurement) for Cognizant, effective as of the Amendment Effective Date.",
+        "Exhibit A-1 HNFS Requirements is incorporated into Schedule A of the Master Services Agreement and prevails over any conflicting term in the Agreement."
       ],
       "conflicts_risks": [
         "Convenience termination in the first year can trigger a maximum $300 million fee"
@@ -3231,35 +3444,50 @@
         "Current exit costs, transition readiness, and performance require human confirmation."
       ],
       "recommended_next_steps": [
-        "Obtain the latest SLA and incident reports, calculate current exit cost, and validate the transition plan."
+        "Obtain the latest SLA and incident reports, calculate current exit cost, and validate the transition plan.",
+        "Continue only if current service performance, pricing, and transition exposure support retention; otherwise use the replacement plan."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
           "statement": "Hold: Convenience termination in the first year can trigger a maximum $300 million fee",
           "citation_refs": [
-            "evidence_chunk:chunk_2aeb154ec39d99543e1c50ba99008c7a3d0277086b71fe516ba22492cb058141"
+            "evidence_chunk:chunk_b856f2a53907f877153a009a0f10a5e0168ec8537fdfc43f0e6ee7fb4cbd046e"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "An amendment effective as of the Amendment Effective Date was signed by David Brown (VP, Strategic Sourcing) for Health Net and Robert Bushey (Senior Director, Procurement) for Cognizant.",
+          "statement": "The Amendment is signed by David Brown (VP Strategic Sourcing) for Health Net and Robert Bushey (Senior Director Procurement) for Cognizant, effective as of the Amendment Effective Date.",
           "citation_refs": [
-            "evidence_chunk:chunk_597fa5590909baa9851fff8d2b305c9683764792c55540499c062bf5f0227d19"
+            "evidence_chunk:chunk_169c12cb0c47983cbf5cb9853c8ee2de1c89deccab7b7aa8d4063597d5598894"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "Exhibit A-1 HNFS Requirements is incorporated into Schedule A of the Master Services Agreement and prevails over any conflicting term in the Agreement.",
+          "citation_refs": [
+            "evidence_chunk:chunk_f481259baf8b11e9e4281ef71080774ed2512aa2a316faae7a85880e16aacf5c"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Convenience termination in the first year can trigger a maximum $300 million fee",
           "citation_refs": [
-            "evidence_chunk:chunk_2aeb154ec39d99543e1c50ba99008c7a3d0277086b71fe516ba22492cb058141"
+            "evidence_chunk:chunk_b856f2a53907f877153a009a0f10a5e0168ec8537fdfc43f0e6ee7fb4cbd046e"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Obtain the latest SLA and incident reports, calculate current exit cost, and validate the transition plan.",
           "citation_refs": [
-            "evidence_chunk:chunk_2aeb154ec39d99543e1c50ba99008c7a3d0277086b71fe516ba22492cb058141"
+            "evidence_chunk:chunk_b856f2a53907f877153a009a0f10a5e0168ec8537fdfc43f0e6ee7fb4cbd046e"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Continue only if current service performance, pricing, and transition exposure support retention; otherwise use the replacement plan.",
+          "citation_refs": [
+            "evidence_chunk:chunk_b856f2a53907f877153a009a0f10a5e0168ec8537fdfc43f0e6ee7fb4cbd046e"
           ]
         }
       ],
@@ -3342,31 +3570,31 @@
       "reviewer_role": null,
       "is_owner": true,
       "brief_ids": [
-        "brief_25248865a6e578c0",
-        "brief_c71bf388a29d426c",
-        "brief_1fbe7068306a9e08",
-        "brief_cec059cb18df7154",
-        "brief_be2c8178730684ae",
-        "brief_40fcf32e885c135e",
-        "brief_e814798f1e9a1456",
-        "brief_875c2368b6411f1d",
-        "brief_70f2778f835f9f4c",
-        "brief_6381360441cae511",
-        "brief_e31f0da8936862ca",
-        "brief_d3c2de38509e7ba2",
-        "brief_6f4d3c594206932d",
-        "brief_5cf7e611813863c3",
-        "brief_3a0c5a924f216e6f",
-        "brief_a83dc923eea434a0",
-        "brief_ff70c9b0c7a1e93f",
-        "brief_9930c34d91bc603d",
-        "brief_06c9b6379f232343",
-        "brief_d06b3d1420989971",
-        "brief_63bc044d81f9592a",
-        "brief_21ccf75c423a5165",
-        "brief_f22f5b35a5416019",
-        "brief_1969da370f925df2",
-        "brief_fbf13a44168e0444"
+        "brief_067493659a22d51a",
+        "brief_f4aa7a46293ddd4b",
+        "brief_87ca53be343f4f7c",
+        "brief_32e85dcf982cc032",
+        "brief_3348f46728a749b8",
+        "brief_4a11bd3a4ca4f8db",
+        "brief_3e031972e369f89e",
+        "brief_f904b1a4bbe8f8e4",
+        "brief_a8a097b74bc67440",
+        "brief_70890dc390c766fe",
+        "brief_b7942a5716362f7b",
+        "brief_cc38ecd455f79b27",
+        "brief_237514b99d1d3d21",
+        "brief_6c4b7347f14ac80d",
+        "brief_d3df02ec36a1fb71",
+        "brief_ed1626b7ec8d0483",
+        "brief_356bdae8cd725046",
+        "brief_18723dd330d51ce4",
+        "brief_4446d7b5e80248ad",
+        "brief_cfed0c8acb1ef3c8",
+        "brief_4a8fe8f52ea60f4e",
+        "brief_75347548ab28a70c",
+        "brief_8e449370ae828a6e",
+        "brief_74ac578b7a8f0b15",
+        "brief_49b92cdadb54d69b"
       ],
       "usefulness_rating_1_to_5": null,
       "rationale": null
@@ -3376,31 +3604,31 @@
       "reviewer_role": null,
       "is_owner": false,
       "brief_ids": [
-        "brief_25248865a6e578c0",
-        "brief_c71bf388a29d426c",
-        "brief_1fbe7068306a9e08",
-        "brief_cec059cb18df7154",
-        "brief_be2c8178730684ae",
-        "brief_40fcf32e885c135e",
-        "brief_e814798f1e9a1456",
-        "brief_875c2368b6411f1d",
-        "brief_70f2778f835f9f4c",
-        "brief_6381360441cae511",
-        "brief_e31f0da8936862ca",
-        "brief_d3c2de38509e7ba2",
-        "brief_6f4d3c594206932d",
-        "brief_5cf7e611813863c3",
-        "brief_3a0c5a924f216e6f",
-        "brief_a83dc923eea434a0",
-        "brief_ff70c9b0c7a1e93f",
-        "brief_9930c34d91bc603d",
-        "brief_06c9b6379f232343",
-        "brief_d06b3d1420989971",
-        "brief_63bc044d81f9592a",
-        "brief_21ccf75c423a5165",
-        "brief_f22f5b35a5416019",
-        "brief_1969da370f925df2",
-        "brief_fbf13a44168e0444"
+        "brief_067493659a22d51a",
+        "brief_f4aa7a46293ddd4b",
+        "brief_87ca53be343f4f7c",
+        "brief_32e85dcf982cc032",
+        "brief_3348f46728a749b8",
+        "brief_4a11bd3a4ca4f8db",
+        "brief_3e031972e369f89e",
+        "brief_f904b1a4bbe8f8e4",
+        "brief_a8a097b74bc67440",
+        "brief_70890dc390c766fe",
+        "brief_b7942a5716362f7b",
+        "brief_cc38ecd455f79b27",
+        "brief_237514b99d1d3d21",
+        "brief_6c4b7347f14ac80d",
+        "brief_d3df02ec36a1fb71",
+        "brief_ed1626b7ec8d0483",
+        "brief_356bdae8cd725046",
+        "brief_18723dd330d51ce4",
+        "brief_4446d7b5e80248ad",
+        "brief_cfed0c8acb1ef3c8",
+        "brief_4a8fe8f52ea60f4e",
+        "brief_75347548ab28a70c",
+        "brief_8e449370ae828a6e",
+        "brief_74ac578b7a8f0b15",
+        "brief_49b92cdadb54d69b"
       ],
       "usefulness_rating_1_to_5": null,
       "rationale": null

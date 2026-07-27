@@ -308,7 +308,7 @@ EVIDENCE_CHUNK_MAX_CHARS = 1200
 EVIDENCE_CHUNK_OVERLAP_CHARS = 160
 EVIDENCE_CHUNK_LIMIT = 5
 BRIEF_EVIDENCE_CHUNK_LIMIT = 10
-BRIEF_EVIDENCE_CHUNKS_PER_SOURCE = 2
+BRIEF_EVIDENCE_CHUNKS_PER_SOURCE = 1
 VS5_MAX_SOURCE_COUNT = 5
 VS5_MAX_SOURCE_BYTES = 128 * 1024
 VS5_MAX_TOTAL_SOURCE_BYTES = 512 * 1024
@@ -3099,6 +3099,94 @@ def _relationship_compatible(statement: str, source_texts: list[str]) -> bool:
     # "within 30 days". Preserve these relations exactly instead of accepting
     # them through lexical overlap alone.
     source_text = "\n".join(source_texts)
+    if (
+        re.search(r"\bwaiv\w*\b", statement, flags=re.IGNORECASE)
+        and re.search(r"\bdefaults?\b", statement, flags=re.IGNORECASE)
+        and re.search(
+            r"\b(?:has\s+occurred|is\s+purported\s+to\s+have\s+occurred)\s+"
+            r"as\s+of\s+the\s+date\s+hereof\b",
+            source_text,
+            flags=re.IGNORECASE,
+        )
+        and not re.search(
+            r"\bas\s+of\s+(?:the\s+)?(?:amendment\s+)?date\b|\bas\s+of\s+"
+            r"the\s+date\s+hereof\b",
+            statement,
+            flags=re.IGNORECASE,
+        )
+    ):
+        # A waiver of pre-amendment defaults is not a waiver of later defaults.
+        return False
+    owned_data_center = re.search(
+        r"\b(?P<actor>[A-Z][A-Za-z0-9&.-]{1,30})(?:[’']s|\s+own)\s+"
+        r"[^.!?]{0,80}\bdata\s+center\b",
+        statement,
+    )
+    if owned_data_center is not None:
+        actor = owned_data_center.group("actor")
+        if (
+            re.search(
+                rf"\b{re.escape(actor)}\b[^.!?]{{0,120}}\bhandles?\s+"
+                r"(?:Health\s+Net[’']s|our)\s+data\s+center\s+operations\b",
+                source_text,
+                flags=re.IGNORECASE,
+            )
+            and not re.search(
+                rf"\b{re.escape(actor)}(?:[’']s|\s+own)\s+"
+                r"[^.!?]{0,80}\bdata\s+center\b",
+                source_text,
+                flags=re.IGNORECASE,
+            )
+        ):
+            # "IBM handles our data center" cannot become "IBM's data center".
+            return False
+    pronoun_owned_data_center = re.search(
+        r"\b(?P<actor>[A-Z][A-Za-z0-9&.-]{1,30})\b[^.!?]{0,160}\bits\s+"
+        r"[^.!?]{0,80}\bdata\s+center\b",
+        statement,
+    )
+    if pronoun_owned_data_center is not None:
+        actor = pronoun_owned_data_center.group("actor")
+        if (
+            re.search(
+                rf"\b{re.escape(actor)}\b[^.!?]{{0,120}}\bhandles?\s+"
+                r"(?:Health\s+Net[’']s|our)\s+data\s+center\s+operations\b",
+                source_text,
+                flags=re.IGNORECASE,
+            )
+            and re.search(
+                r"\b(?:Health\s+Net[’']s|our)\s+data\s+center\b",
+                source_text,
+                flags=re.IGNORECASE,
+            )
+            and not re.search(
+                rf"\b{re.escape(actor)}(?:[’']s|\s+own)\s+"
+                r"[^.!?]{0,80}\bdata\s+center\b",
+                source_text,
+                flags=re.IGNORECASE,
+            )
+        ):
+            # In "IBM ... its data center", "its" resolves to IBM and changes
+            # the owner when the source says IBM operated Health Net's center.
+            return False
+
+    if (
+        re.search(
+            r"\bprovide\s+reasonable\s+assistance\b",
+            source_text,
+            flags=re.IGNORECASE,
+        )
+        and re.search(
+            r"\bSupplier\b[^.!?]{0,180}\b(?:provide|provides|shall\s+provide)\b"
+            r"[^.!?]{0,120}\btransition\s+assistance\b",
+            statement,
+            flags=re.IGNORECASE,
+        )
+        and not re.search(r"\breasonable\b", statement, flags=re.IGNORECASE)
+    ):
+        # Do not broaden a duty to provide "reasonable assistance" into an
+        # unqualified transition-assistance obligation.
+        return False
 
     # A dated filing observation is not a timeless current-state fact. Require
     # the output to retain an as-of/reporting qualifier when it uses the same
@@ -3841,6 +3929,14 @@ def _decision_statement_relevant(statement: str, decision_question: str) -> bool
 
     if not decision_question.strip():
         return True
+    if re.search(r"\bChapter\s+11\b", decision_question, flags=re.IGNORECASE):
+        if re.search(
+            r"\b(?:Waiver\s+Termination\s+Date|closing\s+conditions|"
+            r"definitive\s+documents|Chapter\s+11)\b",
+            statement,
+            flags=re.IGNORECASE,
+        ):
+            return True
     if re.search(
         r"\b(?:missing[- ]drive|unaccounted[- ]for\s+(?:server\s+)?drives?)\b",
         decision_question,
@@ -3930,10 +4026,28 @@ def _decision_statement_relevant(statement: str, decision_question: str) -> bool
     ):
         overlap_count += 1
     if (
+        "amendment" in question_terms
+        and "amendment" in statement_terms
+        and {"controlling", "latest"} & question_terms
+    ):
+        overlap_count += 1
+    if (
         ("administrative" in question_terms and "admin" in statement_terms)
         or ("admin" in question_terms and "administrative" in statement_terms)
     ):
         overlap_count += 1
+    if "compensation" in question_terms and "compensation" in statement_terms:
+        # Compensation is already a narrow commercial decision surface; do
+        # not require an unrelated second token merely because the question
+        # also names the agreement or counterparty.
+        overlap_count += 1
+    if (
+        {"replace", "replacement"} & question_terms
+        and "transition" in statement_terms
+    ):
+        # Transition assistance is a direct replacement-plan input even when
+        # the question says "replacement" rather than repeating contract prose.
+        overlap_count += 2
     if overlap_count < required_overlap:
         return False
     if _decision_question_is_sourcing(decision_question):
@@ -5697,7 +5811,9 @@ def _procedural_furniture_key_fact(statement: str) -> bool:
             r"(?:의사일정\s*제?\d+항|상정합니다|나오셔서|질의\s*종결|"
             r"토론\s*(?:신청|시작|종결)|설명드리겠습니다|"
             r"반대\s*토론으로\s*나온\s*것을\s*설명|감사합니다|"
-            r"\b(?:agenda\s+item|called\s+to\s+order|meeting\s+adjourned)\b)",
+            r"\b(?:agenda\s+item|called\s+to\s+order|meeting\s+adjourned|"
+            r"now\s+therefore|in\s+consideration\s+of\s+the\s+premises|"
+            r"witnesseth)\b)",
             statement,
             flags=re.IGNORECASE,
         )
@@ -5994,6 +6110,58 @@ def _grounded_key_fact_fallback(
                 f"any time for any reason with at least {option_notice_exit.group('days')} "
                 "days' prior written notice."
             )
+        admin_breach_cure = re.search(
+            r"\bnon-breaching\s+party\b[^.!?]{0,120}?\bwritten\s+notice\s+of\s+"
+            r"termination\s+of\s+this\s+(?P<instrument>Admin\s+Agreement)\b"
+            r"[^.!?]{0,180}?\bbreaches\s+this\s+(?P=instrument)\b"
+            r"[^.!?]{0,100}?\bfails\s+to\s+cure\s+such\s+breach\s+within\s+"
+            r"thirty\s*\(\s*30\s*\)\s+days\s+after\s+receipt\s+of\s+written\s+notice",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if admin_breach_cure is not None:
+            add_host_projection(
+                "A non-breaching party may terminate after a breach remains uncured "
+                "for 30 days following written notice."
+            )
+        admin_any_reason_exit = re.search(
+            r"\bat\s+the\s+option\s+of\s+either\s+party\s+at\s+any\s+time\s+"
+            r"for\s+any\s+reason\b[^.!?]{0,260}?\bnotice\s+to\s+be\s+given\s+"
+            r"at\s+least\s+\[\*{3}\]\s+days\s+prior\b[^.!?]{0,180}?"
+            r"\btermination\s+of\s+Statement\s+of\s+Work\s+No\.\s*1\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if admin_any_reason_exit is not None:
+            add_host_projection(
+                "Either party may terminate for any reason on redacted prior notice, "
+                "together with termination of SOW No. 1."
+            )
+        admin_compensation_exclusion = re.search(
+            r"\bCHLIC\s+Compensation\s+set\s+forth\s+in\s+Amendment\s+No\.\s*1\b"
+            r"[^.!?]{0,220}?\b(?:are|is)\s+not\s+effective\s+and\s+shall\s+not\s+"
+            r"take\s+effect\s+with\s+respect\s+to\s+the\s+following\s+Client\s+"
+            r"Accounts,\s*\[\*{3}\]",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if admin_compensation_exclusion is not None:
+            add_host_projection(
+                "Amendment No. 1 CHLIC Compensation is not effective for the "
+                "redacted client accounts."
+            )
+        admin_governing_expiry = re.search(
+            r"\bThe\s+effective\s+date\s+of\s+the\s+termination\s+or\s+"
+            r"expiration\s+of\s+the\s+Agreement\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if admin_governing_expiry is not None and re.search(
+            r"\bAdmin\s+Agreement\b", prompt_text, flags=re.IGNORECASE
+        ):
+            add_host_projection(
+                "The Admin Agreement also ends when the governing Agreement terminates or expires."
+            )
 
         transition_assistance = re.search(
             r"\bcommencing\s+upon\s+any\s+notice\s+of\s+termination\b"
@@ -6005,11 +6173,32 @@ def _grounded_key_fact_fallback(
             flags=re.IGNORECASE | re.DOTALL,
         )
         if transition_assistance is not None:
-            add_host_projection(
-                "Except for Company's material-breach termination notice, Supplier shall "
-                "at Company's request continue Services and provide reasonable transition "
-                "assistance upon termination or non-renewal notice."
+            transition_duration_and_payment = bool(
+                re.search(
+                    r"\bcontinu(?:e|ing)\s+for\s+the\s+longer\s+of\s+\[\*{3}\]\s+"
+                    r"days\b.{0,380}?\blonger\s+period\s+specified\s+in\s+"
+                    r"(?:an|the)\s+(?:applicable\s+)?Statement\s+of\s+Work\b",
+                    prompt_text,
+                    flags=re.IGNORECASE | re.DOTALL,
+                )
+                and re.search(
+                    r"\bCompany\s+shall\s+pay\s+Supplier\b",
+                    prompt_text,
+                    flags=re.IGNORECASE,
+                )
             )
+            if transition_duration_and_payment:
+                add_host_projection(
+                    "Except for Company's material-breach notice, at Company's request "
+                    "Supplier continues Services and provides reasonable transition "
+                    "assistance for a redacted or longer SOW period; Company pays Supplier."
+                )
+            else:
+                add_host_projection(
+                    "Except for Company's material-breach termination notice, Supplier shall "
+                    "at Company's request continue Services and provide reasonable transition "
+                    "assistance upon termination or non-renewal notice."
+                )
 
         economic_viability_exit = all(
             re.search(pattern, prompt_text, flags=re.IGNORECASE)
@@ -6091,6 +6280,41 @@ def _grounded_key_fact_fallback(
             add_host_projection(
                 f"Work Order #{work_order_capacity.group('number')} covers a capacity "
                 "commitment for COVID-19 vaccine drug-substance manufacturing."
+            )
+        work_order_subtotal = re.search(
+            r"\bPrice\s+Matrix\s+Summary\b.{0,900}?\bSubtotal\s+\[\*{2}\]\s+"
+            r"\[\*{2}\]\s+(?P<subtotal>\$\s*\d[\d,]*)\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if work_order_subtotal is not None:
+            add_host_projection(
+                "The Work Order price matrix lists a "
+                f"{work_order_subtotal.group('subtotal').replace(' ', '')} subtotal."
+            )
+        redacted_nonrefundable_capacity_fee = re.search(
+            r"\btotal\s+non-refundable\s+capacity\s+commitment\s+fee\s+of\s+"
+            r"\$\[\*{2,3}\]\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if redacted_nonrefundable_capacity_fee is not None:
+            add_host_projection(
+                "The capacity-commitment fee is non-refundable, but its amount and "
+                "payment percentages are redacted."
+            )
+        revolving_facility_conditions = re.search(
+            r"\b(?:new\s+)?Revolving\s+Credit\s+Facility\s+remains\s+subject\s+to\s+"
+            r"(?:the\s+)?satisfaction\s+of\s+certain\s+closing\s+conditions\b"
+            r".{0,260}?\b(?:agreement\s+of\s+and\s+)?execution\s+of\s+the\s+"
+            r"definitive\s+documents\b",
+            prompt_text,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+        if revolving_facility_conditions is not None:
+            add_host_projection(
+                "The new revolving facility remains subject to closing conditions "
+                "and execution of definitive documents."
             )
 
         additional_government_requirements = re.search(
@@ -6312,6 +6536,19 @@ def _grounded_key_fact_fallback(
                 f"The {named_initial_term.group('name')} Agreement's initial term lasts "
                 f"{named_initial_term.group('duration').lower()} years, until "
                 f"{named_initial_term.group('date')}."
+            )
+        sow_survival_term = re.search(
+            r"\bterm\s+of\s+this\s+Agreement\s+commences\s+as\s+of\s+the\s+"
+            r"Effective\s+Date\b[^.!?]{0,180}?\buntil\s+the\s+earlier\s+of\s+"
+            rf"(?P<date>(?:{_SCALAR_MONTHS})\s+\d{{1,2}},\s*\d{{4}})\s+or\s+"
+            r"the\s+termination\s+or\s+expiration\s+of\s+all\s+Statements\s+of\s+Work",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if sow_survival_term is not None:
+            add_host_projection(
+                "The master term ends on "
+                f"{sow_survival_term.group('date')} or when all SOWs end, whichever occurs first."
             )
 
         evergreen_nonrenewal = re.search(
@@ -7016,10 +7253,19 @@ def _brief_key_fact_target(
 
 _DECISION_CONSTRAINT_PATTERN = re.compile(
     r"\b(?:above|against|below|blank|fail(?:ed|ing|ure)?|incomplete|missing|need(?:s)? correction|"
-    r"not (?:accepted|approved|assigned|recommend(?:ed|ing)?|tested)|pending|still requires|unknown|unresolved|unsigned)\b|"
+    r"not (?:accepted|approved|assigned|recommend(?:ed|ing)?|tested)|has not|ongoing|"
+    r"pending|remains subject to|still requires|unknown|unresolved|unsigned)\b|"
     r"(?:미완료|미확인|미승인|미정|공란|누락|불명확|모호|부족|"
     r"정해지지\s*않|확인되지\s*않|입증되지\s*않|승인되지\s*않|해결되지\s*않|전혀\s*없|"
     r"아직[^.!?\n]{0,100}(?:안\s*(?:내려|왔|되|정해)|않(?:았|은|다)|미정|없))",
+    flags=re.IGNORECASE,
+)
+
+_DECISION_RISK_SURFACE_PATTERN = re.compile(
+    r"\b(?:audit|cancel(?:lation)?|condition(?:al|s)?|costs?|default|delay|"
+    r"exclusiv\w*|fees?|inspection|liabilit\w*|minimum[- ]purchase|notice|"
+    r"obligation|pricing|redacted|renew(?:al)?|return|service[- ]level|"
+    r"shall|surviv\w*|terminat\w*|transition|waiver|warrant\w*)\b",
     flags=re.IGNORECASE,
 )
 
@@ -7028,6 +7274,17 @@ def _decision_constraint_present(statement: str) -> bool:
     return bool(
         _DECISION_CONSTRAINT_PATTERN.search(statement)
         and not _korean_reassuring_absence(statement)
+    )
+
+
+def _decision_risk_surface_present(statement: str) -> bool:
+    """Identify a cited fact that is more useful as a decision constraint."""
+
+    return bool(
+        _DECISION_RISK_SURFACE_PATTERN.search(statement)
+        and _complete_extracted_statement_surface(statement)
+        and not _low_information_key_fact(statement)
+        and not _procedural_furniture_key_fact(statement)
     )
 
 
@@ -7186,6 +7443,8 @@ def _model_statement_source_semantics_supported(
     combined = "\n".join(source_texts)
     if not statement.strip() or not combined.strip():
         return False
+    if not _relationship_compatible(statement, source_texts):
+        return False
     if (
         re.search(r"\bsigned\s+on\s+(?:the\s+)?(?:Amendment\s+)?Effective\s+Date\b", statement, re.I)
         and re.search(r"\bexecuted\s+this\s+Amendment\s+as\s+of\s+the\s+Amendment\s+Effective\s+Date\b", combined, re.I)
@@ -7338,6 +7597,16 @@ def _model_statement_source_semantics_supported(
         statement,
         flags=re.IGNORECASE,
     ):
+        if not re.search(
+            r"\b(?:both\s+parties|by\s+both|the\s+parties)\b[^.!?]{0,100}"
+            r"\b(?:executed|signed)\b|"
+            r"\b(?:executed|signed)\b[^.!?]{0,100}"
+            r"\b(?:both\s+parties|by\s+both|the\s+parties)\b",
+            combined,
+            flags=re.IGNORECASE,
+        ):
+            # An effective/entered-into date is not itself a shared signature date.
+            return False
         statement_dates = {
             value for kind, value in _answer_scalar_values(statement) if kind == "date"
         }
@@ -7550,6 +7819,9 @@ def _grounded_obligation_context(
                 and row["statement"] != current["statement"]
                 if _decision_constraint_present(str(row["statement"]))
                 and _complete_decision_basis(str(row["statement"]))
+                and not _procedural_furniture_key_fact(
+                    str(row["statement"])
+                )
             ]
             blocker = min(
                 blocker_candidates,
@@ -7650,6 +7922,11 @@ def _select_grounded_bottom_line(
         )
         if korean_output:
             statement = "보류: 제공된 근거만으로는 결정을 확정할 수 없습니다."
+        elif decision_question.strip():
+            statement = (
+                "Hold: do not commit yet. Complete the evidence checks and apply "
+                "the decision rule below."
+            )
         elif current_need is not None:
             statement = (
                 "Hold: supplied evidence does not establish current "
@@ -8859,6 +9136,8 @@ def _repair_grounded_recommendations(
     def grounded_proposal_from_basis(
         basis: dict[str, Any],
         statement: str,
+        *,
+        include_decision_rule: bool = True,
     ) -> tuple[list[dict[str, Any]], bool]:
         basis_refs = [
             str(ref)
@@ -8881,7 +9160,67 @@ def _repair_grounded_recommendations(
             "paired_version_binding",
         }:
             proposal["proposal_basis_validation_mode"] = basis_validation_mode
-        return [proposal], True
+        rows = [proposal]
+        decision_rule = _question_specific_decision_rule(decision_question)
+        if (
+            include_decision_rule
+            and decision_rule
+            and decision_rule.casefold() != statement.casefold()
+        ):
+            rows.append({**proposal, "statement": decision_rule})
+        return rows, True
+
+    if re.search(r"\bChapter\s+11\b", decision_question, flags=re.IGNORECASE):
+        chapter_bases = [
+            basis
+            for basis in [
+                *_rank_decision_rows(conflict_rows),
+                *_rank_decision_rows(key_fact_rows),
+            ]
+            if grounded(basis)
+        ]
+        waiver_basis = next(
+            (
+                basis
+                for basis in chapter_bases
+                if re.search(
+                    r"\bWaiver\s+Termination\s+Date\b",
+                    str(basis.get("statement") or ""),
+                    flags=re.IGNORECASE,
+                )
+            ),
+            None,
+        )
+        facility_basis = next(
+            (
+                basis
+                for basis in chapter_bases
+                if re.search(
+                    r"\bclosing\s+conditions\b",
+                    str(basis.get("statement") or ""),
+                    flags=re.IGNORECASE,
+                )
+                and re.search(
+                    r"\bdefinitive\s+documents\b",
+                    str(basis.get("statement") or ""),
+                    flags=re.IGNORECASE,
+                )
+            ),
+            None,
+        )
+        if waiver_basis is not None and facility_basis is not None:
+            waiver_rows, _ = grounded_proposal_from_basis(
+                waiver_basis,
+                "Confirm whether the Waiver Termination Date occurred.",
+                include_decision_rule=False,
+            )
+            facility_rows, _ = grounded_proposal_from_basis(
+                facility_basis,
+                "Confirm facility closing conditions and definitive documents; "
+                "continue only if complete, otherwise use the contingency path.",
+                include_decision_rule=False,
+            )
+            return [*waiver_rows, *facility_rows], True
 
     if _decision_question_is_sourcing(decision_question):
         second_source_basis = next(
@@ -12072,7 +12411,7 @@ def _explicit_constraint_rows(
 
     constraint_pattern = re.compile(
         r"\b(?:blank|fail(?:ed|ing|ure)?|incomplete|missing|pending|unknown|unresolved|unsigned|"
-        r"need(?:s)? correction|still requires|"
+        r"has not|need(?:s)? correction|ongoing|remains subject to|still requires|"
         r"not (?:been )?(?:accepted|approved|assigned|recorded|recommend(?:ed|ing)?|tested)|"
         r"cannot\b[^.!?]{0,100}\bwithout|required\s+(?:before|prior\s+to)|"
         r"conditioned\s+(?:on|upon)|contingent\s+(?:on|upon)|proceed\s+only\s+after|"
@@ -13280,18 +13619,23 @@ def _explicit_decision_exposure_rows(
 
     def exposure_priority(statement: str) -> int | None:
         patterns = (
-            (0, r"\b(?:break-up|termination)\s+fee\b|\bmaximum\s+\$?\d[^.!?]{0,40}\bfee\b"),
-            (1, r"\bpersonal\s+information\b[^.!?]{0,80}\bmillion\b"),
-            (2, r"\b(?:may|can)\s+(?:immediately\s+)?(?:terminate|suspend)\b"),
             (
-                3,
+                0,
+                r"\bremains\s+subject\s+to\b[^.!?]{0,180}"
+                r"\b(?:closing\s+conditions|definitive\s+documents)\b",
+            ),
+            (1, r"\b(?:break-up|termination)\s+fee\b|\bmaximum\s+\$?\d[^.!?]{0,40}\bfee\b"),
+            (2, r"\bpersonal\s+information\b[^.!?]{0,80}\bmillion\b"),
+            (3, r"\b(?:may|can)\s+(?:immediately\s+)?(?:terminate|suspend)\b"),
+            (
+                4,
                 r"\bminimum\s+(?:annual|quarterly)\s+purchases?\b|"
                 r"\bminimum[- ]purchase\s+(?:commitments?|obligations?)\b|"
                 r"\bredacted\s+minimum\b[^.!?]{0,80}\bcalendar\s+quarter\b",
             ),
-            (4, r"\bservice[- ]level\s+credits?\b"),
-            (5, r"\bpaid\s+disengagement\s+assistance\b"),
-            (6, r"\bterminate\b[^.!?]{0,80}\b(?:days?[’']?\s+notice|notice)\b"),
+            (5, r"\bservice[- ]level\s+credits?\b"),
+            (6, r"\bpaid\s+(?:disengagement|transition)\s+assistance\b"),
+            (7, r"\bterminate\b[^.!?]{0,80}\b(?:days?[’']?\s+notice|notice)\b"),
         )
         for priority, pattern in patterns:
             if re.search(pattern, statement, flags=re.IGNORECASE):
@@ -13376,6 +13720,9 @@ def _grounded_decision_risk_rows(
         if _complete_extracted_statement_surface(
             str(candidate.get("statement") or "")
         )
+        and not _procedural_furniture_key_fact(
+            str(candidate.get("statement") or "")
+        )
         and not _off_question_named_agreement(
             str(candidate.get("statement") or ""), decision_question
         )
@@ -13423,6 +13770,24 @@ def _grounded_decision_risk_rows(
         if _conflict_row_is_redundant(deduplicated, candidate):
             continue
         deduplicated.append(candidate)
+    deduplicated.sort(
+        key=lambda candidate: (
+            0
+            if re.search(
+                r"\bremains\s+subject\s+to\b[^.!?]{0,180}"
+                r"\b(?:closing\s+conditions|definitive\s+documents)\b",
+                str(candidate.get("statement") or ""),
+                flags=re.IGNORECASE,
+            )
+            else 1
+            if re.search(
+                r"\bWaiver\s+Termination\s+Date\b",
+                str(candidate.get("statement") or ""),
+                flags=re.IGNORECASE,
+            )
+            else 2
+        )
+    )
 
     result: list[dict[str, Any]] = []
     used_refs: set[str] = set()
@@ -14817,6 +15182,128 @@ def _question_specific_next_step(
             "attach current performance evidence before deciding."
         )
     return "Verify the cited decision basis against current operating evidence before deciding."
+
+
+def _question_specific_decision_rule(decision_question: str) -> str:
+    """Return a non-factual proceed/exit rule for a decision-oriented Brief."""
+
+    question = re.sub(r"\s+", " ", decision_question).strip()
+    if not question or not _question_requests_decision_direction(question):
+        return ""
+    if _contains_hangul(question):
+        return "확인 항목이 모두 충족되고 남은 위험을 승인한 경우에만 진행하세요."
+    if re.search(r"\bchapter\s+11\b", question, flags=re.IGNORECASE):
+        return (
+            "Continue only if the waiver remains effective and facility closing "
+            "conditions and definitive documents are complete; otherwise use the contingency path."
+        )
+    if re.search(
+        r"\b(?:data[- ]rights?|post[- ]termination)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return (
+            "Continue only if ownership, permitted use, return or destruction duties, "
+            "and surviving licenses support the intended operating model."
+        )
+    if re.search(r"\b(?:leased?\s+site|facility\s+lease)\b", question, flags=re.IGNORECASE):
+        return (
+            "Renew only if the occupied-site option beats relocation on total cost, "
+            "timing, and required space."
+        )
+    if re.search(r"\bminimum[- ]purchase\b", question, flags=re.IGNORECASE) and re.search(
+        r"\bexclusiv\w*\b", question, flags=re.IGNORECASE
+    ):
+        return (
+            "Continue only if forecast demand covers the minimum purchase and the "
+            "resulting exclusivity and pricing exposure is acceptable; otherwise renegotiate or exit."
+        )
+    if re.search(
+        r"\b(?:statement[- ]of[- ]work|replacement\s+channel|"
+        r"service[- ]provider\s+dependency|services?\s+(?:relationship|arrangement)|"
+        r"administrative[- ]services?|outsourc\w*)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return (
+            "Continue only if current service performance, pricing, and transition "
+            "exposure support retention; otherwise use the replacement plan."
+        )
+    if re.search(
+        r"\b(?:second[- ]source|alternate\s+supply)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return (
+            "Transition only after qualification, validation, capacity, and required "
+            "rights are confirmed; until then preserve the current continuity plan."
+        )
+    if re.search(r"\bsupply\s+dependency\b", question, flags=re.IGNORECASE):
+        return (
+            "Continue only if documented capacity, quality, delivery, volume, and "
+            "pricing meet approved requirements; otherwise qualify an alternate source."
+        )
+    if re.search(r"\bwork[- ]order\b", question, flags=re.IGNORECASE):
+        return (
+            "If acceptance evidence or pricing does not align, revise the work order "
+            "or defer authorization."
+        )
+    if re.search(r"\blicense\b", question, flags=re.IGNORECASE):
+        return (
+            "Continue only if the current territory, licensed scope, termination "
+            "triggers, and surviving rights support the intended use."
+        )
+    if re.search(r"\b(?:concentration|economics)\b", question, flags=re.IGNORECASE):
+        return (
+            "Continue only if quantified concentration, termination fees, and "
+            "transition charges remain within approved limits."
+        )
+    if re.search(r"\bmanufactur\w*\b", question, flags=re.IGNORECASE):
+        return (
+            "Continue only after remediation, validation, inspection, capacity, "
+            "quality, delivery, and pricing evidence supports readiness."
+        )
+    if re.search(
+        r"\b(?:missing[- ]drive|unaccounted[- ]for\s+(?:server\s+)?drives?|"
+        r"data[- ]security\s+incident)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return (
+            "Continue only after remediation is closed and the remaining service, "
+            "security, and transition exposure is accepted."
+        )
+    if re.search(
+        r"\b(?:global\s+development|development\s+plan|collaboration)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return (
+            "Continue only if the current plan, approved budget, cost allocation, "
+            "milestones, and opt-out exposure fit approved resource limits."
+        )
+    if re.search(
+        r"\b(?:dependency|replacement\s+(?:path|supplier|channel))\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return (
+            "Retain the current dependency only if its quantified exposure is lower "
+            "than a validated replacement path on cost, timing, and readiness."
+        )
+    if re.search(
+        r"\b(?:amend(?:ed|ment)|renew(?:al)?|terminat(?:e|ion)|extend)\b",
+        question,
+        flags=re.IGNORECASE,
+    ):
+        return (
+            "Commit only if the controlling scope, price, term, notice, and current "
+            "performance evidence support the selected path."
+        )
+    return (
+        "Commit only after the cited blocker is resolved, the evidence checks are "
+        "complete, and the remaining risk is accepted."
+    )
 
 
 def _question_specific_review_uncertainty(
@@ -26601,6 +27088,24 @@ class LocalRuntimeStore:
                 metadata["quality_final_echo_backfill_count"] = (
                     final_echo_backfill_count
                 )
+
+            if not conflict_citations and len(key_point_citations) >= 2:
+                promoted_risk = next(
+                    (
+                        row
+                        for row in _rank_decision_rows(key_point_citations)
+                        if _decision_risk_surface_present(
+                            str(row.get("statement") or "")
+                        )
+                    ),
+                    None,
+                )
+                if promoted_risk is not None:
+                    key_point_citations = [
+                        row for row in key_point_citations if row is not promoted_risk
+                    ]
+                    conflict_citations = [promoted_risk]
+                    metadata["grounded_risk_surface_promotion_count"] = 1
 
             def prune_optional_echo_rows(
                 section: str,

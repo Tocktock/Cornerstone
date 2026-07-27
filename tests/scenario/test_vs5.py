@@ -101,7 +101,10 @@ from cornerstone_cli.vs5_verification import (
     VERIFICATION_CONTRACT_FILES,
     _answer_review_identity,
     _citation_integrity,
+    _human_record_evidence,
+    _report_claim_language_consistent,
     _run_advisory_judge,
+    _scan_active_claim_language,
     _contains_all_answer_terms,
     _missing_evidence_structure_passes,
     _repeated_normalized_response_count,
@@ -131,6 +134,73 @@ SCOPE = {
 
 
 class Vs5DecisionBriefTest(unittest.TestCase):
+    def test_claim_language_guards_reject_unearned_completion_claims(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            for relative in (
+                "docs/adr/ADR-0007-product-value-first-reset.md",
+                "docs/sot/01_PRODUCT_GOAL_AND_DIRECTION.md",
+                "docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md",
+                "docs/scenario-contracts/VS5_CITATION_GROUNDED_BRIEF_CONTRACT.md",
+            ):
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(
+                    "VS5 is complete only when all human and external rows pass.\n"
+                )
+            self.assertTrue(_scan_active_claim_language(root)["passed"])
+
+            (root / "docs/sot/01_PRODUCT_GOAL_AND_DIRECTION.md").write_text(
+                "VS5 is complete.\n"
+            )
+            scan = _scan_active_claim_language(root)
+            self.assertFalse(scan["passed"])
+            self.assertEqual(scan["violation_count"], 1)
+
+        rows = [
+            {"id": "VS5-BRIEF-001", "owner": "AI", "status": "PASS"},
+            {"id": "VS5-QUAL-003", "owner": "Human", "status": "HUMAN_REQUIRED"},
+        ]
+        self.assertTrue(
+            _report_claim_language_consistent(
+                final_verdict="AI_VERIFIABLE_READY_HUMAN_GATES_PENDING",
+                product_value_claim="NOT_CLAIMED_UNTIL_HUMAN_AND_EXTERNAL_ROWS_PASS",
+                rows=rows,
+            )["passed"]
+        )
+        self.assertFalse(
+            _report_claim_language_consistent(
+                final_verdict="VALUE_VERIFIED_EXTERNAL",
+                product_value_claim="NARROW_VS5_EXTERNAL_VALUE_CLAIM_EARNED",
+                rows=rows,
+            )["passed"]
+        )
+
+    def test_stale_human_decision_is_reported_as_not_run_for_current_revision(self) -> None:
+        evidence = _human_record_evidence(
+            path="review.json",
+            record={"decision": "ACCEPT"},
+            valid=False,
+            reviewed_items=0,
+        )
+        self.assertEqual(evidence["decision"], "NOT_RUN")
+        self.assertEqual(evidence["current_decision"], "NOT_RUN")
+        self.assertEqual(evidence["stale_observed_decision"], "ACCEPT")
+
+    def test_missing_external_records_are_not_counted_as_invalid_records(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            evidence = _validate_external_sessions(
+                Path(temp_dir),
+                corpus_sha256="a" * 64,
+                pipeline_sha256="b" * 64,
+                model_provider="ollama",
+                generation_model="ornith:9b",
+                embedding_model="qwen3-embedding:0.6b",
+                h01_external_authorized=False,
+            )
+        self.assertEqual(evidence["missing_record_count"], 5)
+        self.assertEqual(evidence["invalid_record_count"], 0)
+
     def test_citation_integrity_accepts_only_an_honest_non_factual_empty_draft(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             store = LocalRuntimeStore(Path(temp_dir))
@@ -3882,8 +3952,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         )
         self.assertEqual(
             brief["bottom_line"],
-            "Hold: supplied evidence does not establish current territory, scope, and "
-            "termination rights. "
+            "Hold: do not commit yet. Complete the evidence checks and apply the "
+            "decision rule below. "
             "Basis: Bristol-Myers: Amendment No. 1 deletes ITI's Qualified Study "
             "prerequisite before third-party licensing.",
         )
@@ -3891,7 +3961,9 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             brief["recommended_next_steps"],
             [
                 "Map territory, licensed scope, termination triggers, and surviving "
-                "rights before deciding."
+                "rights before deciding.",
+                "Continue only if the current territory, licensed scope, termination "
+                "triggers, and surviving rights support the intended use.",
             ],
         )
         change_row = next(
@@ -4532,11 +4604,13 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             decision_question="이 안건을 지금 가결해야 하는가?",
         )
         self.assertTrue(changed)
-        self.assertEqual(len(recommendations), 1)
-        self.assertNotRegex(
-            recommendations[0]["statement"],
-            r"Resolve|Reconcile|Use this",
-        )
+        self.assertEqual(len(recommendations), 2)
+        for recommendation in recommendations:
+            self.assertRegex(recommendation["statement"], r"[가-힣]")
+            self.assertNotRegex(
+                recommendation["statement"],
+                r"Resolve|Reconcile|Use this",
+            )
         pending_rows = _explicit_constraint_rows(
             [
                 {
@@ -7507,6 +7581,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             "Obtain remediation closure, validation results, inspection status, and "
             "usable-capacity evidence before deciding.",
         )
+        self.assertEqual(len(repaired), 2)
+        self.assertIn("Continue only after remediation", repaired[1]["statement"])
         self.assertNotIn(basis["statement"], repaired[0]["statement"])
         self.assertEqual(repaired[0]["proposal_basis_statement"], basis["statement"])
 
@@ -7534,6 +7610,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             "Map territory, licensed scope, termination triggers, and surviving "
             "rights before deciding.",
         )
+        self.assertEqual(len(repaired), 2)
+        self.assertIn("Continue only if the current territory", repaired[1]["statement"])
         self.assertNotIn(amendment_basis["statement"], repaired[0]["statement"])
 
     def test_portfolio_review_recommendations_request_concrete_records(self) -> None:
@@ -7585,6 +7663,7 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             )
             self.assertTrue(changed)
             self.assertEqual(repaired[0]["statement"], expected)
+            self.assertEqual(len(repaired), 2)
             self.assertEqual(repaired[0]["proposal_basis_statement"], source)
 
         invalid_change = {
@@ -7662,8 +7741,9 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             decision_question="Should AXP extend the agreement?",
         )
         self.assertTrue(changed)
-        self.assertEqual(len(repaired), 1)
+        self.assertEqual(len(repaired), 2)
         self.assertNotIn("14.12 Notices", repaired[0]["statement"])
+        self.assertIn("controlling scope, price, term, notice", repaired[1]["statement"])
 
     def test_relationship_guard_rejects_waiver_role_and_respective_value_swaps(self) -> None:
         waiver_source = (
@@ -7742,6 +7822,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             repaired[0]["statement"],
             "Verify the second source's readiness before deciding.",
         )
+        self.assertEqual(len(repaired), 2)
+        self.assertIn("Transition only after qualification", repaired[1]["statement"])
         self.assertEqual(repaired[0]["validation_mode"], "grounded_proposal_basis")
         self.assertEqual(repaired[0]["proposal_basis_citation_refs"], [ref])
 
@@ -7801,6 +7883,55 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertTrue(changed)
         self.assertRegex(repaired[0]["statement"], r"Remediate.*retest.*12,000")
         self.assertNotRegex(repaired[0]["statement"], r"Reconcile.*quantit")
+
+    def test_chapter11_recommendations_keep_waiver_and_facility_citations_separate(self) -> None:
+        waiver_ref = "evidence_chunk:waiver"
+        facility_ref = "evidence_chunk:facility"
+        waiver = {
+            "statement": (
+                "Until the Waiver Termination Date, the limited waiver covers defaults "
+                "that occurred or were purported as of the amendment date."
+            ),
+            "citation_refs": [waiver_ref],
+            "allowed_citation_refs": [waiver_ref],
+        }
+        facility = {
+            "statement": (
+                "The new revolving facility remains subject to closing conditions "
+                "and execution of definitive documents."
+            ),
+            "citation_refs": [facility_ref],
+            "allowed_citation_refs": [facility_ref],
+        }
+
+        repaired, changed = _repair_grounded_recommendations(
+            [],
+            [waiver, facility],
+            [],
+            {
+                waiver_ref: {"text": waiver["statement"]},
+                facility_ref: {"text": facility["statement"]},
+                "evidence_chunk:survival": {
+                    "text": (
+                        "Sections 1, 4.3, 8.2, 9, 10, 11, and 17 survive any "
+                        "termination or expiration of the Agreement."
+                    )
+                },
+                "evidence_chunk:recital": {
+                    "text": (
+                        "NOW THEREFORE, in consideration of the premises set forth above."
+                    )
+                },
+            },
+            decision_question="Should the owner continue after the Chapter 11 event?",
+        )
+
+        self.assertTrue(changed)
+        self.assertEqual(len(repaired), 2)
+        self.assertEqual(repaired[0]["citation_refs"], [waiver_ref])
+        self.assertEqual(repaired[1]["citation_refs"], [facility_ref])
+        self.assertIn("Waiver Termination Date", repaired[0]["statement"])
+        self.assertIn("closing conditions", repaired[1]["statement"])
 
     def test_bottom_line_repair_keeps_compound_duration_intact(self) -> None:
         ref = "evidence_chunk:chunk_" + "a" * 64
@@ -7950,6 +8081,14 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             ), mock.patch(
                 "cornerstone_cli.vs5_verification._run_gate",
                 return_value={"command": ASK_HISTORY_GATE_COMMAND, "exit_code": 0},
+            ), mock.patch(
+                "cornerstone_cli.vs5_verification._scan_active_claim_language",
+                return_value={
+                    "passed": True,
+                    "checked_paths": [],
+                    "violation_count": 0,
+                    "violations": [],
+                },
             ):
                 report = revalidate_vs5_human_evidence(root)
             self.assertEqual(report["status"], "success")
@@ -9704,7 +9843,10 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 "renewal of the Agreement or applicable Statement of Work, Supplier "
                 "shall at Company's request continue to provide the Services to "
                 "facilitate Company's transition and provide reasonable assistance."
-                " This Agreement remains in full force during transition assistance."
+                " Such transition assistance will continue for the longer of [***] "
+                "days following termination or the longer period specified in the "
+                "applicable Statement of Work. Company shall pay Supplier for such "
+                "transition assistance."
             ),
             "safety": {},
         }
@@ -9717,10 +9859,81 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             ),
         )
         self.assertIn(
-            "Except for Company's material-breach termination notice, Supplier shall "
-            "at Company's request continue Services and provide reasonable transition "
-            "assistance upon termination or non-renewal notice",
+            "Except for Company's material-breach notice, at Company's request "
+            "Supplier continues Services and provides reasonable transition assistance "
+            "for a redacted or longer SOW period; Company pays Supplier",
             {row["statement"] for row in transition_rows},
+        )
+
+    def test_grounded_key_fact_fallback_projects_admin_and_facility_constraints(self) -> None:
+        admin_text = (
+            "The non-breaching party may give written notice of termination of this "
+            "Admin Agreement if the other party breaches this Admin Agreement and "
+            "fails to cure such breach within thirty (30) days after receipt of written "
+            "notice. At the option of either party at any time for any reason, said "
+            "notice to be given at least [***] days prior to the specified termination "
+            "date in conjunction with the termination of Statement of Work No. 1."
+        )
+        compensation_text = (
+            "CHLIC Compensation set forth in Amendment No. 1 to the Admin Agreement "
+            "are not effective and shall not take effect with respect to the following "
+            "Client Accounts, [***]."
+        )
+        facility_text = (
+            "The New Revolving Credit Facility remains subject to satisfaction of "
+            "certain closing conditions and agreement of and execution of the "
+            "definitive documents for the New Revolving Credit Facility."
+        )
+        admin_rows = _grounded_key_fact_fallback(
+            [
+                {
+                    "artifact_id": "cigna-admin",
+                    "evidence_chunk_id": "admin-exit",
+                    "text": admin_text,
+                    "safety": {},
+                },
+                {
+                    "artifact_id": "cigna-admin-amendment",
+                    "evidence_chunk_id": "admin-compensation",
+                    "text": compensation_text,
+                    "safety": {},
+                },
+            ],
+            limit=6,
+            decision_question=(
+                "Should the owner continue the Cigna admin relationship under its "
+                "termination and compensation terms?"
+            ),
+        )
+        facility_rows = _grounded_key_fact_fallback(
+            [
+                {
+                    "artifact_id": "airspan-filing",
+                    "evidence_chunk_id": "facility-conditions",
+                    "text": facility_text,
+                    "safety": {},
+                },
+            ],
+            limit=6,
+            decision_question="Should the owner continue after the Chapter 11 event?",
+        )
+        statements = {
+            row["statement"] for row in [*admin_rows, *facility_rows]
+        }
+        self.assertIn(
+            "Either party may terminate for any reason on redacted prior notice, "
+            "together with termination of SOW No. 1",
+            statements,
+        )
+        self.assertIn(
+            "Amendment No. 1 CHLIC Compensation is not effective for the "
+            "redacted client accounts",
+            statements,
+        )
+        self.assertIn(
+            "The new revolving facility remains subject to closing conditions "
+            "and execution of definitive documents",
+            statements,
         )
 
     def test_grounded_key_fact_fallback_prefers_question_relevance_and_projects_allocations(self) -> None:
@@ -9960,6 +10173,56 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 ("evidence_chunk:security",),
             },
         )
+
+    def test_chapter11_risks_prioritize_open_facility_conditions_and_waiver_scope(self) -> None:
+        chunks = [
+            {
+                "evidence_chunk_id": "facility",
+                "text": (
+                    "The New Revolving Credit Facility remains subject to satisfaction "
+                    "of closing conditions and execution of definitive documents."
+                ),
+                "safety": {},
+            },
+            {
+                "evidence_chunk_id": "waiver",
+                "text": (
+                    "Until the Waiver Termination Date, Gogo waives defaults that "
+                    "occurred or were purported as of the date hereof."
+                ),
+                "safety": {},
+            },
+            {
+                "evidence_chunk_id": "recital",
+                "text": "NOW THEREFORE, in consideration of the premises set forth above.",
+                "safety": {},
+            },
+        ]
+        chunk_by_ref = {
+            f"evidence_chunk:{chunk['evidence_chunk_id']}": chunk
+            for chunk in chunks
+        }
+        rows = _grounded_decision_risk_rows(
+            [
+                {
+                    "statement": chunks[1]["text"],
+                    "citation_refs": ["evidence_chunk:waiver"],
+                },
+                {
+                    "statement": chunks[2]["text"],
+                    "citation_refs": ["evidence_chunk:recital"],
+                }
+            ],
+            chunks,
+            chunk_by_ref,
+            limit=2,
+            decision_question="Should the owner continue after the Chapter 11 event?",
+        )
+
+        self.assertEqual(len(rows), 2)
+        self.assertIn("closing conditions", rows[0]["statement"])
+        self.assertIn("Waiver Termination Date", rows[1]["statement"])
+        self.assertNotIn("NOW THEREFORE", " ".join(row["statement"] for row in rows))
 
     def test_grounded_key_fact_fallback_balances_multiple_sources(self) -> None:
         chunks = [
@@ -10739,6 +11002,82 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 ],
             )
         )
+        self.assertFalse(
+            _model_statement_source_semantics_supported(
+                "Both Lonza and ITI executed Amendment 1 on December 19, 2022.",
+                [
+                    "Amendment 1 is entered into on December 19, 2022. "
+                    "Lonza Date: December 20, 2022. ITI Date: December 19, 2022."
+                ],
+            )
+        )
+        self.assertFalse(
+            _model_statement_source_semantics_supported(
+                "The waiver covers any purported default.",
+                [
+                    "Until the Waiver Termination Date, Gogo waives each default or "
+                    "event of default that has occurred or is purported to have "
+                    "occurred as of the date hereof."
+                ],
+            )
+        )
+        self.assertTrue(
+            _model_statement_source_semantics_supported(
+                "Until the Waiver Termination Date, the waiver covers defaults "
+                "that occurred or were purported as of the amendment date.",
+                [
+                    "Until the Waiver Termination Date, Gogo waives each default or "
+                    "event of default that has occurred or is purported to have "
+                    "occurred as of the date hereof."
+                ],
+            )
+        )
+        self.assertFalse(
+            _model_statement_source_semantics_supported(
+                "IBM could not locate drives used in IBM's Rancho Cordova data center.",
+                [
+                    "IBM, which handles our data center operations, notified us that "
+                    "it could not locate hard disk drives used in our data center "
+                    "located in Rancho Cordova."
+                ],
+            )
+        )
+        self.assertFalse(
+            _model_statement_source_semantics_supported(
+                "IBM notified Health Net that it could not locate drives used in "
+                "its Rancho Cordova data center.",
+                [
+                    "IBM, which handles our data center operations, notified us that "
+                    "it could not locate hard disk drives used in our data center "
+                    "located in Rancho Cordova."
+                ],
+            )
+        )
+        self.assertFalse(
+            _model_statement_source_semantics_supported(
+                "Supplier provides Company-requested, paid transition assistance "
+                "for a redacted period.",
+                [
+                    "Supplier shall at Company's request continue Services to facilitate "
+                    "Company's transition and provide reasonable assistance. Such "
+                    "transition assistance will continue for [***] days, and Company "
+                    "shall pay Supplier for such transition assistance."
+                ],
+            )
+        )
+        self.assertTrue(
+            _model_statement_source_semantics_supported(
+                "At Company's request, Supplier continues Services and provides "
+                "reasonable transition assistance for a redacted or longer SOW period; "
+                "Company pays Supplier.",
+                [
+                    "Supplier shall at Company's request continue Services to facilitate "
+                    "Company's transition and provide reasonable assistance. Such "
+                    "transition assistance will continue for [***] days, and Company "
+                    "shall pay Supplier for such transition assistance."
+                ],
+            )
+        )
 
     def test_same_party_master_agreement_chains_require_control_confirmation(self) -> None:
         ambiguity = _agreement_chain_ambiguity(
@@ -11110,6 +11449,20 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             _decision_statement_relevant(
                 "Exclusivity may be cancelled on future renewals below an undisclosed annual sales threshold.",
                 multifacet_question,
+            )
+        )
+        self.assertTrue(
+            _decision_statement_relevant(
+                "Supplier provides reasonable, paid transition assistance for a "
+                "redacted period.",
+                "Should CornerStone continue with Evernorth or prepare a replacement plan?",
+            )
+        )
+        self.assertTrue(
+            _decision_statement_relevant(
+                "Amendment No. 1 CHLIC Compensation is not effective for the "
+                "redacted client accounts.",
+                "Should the Cigna arrangement continue under the latest controlling amendment?",
             )
         )
 

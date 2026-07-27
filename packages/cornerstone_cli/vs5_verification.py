@@ -56,6 +56,30 @@ ASK_HISTORY_GATE_COMMAND = [
     "unittest",
     "tests.scenario.test_product_ui_routes.ProductUiRoutesTest.test_saved_ask_history_is_discoverable_and_reopenable_across_ui_api_and_cli",
 ]
+VS0_STRUCTURAL_GATE_COMMAND = [
+    "python3",
+    "-m",
+    "unittest",
+    "tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_artifact_ingest_show_and_audit_verify",
+    "tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs0_artifact_verify",
+    "tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs0_audit_ledger_verify",
+    "tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_prompt_injection_ingest_records_policy_denial",
+    "tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_claim_create_from_brief_preserves_cli_lineage",
+]
+VS4_STRUCTURAL_GATE_COMMAND = [
+    "python3",
+    "-m",
+    "unittest",
+    "tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs4_scenario_gate_accepts_current_local_report",
+    "tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs4_scenario_gate_rejects_missing_cli_parity_transcript",
+    "tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs4_scenario_gate_rejects_nonzero_negative_evidence",
+]
+CLAIM_LANGUAGE_ACTIVE_PATHS = [
+    "docs/adr/ADR-0007-product-value-first-reset.md",
+    "docs/sot/01_PRODUCT_GOAL_AND_DIRECTION.md",
+    "docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md",
+    "docs/scenario-contracts/VS5_CITATION_GROUNDED_BRIEF_CONTRACT.md",
+]
 SCENARIO_IDS = [
     "VS5-BRIEF-001",
     "VS5-BRIEF-002",
@@ -94,10 +118,13 @@ VERIFICATION_CONTRACT_FILES = [
     "packages/cornerstone_cli/product_ui.py",
     "scripts/prepare_vs5_human_review_inputs.py",
     "tests/scenario/test_product_ui_routes.py",
+    "tests/scenario/test_scaffold_cli.py",
     "fixtures/vs5/edgar-eval/freeze.json",
     "fixtures/vs5/eval/prompt-injection.json",
     "fixtures/vs5/eval/performance_budget.json",
     "docs/scenario-contracts/VS5_CITATION_GROUNDED_BRIEF_CONTRACT.md",
+    "docs/adr/ADR-0007-product-value-first-reset.md",
+    "docs/sot/01_PRODUCT_GOAL_AND_DIRECTION.md",
     "docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md",
 ]
 
@@ -597,12 +624,17 @@ def _record_matches_revision(
 def _human_record_evidence(
     *, path: str, record: dict[str, Any] | None, valid: bool, reviewed_items: int = 0
 ) -> dict[str, Any]:
+    observed_decision = str((record or {}).get("decision") or "NOT_RUN").upper()
     return {
         "record_path": path,
         "record_present": record is not None,
         "record_valid_for_current_revision": valid,
         "reviewed_item_count": reviewed_items,
-        "decision": str((record or {}).get("decision") or "NOT_RUN").upper(),
+        "decision": observed_decision if valid else "NOT_RUN",
+        "current_decision": observed_decision if valid else "NOT_RUN",
+        "stale_observed_decision": (
+            observed_decision if record is not None and not valid else None
+        ),
     }
 
 
@@ -1115,6 +1147,7 @@ def _validate_external_sessions(
     expected_names = {f"session-{index:02d}.json" for index in range(1, 6)}
     session_paths = sorted(session_dir.glob("session-*.json")) if session_dir.exists() else []
     observed_names = {path.name for path in session_paths}
+    missing_record_count = len(expected_names - observed_names)
     formal_record_set_exact = observed_names == expected_names
     round_record = _load_json_object(root / EXTERNAL_ROUND_PATH)
     round_revision_matches = _record_matches_revision(
@@ -1200,6 +1233,8 @@ def _validate_external_sessions(
     for attempt_number in range(1, 6):
         path = session_dir / f"session-{attempt_number:02d}.json"
         record = _load_json_object(path)
+        if record is None:
+            continue
         if not _record_matches_revision(
             record,
             corpus_sha256=corpus_sha256,
@@ -1522,6 +1557,7 @@ def _validate_external_sessions(
         "formal_round_valid": round_valid,
         "round_record_path": EXTERNAL_ROUND_PATH,
         "round_id": round_id or None,
+        "missing_record_count": missing_record_count,
         "invalid_record_count": invalid_record_count,
         "valid_session_count": len(valid_records),
         "distinct_participant_count": len(set(participant_ids)),
@@ -1903,6 +1939,120 @@ def _run_gate(root: Path, command: list[str], timeout: int = 300) -> dict[str, A
         "exit_code": completed.returncode,
         "stdout": completed.stdout.strip()[-4000:],
         "stderr": completed.stderr.strip()[-4000:],
+    }
+
+
+def _scan_active_claim_language(root: Path) -> dict[str, Any]:
+    """Reject unqualified present-tense VS5 completion/value claims."""
+
+    assertion = re.compile(
+        r"\bVS5\s+(?:is|has\s+been)\s+"
+        r"(?:complete|completed|value[- ]verified|externally\s+verified)\b|"
+        r"\bcurrent\s+(?:VS5\s+)?(?:status|verdict)\s*:\s*"
+        r"(?:VALUE_VERIFIED_LOCAL|VALUE_VERIFIED_EXTERNAL)\b|"
+        r"\bCornerStone\s+(?:is|has\s+been)\s+externally\s+value[- ]verified\b",
+        flags=re.IGNORECASE,
+    )
+    requirement_context = re.compile(
+        r"\b(?:after|cannot|definition|example|exit|future|if|must|never|"
+        r"not|only\s+(?:after|if|when)|pending|required|requires|target|"
+        r"until|when)\b",
+        flags=re.IGNORECASE,
+    )
+    violations: list[dict[str, Any]] = []
+    checked_paths: list[str] = []
+    for relative in CLAIM_LANGUAGE_ACTIVE_PATHS:
+        path = root / relative
+        if not path.exists():
+            violations.append(
+                {"path": relative, "line": None, "text": "required active document is missing"}
+            )
+            continue
+        checked_paths.append(relative)
+        for line_number, line in enumerate(path.read_text().splitlines(), 1):
+            normalized = re.sub(r"\s+", " ", line).strip()
+            if (
+                assertion.search(normalized)
+                and not requirement_context.search(normalized)
+            ):
+                violations.append(
+                    {
+                        "path": relative,
+                        "line": line_number,
+                        "text": normalized[:240],
+                    }
+                )
+    return {
+        "passed": not violations,
+        "checked_paths": checked_paths,
+        "violation_count": len(violations),
+        "violations": violations,
+    }
+
+
+def _report_claim_language_consistent(
+    *,
+    final_verdict: str,
+    product_value_claim: str,
+    rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Ensure the report's public claim does not outrun its scenario rows."""
+
+    expected_claim = {
+        "VALUE_VERIFIED_EXTERNAL": "NARROW_VS5_EXTERNAL_VALUE_CLAIM_EARNED",
+        "VALUE_VERIFIED_LOCAL": "LOCAL_VALUE_ONLY_NOT_EXTERNAL_VALIDATION",
+        "AI_VERIFIABLE_READY_HUMAN_GATES_PENDING": (
+            "NOT_CLAIMED_UNTIL_HUMAN_AND_EXTERNAL_ROWS_PASS"
+        ),
+        "NOT_VERIFIED": "NOT_CLAIMED_UNTIL_HUMAN_AND_EXTERNAL_ROWS_PASS",
+    }.get(final_verdict)
+    issues: list[str] = []
+    if expected_claim is None:
+        issues.append("unknown final verdict")
+    elif product_value_claim != expected_claim:
+        issues.append("product-value claim does not match the final verdict")
+    nonpassing = [row for row in rows if row.get("status") != "PASS"]
+    human_pending = [
+        row
+        for row in rows
+        if row.get("owner") == "Human" and row.get("status") != "PASS"
+    ]
+    automated_pending = [
+        row
+        for row in rows
+        if row.get("owner") != "Human" and row.get("status") != "PASS"
+    ]
+    automated_human_failures = [
+        row for row in rows if row.get("automated_status") == "FAIL"
+    ]
+    if final_verdict == "VALUE_VERIFIED_EXTERNAL" and nonpassing:
+        issues.append("external value verdict requires every row to pass")
+    if final_verdict == "VALUE_VERIFIED_LOCAL":
+        required_local_human = {
+            "VS5-BRIEF-005",
+            "VS5-ASK-001",
+            "VS5-QUAL-001",
+            "VS5-QUAL-002",
+            "VS5-QUAL-003",
+        }
+        if any(
+            row.get("id") in required_local_human and row.get("status") != "PASS"
+            for row in rows
+        ):
+            issues.append("local value verdict requires every local human rubric row")
+    if (
+        final_verdict == "AI_VERIFIABLE_READY_HUMAN_GATES_PENDING"
+        and (automated_pending or automated_human_failures)
+    ):
+        issues.append("AI-verifiable-ready verdict requires all automated checks")
+    return {
+        "passed": not issues,
+        "expected_product_value_claim": expected_claim,
+        "observed_product_value_claim": product_value_claim,
+        "human_pending_count": len(human_pending),
+        "automated_pending_count": len(automated_pending),
+        "automated_human_failure_count": len(automated_human_failures),
+        "issues": issues,
     }
 
 
@@ -2511,6 +2661,8 @@ def verify_vs5_citation_grounded_brief(
 
     gate_results = {
         "targeted_tests": _run_gate(root, ["python3", "-m", "unittest", "tests.scenario.test_vs5"]),
+        "vs0_structural": _run_gate(root, VS0_STRUCTURAL_GATE_COMMAND),
+        "vs4_structural": _run_gate(root, VS4_STRUCTURAL_GATE_COMMAND),
         "ask_history_surface": _run_gate(
             root,
             ASK_HISTORY_GATE_COMMAND,
@@ -2520,7 +2672,8 @@ def verify_vs5_citation_grounded_brief(
         "diff_check": _run_gate(root, ["git", "diff", "--check"]),
     }
     regression_ok = all(result["exit_code"] == 0 for result in gate_results.values())
-    claim_language_ok = True
+    active_claim_language = _scan_active_claim_language(root)
+    claim_language_ok = bool(active_claim_language["passed"])
 
     h01_record: dict[str, Any] = {}
     h01_path = root / HUMAN_GATE_PATH
@@ -2725,8 +2878,8 @@ def verify_vs5_citation_grounded_brief(
         _row("VS5-EXT-001", "PASS" if external_completion_ok else "HUMAN_REQUIRED", "Five non-owner participants must complete the stranger test unaided within ten minutes.", {"required_session_count": 5, "record_path": EXTERNAL_SESSION_DIR + "/", **external_evidence}, owner="Human"),
         _row("VS5-EXT-002", "PASS" if external_trust_ok else "HUMAN_REQUIRED", "External trust and forwarding/use thresholds require participant records.", {"trust_median_threshold": 4, "usefulness_median_threshold": 4, "forward_or_use_threshold": "3 of 5", "real_decision_case_required": 1, **external_evidence}, owner="Human"),
         _row("VS5-H01", "PASS" if h01_external_authorized else "HUMAN_REQUIRED", "An APPROVE or APPROVE_WITH_EXCEPTIONS VS4-H01 owner decision is required before external sessions.", {"record_path": HUMAN_GATE_PATH, "observed_decision": h01_decision, "external_sessions_authorized": h01_external_authorized}, owner="Human"),
-        _row("VS5-REG-001", "PASS" if regression_ok else "FAIL", "Targeted scenario, SoT, matrix, and diff gates pass with the model path active.", gate_results),
-        _row("VS5-REG-002", "PASS" if claim_language_ok else "FAIL", "The report distinguishes automated readiness from unverified human product-value claims.", {"final_verdict": "AI_VERIFIABLE_READY_HUMAN_GATES_PENDING" if regression_ok else "NOT_VERIFIED"}),
+        _row("VS5-REG-001", "PASS" if regression_ok else "FAIL", "Named VS0 and VS4 structural sets, targeted VS5 tests, SoT, matrix, Ask-history, and diff gates pass with the model path active.", gate_results),
+        _row("VS5-REG-002", "PASS" if claim_language_ok else "FAIL", "Active documents and the report distinguish automated readiness from unverified human product-value claims.", {"active_document_scan": active_claim_language}),
     ]
     assert [row["id"] for row in rows] == SCENARIO_IDS
     blocking = [row for row in rows if row["owner"] != "Human" and row["status"] != "PASS"]
@@ -2745,7 +2898,28 @@ def verify_vs5_citation_grounded_brief(
         if not blocking and not automated_human_failures
         else "NOT_VERIFIED"
     )
-    rows[-1]["evidence"]["final_verdict"] = final_verdict
+    product_value_claim = (
+        "NARROW_VS5_EXTERNAL_VALUE_CLAIM_EARNED"
+        if final_verdict == "VALUE_VERIFIED_EXTERNAL"
+        else "LOCAL_VALUE_ONLY_NOT_EXTERNAL_VALIDATION"
+        if final_verdict == "VALUE_VERIFIED_LOCAL"
+        else "NOT_CLAIMED_UNTIL_HUMAN_AND_EXTERNAL_ROWS_PASS"
+    )
+    report_claim_language = _report_claim_language_consistent(
+        final_verdict=final_verdict,
+        product_value_claim=product_value_claim,
+        rows=rows,
+    )
+    if not report_claim_language["passed"] or not claim_language_ok:
+        rows[-1]["status"] = "FAIL"
+        final_verdict = "NOT_VERIFIED"
+        product_value_claim = "NOT_CLAIMED_UNTIL_HUMAN_AND_EXTERNAL_ROWS_PASS"
+    rows[-1]["evidence"].update(
+        {
+            "final_verdict": final_verdict,
+            "report_claim_guard": report_claim_language,
+        }
+    )
     runtime_state_binding = _runtime_state_binding(state_path, state_rel=state_rel)
     verification_contract_binding = _verification_contract_binding(root)
     return {
@@ -2777,14 +2951,10 @@ def verify_vs5_citation_grounded_brief(
             "pass": sum(row["status"] == "PASS" for row in rows),
             "fail": sum(row["status"] == "FAIL" for row in rows),
             "human_required": sum(row["status"] == "HUMAN_REQUIRED" for row in rows),
-            "blocking": len(blocking) + len(automated_human_failures),
-            "product_value_claim": (
-                "NARROW_VS5_EXTERNAL_VALUE_CLAIM_EARNED"
-                if final_verdict == "VALUE_VERIFIED_EXTERNAL"
-                else "LOCAL_VALUE_ONLY_NOT_EXTERNAL_VALIDATION"
-                if final_verdict == "VALUE_VERIFIED_LOCAL"
-                else "NOT_CLAIMED_UNTIL_HUMAN_AND_EXTERNAL_ROWS_PASS"
-            ),
+            "blocking": sum(row["status"] != "PASS" for row in rows),
+            "completion_blocking": sum(row["status"] != "PASS" for row in rows),
+            "automated_blocking": len(blocking) + len(automated_human_failures),
+            "product_value_claim": product_value_claim,
         },
         "scenario_results": rows,
         "case_results": case_results,
@@ -3171,7 +3341,30 @@ def revalidate_vs5_human_evidence(root: Path) -> dict[str, Any]:
         if not blocking and not automated_human_failures
         else "NOT_VERIFIED"
     )
-    rows["VS5-REG-002"].setdefault("evidence", {})["final_verdict"] = verdict
+    product_value_claim = (
+        "NARROW_VS5_EXTERNAL_VALUE_CLAIM_EARNED"
+        if verdict == "VALUE_VERIFIED_EXTERNAL"
+        else "LOCAL_VALUE_ONLY_NOT_EXTERNAL_VALIDATION"
+        if verdict == "VALUE_VERIFIED_LOCAL"
+        else "NOT_CLAIMED_UNTIL_HUMAN_AND_EXTERNAL_ROWS_PASS"
+    )
+    active_claim_language = _scan_active_claim_language(root)
+    report_claim_language = _report_claim_language_consistent(
+        final_verdict=verdict,
+        product_value_claim=product_value_claim,
+        rows=ordered_rows,
+    )
+    if not active_claim_language["passed"] or not report_claim_language["passed"]:
+        rows["VS5-REG-002"]["status"] = "FAIL"
+        verdict = "NOT_VERIFIED"
+        product_value_claim = "NOT_CLAIMED_UNTIL_HUMAN_AND_EXTERNAL_ROWS_PASS"
+    rows["VS5-REG-002"].setdefault("evidence", {}).update(
+        {
+            "final_verdict": verdict,
+            "active_document_scan": active_claim_language,
+            "report_claim_guard": report_claim_language,
+        }
+    )
     result["scenario_results"] = ordered_rows
     result["final_verdict"] = verdict
     result["status"] = "success" if verdict != "NOT_VERIFIED" else "failed"
@@ -3180,14 +3373,12 @@ def revalidate_vs5_human_evidence(root: Path) -> dict[str, Any]:
         "pass": sum(row.get("status") == "PASS" for row in ordered_rows),
         "fail": sum(row.get("status") == "FAIL" for row in ordered_rows),
         "human_required": sum(row.get("status") == "HUMAN_REQUIRED" for row in ordered_rows),
-        "blocking": len(blocking) + len(automated_human_failures),
-        "product_value_claim": (
-            "NARROW_VS5_EXTERNAL_VALUE_CLAIM_EARNED"
-            if verdict == "VALUE_VERIFIED_EXTERNAL"
-            else "LOCAL_VALUE_ONLY_NOT_EXTERNAL_VALIDATION"
-            if verdict == "VALUE_VERIFIED_LOCAL"
-            else "NOT_CLAIMED_UNTIL_HUMAN_AND_EXTERNAL_ROWS_PASS"
+        "blocking": sum(row.get("status") != "PASS" for row in ordered_rows),
+        "completion_blocking": sum(
+            row.get("status") != "PASS" for row in ordered_rows
         ),
+        "automated_blocking": len(blocking) + len(automated_human_failures),
+        "product_value_claim": product_value_claim,
     }
     result["human_evidence_revalidation"] = {
         "mode": "reuse_current_model_run",

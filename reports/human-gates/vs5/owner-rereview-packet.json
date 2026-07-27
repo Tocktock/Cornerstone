@@ -1,14 +1,16 @@
 {
   "schema_version": "cs.vs5_owner_rereview_packet.v1",
-  "status": "REVIEW_COMPLETED",
+  "status": "HISTORICAL_REVIEW_COMPLETED",
   "scenario_id": "VS4-H01",
-  "purpose": "Reassess the model-backed Home to Brief to citation to Decision-draft journey after the 2026-07-04 owner rejection.",
+  "purpose": "Preserve the historical VS4-H01 owner entry review; this packet is not current VS5 quality or completion evidence.",
+  "current_revision_use": "HISTORICAL_ONLY_NOT_CURRENT_VS5_QUALITY_EVIDENCE",
   "claim_boundary": {
     "packet_is_review_input_only": true,
     "prior_rejection_remains_current_until_superseded": false,
     "human_acceptance_claimed": true,
     "external_sessions_authorized": true,
-    "product_value_claimed": false
+    "product_value_claimed": false,
+    "current_vs5_quality_claim_authorized": false
   },
   "prior_decision": {
     "decision": "REJECT",
@@ -30,7 +32,7 @@
       "browser_evidence_path": "output/playwright/vs5-ask-history-2026-07-12/"
     }
   },
-  "current_revision": {
+  "reviewed_revision": {
     "corpus_manifest_sha256": "d82fb349e646b8bdff957c8f67c0395f8816e979c9d1b7e47d1aba17dcfbe3f1",
     "pipeline_sha256": "ce1e5b4bf03717a076708b5068881eb01f3320c245ae2f06b4d7499fd2d4ec6a",
     "model_stack": {
